@@ -1,6 +1,6 @@
 import {
 	EnumValidator,
-	Environment,
+	NodeEnv,
 	PortValidator,
 	StringValidator,
 	UrlValidator,
@@ -9,8 +9,8 @@ import { ConfigType, registerAs } from "@nestjs/config";
 import { validateConfig } from "./validate-config";
 
 class AppEnvVariables {
-	@EnumValidator(Environment)
-	NODE_ENV!: Environment;
+	@EnumValidator(NodeEnv)
+	NODE_ENV!: NodeEnv;
 
 	@UrlValidator({ require_tld: false }) // to allow localhost
 	APP_HOST!: string;

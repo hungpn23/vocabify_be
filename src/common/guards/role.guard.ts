@@ -1,4 +1,4 @@
-import { MetadataKey, RequestUser, UserRole } from "@common";
+import { MetadataKey, RequestWithUser, UserRole } from "@common";
 import {
 	type CanActivate,
 	type ExecutionContext,
@@ -19,7 +19,7 @@ export class RoleGuard implements CanActivate {
 
 		if (!requiredRole) return true;
 
-		const request = context.switchToHttp().getRequest<RequestUser>();
+		const request = context.switchToHttp().getRequest<RequestWithUser>();
 		if (!request.user) throw new ForbiddenException();
 
 		return requiredRole === request.user.role;

@@ -1,4 +1,4 @@
-import { ApiEndpoint, Payload, type UUID } from "@common";
+import { ApiEndpoint, User, type UUID } from "@common";
 import {
 	Body,
 	Controller,
@@ -17,7 +17,7 @@ export class StudyController {
 	@ApiEndpoint()
 	@Post("save-answer/:deckId")
 	async saveAnswers(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 		@Body() dto: SaveAnswersDto,
 	) {
@@ -26,7 +26,7 @@ export class StudyController {
 
 	@ApiEndpoint()
 	@Get("stats")
-	async getUserStats(@Payload("userId") userId: UUID) {
+	async getUserStats(@User("userId") userId: UUID) {
 		return await this.studyService.getUserStats(userId);
 	}
 }

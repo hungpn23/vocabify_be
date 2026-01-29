@@ -1,4 +1,4 @@
-import { ApiEndpoint, ApiPublicEndpoint, Payload, type UUID } from "@common";
+import { ApiEndpoint, ApiPublicEndpoint, User, type UUID } from "@common";
 import {
 	Body,
 	Controller,
@@ -30,7 +30,7 @@ export class DeckController {
 	@ApiPublicEndpoint({ type: GetSharedManyResDto, isPaginated: true })
 	@Get("shared")
 	async getSharedMany(
-		@Payload("userId") userId: UUID | undefined,
+		@User("userId") userId: UUID | undefined,
 		@Query() query: GetManyQueryDto,
 	) {
 		return await this.deckService.getSharedMany(userId, query);
@@ -39,7 +39,7 @@ export class DeckController {
 	@ApiPublicEndpoint({ type: GetSharedOneResDto })
 	@Get("shared/:deckId")
 	async getSharedOne(
-		@Payload("userId") userId: UUID | undefined,
+		@User("userId") userId: UUID | undefined,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 	) {
 		return await this.deckService.getSharedOne(userId, deckId);
@@ -47,17 +47,14 @@ export class DeckController {
 
 	@ApiEndpoint({ type: GetManyResDto, isPaginated: true })
 	@Get()
-	async getMany(
-		@Payload("userId") userId: UUID,
-		@Query() query: GetManyQueryDto,
-	) {
+	async getMany(@User("userId") userId: UUID, @Query() query: GetManyQueryDto) {
 		return await this.deckService.getMany(userId, query);
 	}
 
 	@ApiEndpoint({ type: GetOneResDto })
 	@Get(":deckId")
 	async getOne(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 	) {
 		return await this.deckService.getOne(userId, deckId);
@@ -65,14 +62,14 @@ export class DeckController {
 
 	@ApiEndpoint({ type: DeckDto })
 	@Post()
-	async create(@Payload("userId") userId: UUID, @Body() dto: CreateDeckDto) {
+	async create(@User("userId") userId: UUID, @Body() dto: CreateDeckDto) {
 		return await this.deckService.create(userId, dto);
 	}
 
 	@ApiEndpoint({ type: DeckDto })
 	@Patch(":deckId")
 	async update(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 		@Body() dto: UpdateDeckDto,
 	) {
@@ -82,7 +79,7 @@ export class DeckController {
 	@ApiEndpoint()
 	@Delete(":deckId")
 	async delete(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 	) {
 		return await this.deckService.delete(userId, deckId);
@@ -91,7 +88,7 @@ export class DeckController {
 	@ApiEndpoint()
 	@Post("clone/:deckId")
 	async clone(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 		@Body() dto: CloneDeckDto,
 	) {
@@ -101,7 +98,7 @@ export class DeckController {
 	@ApiEndpoint()
 	@Post("restart/:deckId")
 	async restart(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 	) {
 		return await this.deckService.restart(userId, deckId);

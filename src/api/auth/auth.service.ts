@@ -4,10 +4,10 @@ import {
 	GoogleJwtPayload,
 	GoogleTokenResponse,
 	JobName,
-	JwtPayload,
 	Milliseconds,
 	QueueName,
 	RefreshTokenPayload,
+	UserJwtPayload,
 	type UUID,
 } from "@common";
 import {
@@ -166,7 +166,7 @@ export class AuthService {
 		return plainToInstance(TokenPairDto, tokenPair);
 	}
 
-	async logout(user: JwtPayload) {
+	async logout(user: UserJwtPayload) {
 		const { sessionId, exp, userId } = user;
 		await this.cacheManager.set<boolean>(
 			`session_blacklist:${userId}:${sessionId}`,
@@ -201,7 +201,7 @@ export class AuthService {
 
 		const newSignature = this._createSignature();
 
-		const jwtPayload: JwtPayload = {
+		const jwtPayload: UserJwtPayload = {
 			userId: session.user.id,
 			sessionId,
 			role: session.user.$.role,
@@ -263,7 +263,7 @@ export class AuthService {
 	async verifyAccessToken(authorizationHeader?: string) {
 		const accessToken = this._extractTokenFromHeader(authorizationHeader);
 
-		let payload: JwtPayload;
+		let payload: UserJwtPayload;
 		try {
 			payload = await this.jwtService.verifyAsync(accessToken, {
 				secret: this.authConf.jwtSecret,
@@ -329,7 +329,7 @@ export class AuthService {
 			expiresAt: new Date(Date.now() + ms(refreshTokenExpiresIn)),
 		});
 
-		const jwtPayload: JwtPayload = {
+		const jwtPayload: UserJwtPayload = {
 			userId: user.id,
 			sessionId: newSession.id,
 			role: user.role,

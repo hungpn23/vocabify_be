@@ -8,12 +8,11 @@ type BaseJwtPayload = {
 	exp?: Seconds;
 };
 
-export type JwtPayload = BaseJwtPayload & { userId: UUID; role: UserRole };
-export type RefreshTokenPayload = JwtPayload & { signature: string };
-export type RequestUser = ExpressRequest & {
-	user?: JwtPayload;
+export type UserJwtPayload = BaseJwtPayload & { userId: UUID; role: UserRole };
+export type RefreshTokenPayload = UserJwtPayload & { signature: string };
+export type RequestWithUser = ExpressRequest & {
+	user?: UserJwtPayload;
 };
-
-export type SocketUser = Socket & {
-	user: JwtPayload;
+export type SocketWithUser = Socket & {
+	user: UserJwtPayload;
 };

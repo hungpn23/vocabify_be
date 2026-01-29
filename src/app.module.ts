@@ -1,5 +1,6 @@
 import { ApiModule } from "@api/api.module";
 import { AppController } from "@app.controller";
+import { NodeEnv } from "@common";
 import {
 	appConfig,
 	authConfig,
@@ -22,13 +23,13 @@ import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import * as entities from "./db/entities";
 
-const isProd = process.env.NODE_ENV === "prod";
+const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath: isProd ? ".env" : ".env",
+			envFilePath: isProduction ? ".env.production" : ".env",
 			cache: true,
 			expandVariables: true, // support ${<ENV_KEY>} in .env file
 			skipProcessEnv: true,
@@ -52,7 +53,7 @@ const isProd = process.env.NODE_ENV === "prod";
 					driver: PostgreSqlDriver,
 					entities: Object.values(entities),
 
-					debug: !isProd,
+					debug: !isProduction,
 					highlighter: new SqlHighlighter(),
 					logger: (msg) => logger.debug(msg),
 				};

@@ -2,8 +2,8 @@ import { UserDto } from "@api/user/user.dto";
 import {
 	ApiEndpoint,
 	ApiPublicEndpoint,
-	type JwtPayload,
-	Payload,
+	User,
+	type UserJwtPayload,
 	type UUID,
 } from "@common";
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
@@ -36,7 +36,7 @@ export class AuthController {
 
 	@ApiEndpoint({ type: UserDto })
 	@Get("session")
-	async getSession(@Payload("userId") userId: UUID) {
+	async getSession(@User("userId") userId: UUID) {
 		return await this.authService.getSession(userId);
 	}
 
@@ -54,7 +54,7 @@ export class AuthController {
 
 	@ApiEndpoint()
 	@Post("logout")
-	async logout(@Payload() payload: JwtPayload) {
+	async logout(@User() payload: UserJwtPayload) {
 		return await this.authService.logout(payload);
 	}
 
@@ -67,7 +67,7 @@ export class AuthController {
 	@ApiEndpoint()
 	@Post("password/change")
 	async changePassword(
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 		@Body() dto: ChangePasswordDto,
 	) {
 		return await this.authService.changePassword(userId, dto);

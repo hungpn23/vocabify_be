@@ -2,7 +2,7 @@ import {
 	ApiEndpoint,
 	ApiFile,
 	multerStorage,
-	Payload,
+	User,
 	type UUID,
 	validateImagePipe,
 } from "@common";
@@ -20,7 +20,7 @@ export class UserController {
 	async uploadAvatar(
 		@UploadedFile(validateImagePipe())
 		file: Express.Multer.File,
-		@Payload("userId") userId: UUID,
+		@User("userId") userId: UUID,
 	) {
 		return await this.userService.uploadAvatar(userId, file);
 	}

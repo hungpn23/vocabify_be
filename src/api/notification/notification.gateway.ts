@@ -1,4 +1,4 @@
-import { Namespace, SocketUser } from "@common";
+import { Namespace, SocketWithUser } from "@common";
 import { getAppConfig } from "@config";
 import { Logger } from "@nestjs/common";
 import {
@@ -29,7 +29,7 @@ export class NotificationGateway implements OnGatewayConnection {
 	@WebSocketServer()
 	private readonly server!: Server<DefaultEventsMap, ServerToClientEvents>;
 
-	async handleConnection(socket: SocketUser) {
+	async handleConnection(socket: SocketWithUser) {
 		const userId = socket.user.userId;
 		this.logger.debug(`Socket connected: ${socket.id} for User: ${userId}`);
 

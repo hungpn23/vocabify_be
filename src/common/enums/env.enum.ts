@@ -1,5 +1,5 @@
-export enum Environment {
-	DEV = "dev",
-	PROD = "prod",
+export enum NodeEnv {
+	DEVELOPMENT = "development",
+	PRODUCTION = "production",
 	LOCAL = "local",
 }

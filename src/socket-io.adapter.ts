@@ -1,5 +1,5 @@
 import { AuthService } from "@api/auth/auth.service";
-import { Namespace, SocketUser } from "@common";
+import { Namespace, SocketWithUser } from "@common";
 
 import { INestApplication, UnauthorizedException } from "@nestjs/common";
 import { IoAdapter } from "@nestjs/platform-socket.io";
@@ -22,7 +22,7 @@ export class SocketIOAdapter extends IoAdapter {
 				this.authService
 					.verifyAccessToken(socket.handshake.headers.authorization)
 					.then((payload) => {
-						(socket as SocketUser).user = payload;
+						(socket as SocketWithUser).user = payload;
 						next();
 					})
 					.catch((ex: UnauthorizedException) => {

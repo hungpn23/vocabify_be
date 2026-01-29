@@ -1,5 +1,5 @@
 import { AuthService } from "@api/auth/auth.service";
-import { MetadataKey, RequestUser } from "@common";
+import { MetadataKey, RequestWithUser } from "@common";
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate {
 	) {}
 
 	async canActivate(context: ExecutionContext) {
-		const request = context.switchToHttp().getRequest<RequestUser>();
+		const request = context.switchToHttp().getRequest<RequestWithUser>();
 
 		const hasPublicDecorator = this.reflector.getAllAndOverride<boolean>(
 			MetadataKey.PUBLIC_ROUTE,
