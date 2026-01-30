@@ -1,11 +1,10 @@
 import { UUID } from "@common/types";
-import { NullableProperty } from "@common/utils";
+import { createUUID, NullableProperty } from "@common/utils";
 import { Opt, PrimaryKey, Property, t } from "@mikro-orm/core";
-import { v4 } from "uuid";
 
 export abstract class BaseEntity {
 	@PrimaryKey({ type: t.uuid })
-	id: Opt<UUID> = v4() as UUID;
+	id: Opt<UUID> = createUUID();
 
 	@Property({ type: t.datetime })
 	createdAt: Opt<Date> = new Date();

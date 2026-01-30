@@ -1,5 +1,6 @@
 import { StringValidator } from "@common/decorators/validators.decorator";
 import { ConfigType, registerAs } from "@nestjs/config";
+import { type Algorithm } from "jsonwebtoken";
 import ms from "ms";
 import { validateConfig } from "./validate-config";
 
@@ -11,10 +12,10 @@ class AuthEnvVariables {
 	AUTH_JWT_EXPIRES_IN!: ms.StringValue;
 
 	@StringValidator()
-	AUTH_REFRESH_TOKEN_SECRET!: string;
+	AUTH_REFRESH_TOKEN_EXPIRES_IN!: ms.StringValue;
 
 	@StringValidator()
-	AUTH_REFRESH_TOKEN_EXPIRES_IN!: ms.StringValue;
+	AUTH_JWT_ALGORITHM!: Algorithm;
 }
 
 export const authConfig = registerAs("auth", () => {
@@ -23,8 +24,8 @@ export const authConfig = registerAs("auth", () => {
 	return {
 		jwtSecret: config.AUTH_JWT_SECRET,
 		jwtExpiresIn: config.AUTH_JWT_EXPIRES_IN,
-		refreshTokenSecret: config.AUTH_REFRESH_TOKEN_SECRET,
 		refreshTokenExpiresIn: config.AUTH_REFRESH_TOKEN_EXPIRES_IN,
+		jwtAlgorithm: config.AUTH_JWT_ALGORITHM,
 	};
 });
 

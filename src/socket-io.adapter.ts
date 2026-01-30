@@ -1,6 +1,7 @@
 import { AuthService } from "@api/auth/auth.service";
 import { SocketIONamespace } from "@common/enums/socket-io.enum";
 import { SocketWithUser } from "@common/types/auth.type";
+import { extractTokenFromHeader } from "@common/utils";
 import { INestApplication, UnauthorizedException } from "@nestjs/common";
 import { IoAdapter } from "@nestjs/platform-socket.io";
 import { ExtendedError, Server, ServerOptions, Socket } from "socket.io";
@@ -19,8 +20,12 @@ export class SocketIOAdapter extends IoAdapter {
 		server
 			.of(SocketIONamespace.NOTIFICATIONS)
 			.use((socket: Socket, next: (err?: ExtendedError) => void) => {
+				const accessToken = extractTokenFromHeader(
+					socket.handshake.headers.authorization,
+				);
+
 				this.authService
-					.verifyAccessToken(socket.handshake.headers.authorization)
+					.verifyJwt(accessToken)
 					.then((payload) => {
 						(socket as SocketWithUser).user = payload;
 						next();

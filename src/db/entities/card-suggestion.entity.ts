@@ -1,13 +1,13 @@
 import type { LanguageCode } from "@api/deck/deck.type";
 import { type UUID } from "@common/types/branded.type";
+import { createUUID } from "@common/utils";
 import { NullableProperty } from "@common/utils/nullable-property";
 import { Entity, Opt, PrimaryKey, Property, t } from "@mikro-orm/core";
-import { v4 } from "uuid";
 
 @Entity()
 export class CardSuggestion {
 	@PrimaryKey({ type: t.uuid })
-	id: Opt<UUID> = v4() as UUID;
+	id: Opt<UUID> = createUUID();
 
 	@Property({ type: t.text })
 	term!: string;

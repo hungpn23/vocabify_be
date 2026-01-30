@@ -1,11 +1,16 @@
 import crypto from "node:crypto";
 import { UserDto } from "@api/user/user.dto";
-import { RefreshTokenPayload, UserJwtPayload } from "@common/types/auth.type";
+import { SuccessResponseDto } from "@common/dtos";
+import { UserRole } from "@common/enums";
+import { JwtToken } from "@common/enums/jwt-token.enum";
+import { UserJwtPayload } from "@common/types/auth.type";
 import { Milliseconds, type UUID } from "@common/types/branded.type";
 import {
 	GoogleJwtPayload,
 	GoogleTokenResponse,
 } from "@common/types/google.type";
+import { createUUID, parseStringValueToSeconds } from "@common/utils";
+
 import {
 	type AppConfig,
 	type AuthConfig,
@@ -14,7 +19,6 @@ import {
 	type GoogleConfig,
 	googleConfig,
 } from "@config";
-import { Session } from "@db/entities/session.entity";
 import { User } from "@db/entities/user.entity";
 import { MailProducer } from "@integrations/mail/mail.producer";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
@@ -24,7 +28,6 @@ import {
 	BadRequestException,
 	Inject,
 	Injectable,
-	Logger,
 	UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -33,7 +36,7 @@ import argon2 from "argon2";
 import type { Cache } from "cache-manager";
 import { plainToInstance } from "class-transformer";
 import { Response } from "express";
-import ms from "ms";
+import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
 import {
 	ChangePasswordDto,
@@ -42,9 +45,15 @@ import {
 	TokenPairDto,
 } from "./auth.dto";
 
+type CreateTokenPairOptions = {
+	userId: UUID;
+	sessionId: UUID;
+	role: UserRole;
+};
+
 @Injectable()
 export class AuthService {
-	private logger = new Logger(AuthService.name);
+	// private readonly logger = new Logger(AuthService.name);
 
 	constructor(
 		private readonly jwtService: JwtService,
@@ -58,8 +67,6 @@ export class AuthService {
 		@Inject(googleConfig.KEY)
 		private readonly googleConf: GoogleConfig,
 		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-		@InjectRepository(Session)
-		private readonly sessionRepository: EntityRepository<Session>,
 		@InjectRepository(User)
 		private readonly userRepository: EntityRepository<User>,
 	) {}
@@ -100,7 +107,11 @@ export class AuthService {
 			});
 		}
 
-		const tokenPair = await this._createTokenPair(user);
+		const tokenPair = await this._createTokenPair({
+			userId: user.id,
+			sessionId: createUUID(),
+			role: user.role,
+		});
 		const oneTimeCode = crypto.randomBytes(20).toString("hex");
 
 		await this.cacheManager.set(
@@ -132,13 +143,18 @@ export class AuthService {
 	}
 
 	async register(dto: RegisterDto) {
-		const { username, password } = dto;
-		const user = await this.userRepository.findOne({ username });
+		const { email, password } = dto;
+		const username = generateFromEmail(email, 3);
+		const user = await this.userRepository.findOne({ username, email });
 
-		if (user) throw new BadRequestException("Username already exists");
+		if (user) throw new BadRequestException("Username or email already exists");
 
-		const newUser = this.userRepository.create({ username, password });
-		const tokenPair = await this._createTokenPair(newUser);
+		const newUser = this.userRepository.create({ username, email, password });
+		const tokenPair = await this._createTokenPair({
+			userId: newUser.id,
+			sessionId: createUUID(),
+			role: newUser.role,
+		});
 
 		await this.em.flush();
 
@@ -149,91 +165,43 @@ export class AuthService {
 			});
 		}
 
-		return plainToInstance(TokenPairDto, tokenPair);
+		return tokenPair;
 	}
 
 	async login(dto: LoginDto) {
-		const { username, password } = dto;
-		const user = await this.userRepository.findOne({ username });
+		const { email, password } = dto;
+		const user = await this.userRepository.findOne({ email });
 
-		const isValid = user && (await argon2.verify(user.password, password));
-		if (!isValid) throw new BadRequestException("Invalid credentials");
+		const isValidPassword =
+			user && (await argon2.verify(user.password, password));
+		if (!isValidPassword) throw new BadRequestException("Invalid credentials");
 
-		const tokenPair = await this._createTokenPair(user);
-
-		await this.em.flush();
-
-		return plainToInstance(TokenPairDto, tokenPair);
+		return await this._createTokenPair({
+			userId: user.id,
+			sessionId: createUUID(),
+			role: user.role,
+		});
 	}
 
-	async logout(user: UserJwtPayload) {
-		const { sessionId, exp, userId } = user;
-		await this.cacheManager.set<boolean>(
-			`session_blacklist:${userId}:${sessionId}`,
-			true,
-			(exp! * 1000 - Date.now()) as Milliseconds,
-		);
+	async logout(payload: UserJwtPayload) {
+		const { userId, sessionId } = payload;
 
-		const sessionRef = this.sessionRepository.getReference(sessionId);
-		if (!sessionRef) throw new BadRequestException();
+		const userTokenKey = this.redisService.getUserSessionKey(userId, sessionId);
+		await this.redisService.deleteKey(userTokenKey);
 
-		await this.em.remove(sessionRef).flush();
+		return { success: true } satisfies SuccessResponseDto;
 	}
 
 	async refresh(refreshToken: string) {
-		const { sessionId, signature, userId } =
-			await this._verifyRefreshToken(refreshToken);
+		const payload = await this.verifyJwt(refreshToken);
 
-		const session = await this.sessionRepository.findOne(sessionId, {
-			populate: ["user"],
-		});
-
-		if (!session) throw new UnauthorizedException();
-
-		if (session.signature !== signature) {
-			this.logger.debug(
-				`Refresh token reuse detected for user ${userId}, revoking all sessions`,
-			);
-
-			await this.sessionRepository.nativeDelete({ user: userId });
+		if (payload.jwtType !== JwtToken.RefreshToken) {
 			throw new UnauthorizedException();
 		}
 
-		const newSignature = this._createSignature();
-
-		const jwtPayload: UserJwtPayload = {
-			userId: session.user.id,
-			sessionId,
-			role: session.user.$.role,
-		};
-
-		const refreshTokenPayload = {
-			...jwtPayload,
-			signature: newSignature,
-		};
-
-		this.sessionRepository.assign(session, {
-			signature: newSignature,
-		});
-
-		const [accessToken, newRefreshToken] = await Promise.all([
-			this.jwtService.signAsync(jwtPayload, {
-				secret: this.authConf.jwtSecret,
-				expiresIn: this.authConf.jwtExpiresIn,
-			}),
-
-			this.jwtService.signAsync(refreshTokenPayload, {
-				secret: this.authConf.refreshTokenSecret,
-				expiresIn: this.authConf.refreshTokenExpiresIn,
-			}),
-
-			this.em.flush(),
-		]);
-
-		return plainToInstance(TokenPairDto, {
-			accessToken,
-			refreshToken: newRefreshToken,
-		});
+		return await this._createTokenPair(
+			pick(payload, ["userId", "sessionId", "role"]),
+		);
 	}
 
 	async changePassword(userId: UUID, dto: ChangePasswordDto) {
@@ -257,102 +225,65 @@ export class AuthService {
 		await this.em.flush();
 	}
 
-	async verifyAccessToken(authorizationHeader?: string) {
-		const accessToken = this._extractTokenFromHeader(authorizationHeader);
+	async verifyJwt(jwt: string) {
+		const payload = await this.jwtService.verifyAsync<UserJwtPayload>(jwt);
+		const { userId, sessionId, jti } = payload;
 
-		let payload: UserJwtPayload;
-		try {
-			payload = await this.jwtService.verifyAsync(accessToken, {
-				secret: this.authConf.jwtSecret,
-			});
-		} catch (_) {
-			throw new UnauthorizedException("Invalid token");
-		}
-
-		const { userId, sessionId } = payload;
-		const isInBlacklist = await this.cacheManager.get<boolean>(
-			`session_blacklist:${userId}:${sessionId}`,
+		const userSessionKey = this.redisService.getUserSessionKey(
+			userId,
+			sessionId,
 		);
 
-		if (isInBlacklist) {
-			const sessions = await this.sessionRepository.find({
-				user: { id: userId },
-			});
-			await this.em.remove(sessions).flush();
+		const currentJti = await this.redisService.getValue<string>(userSessionKey);
+
+		if (currentJti !== jti) {
 			throw new UnauthorizedException();
 		}
 
 		return payload;
 	}
 
-	private _extractTokenFromHeader(authorizationHeader?: string) {
-		const [type, token] = authorizationHeader?.split(" ") ?? [];
-		return type === "Bearer" ? token : "";
-	}
-
-	private async _verifyRefreshToken(refreshToken: string) {
-		let payload: RefreshTokenPayload;
-		try {
-			payload = await this.jwtService.verifyAsync(refreshToken, {
-				secret: this.authConf.refreshTokenSecret,
-			});
-		} catch (_) {
-			const payload = this.jwtService.decode<RefreshTokenPayload | null>(
-				refreshToken,
-			);
-
-			if (payload?.sessionId) {
-				const expiredSession = await this.sessionRepository.findOne(
-					payload.sessionId,
-				);
-
-				if (expiredSession) await this.em.remove(expiredSession).flush();
-			}
-
-			throw new UnauthorizedException("Session expired");
-		}
-
-		return payload;
-	}
-
-	private async _createTokenPair(user: User) {
-		const refreshTokenExpiresIn = this.authConf.refreshTokenExpiresIn;
-
-		const signature = this._createSignature();
-
-		const newSession = this.sessionRepository.create({
-			signature,
-			user: user.id,
-			expiresAt: new Date(Date.now() + ms(refreshTokenExpiresIn)),
-		});
+	private async _createTokenPair({
+		userId,
+		sessionId,
+		role,
+	}: CreateTokenPairOptions) {
+		const jti = createUUID();
 
 		const jwtPayload: UserJwtPayload = {
-			userId: user.id,
-			sessionId: newSession.id,
-			role: user.role,
+			userId,
+			sessionId,
+			jwtType: JwtToken.AccessToken,
+			role,
+			jti,
 		};
 
-		const refreshTokenPayload: RefreshTokenPayload = {
+		const refreshTokenPayload: UserJwtPayload = {
 			...jwtPayload,
-			signature,
+			jwtType: JwtToken.RefreshToken,
 		};
+
+		const userSessionKey = this.redisService.getUserSessionKey(
+			userId,
+			sessionId,
+		);
 
 		const [accessToken, refreshToken] = await Promise.all([
 			this.jwtService.signAsync(jwtPayload, {
-				secret: this.authConf.jwtSecret,
 				expiresIn: this.authConf.jwtExpiresIn,
 			}),
 
 			this.jwtService.signAsync(refreshTokenPayload, {
-				secret: this.authConf.refreshTokenSecret,
-				expiresIn: refreshTokenExpiresIn,
+				expiresIn: this.authConf.refreshTokenExpiresIn,
 			}),
+
+			this.redisService.setValue(
+				userSessionKey,
+				jti,
+				parseStringValueToSeconds(this.authConf.refreshTokenExpiresIn),
+			),
 		]);
 
-		return { accessToken, refreshToken };
-	}
-
-	private _createSignature() {
-		return crypto.randomBytes(16).toString("hex");
+		return { accessToken, refreshToken } satisfies TokenPairDto;
 	}
 }

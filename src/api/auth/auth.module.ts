@@ -1,5 +1,5 @@
 import { QueueName } from "@common/enums/background.enum";
-import { Session } from "@db/entities/session.entity";
+import { AuthConfig, authConfig } from "@config";
 import { User } from "@db/entities/user.entity";
 import { MailModule } from "@integrations/mail/mail.module";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
@@ -11,8 +11,16 @@ import { AuthService } from "./auth.service";
 
 @Module({
 	imports: [
-		JwtModule.register({}),
-		MikroOrmModule.forFeature([User, Session]),
+		JwtModule.registerAsync({
+			inject: [authConfig.KEY],
+			useFactory: (authConf: AuthConfig) => ({
+				secret: authConf.jwtSecret,
+				signOptions: {
+					algorithm: authConf.jwtAlgorithm,
+				},
+			}),
+		}),
+		MikroOrmModule.forFeature([User]),
 		BullModule.registerQueue({ name: QueueName.EMAIL }),
 		MailModule,
 	],

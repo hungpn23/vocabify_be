@@ -1,12 +1,13 @@
 import {
+	EmailValidator,
 	PasswordValidator,
 	StringValidator,
 } from "@common/decorators/validators.decorator";
 import { Exclude, Expose } from "class-transformer";
 
 class BaseAuthDto {
-	@StringValidator({ minLength: 6, maxLength: 20 })
-	username!: string;
+	@EmailValidator()
+	email!: string;
 
 	@PasswordValidator()
 	password!: string;
@@ -41,4 +42,10 @@ export class TokenPairDto {
 
 	@Expose()
 	refreshToken!: string;
+}
+
+@Exclude()
+export class RefreshTokenResponseDto {
+	@Expose()
+	accessToken!: string;
 }

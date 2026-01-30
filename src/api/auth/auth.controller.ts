@@ -4,6 +4,7 @@ import {
 	ApiEndpointPublic,
 } from "@common/decorators/api-endpoint.decorator";
 import { User } from "@common/decorators/user.decorator";
+import { SuccessResponseDto } from "@common/dtos/success.dto";
 import { type UserJwtPayload } from "@common/types/auth.type";
 import { type UUID } from "@common/types/branded.type";
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
@@ -13,6 +14,7 @@ import {
 	ExchangeTokenDto,
 	LoginDto,
 	RefreshTokenDto,
+	RefreshTokenResponseDto,
 	RegisterDto,
 	TokenPairDto,
 } from "./auth.dto";
@@ -52,13 +54,13 @@ export class AuthController {
 		return await this.authService.login(dto);
 	}
 
-	@ApiEndpoint()
+	@ApiEndpoint({ type: SuccessResponseDto })
 	@Post("logout")
 	async logout(@User() payload: UserJwtPayload) {
 		return await this.authService.logout(payload);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: RefreshTokenResponseDto })
 	@Post("refresh")
 	async refresh(@Body() dto: RefreshTokenDto) {
 		return await this.authService.refresh(dto.refreshToken);

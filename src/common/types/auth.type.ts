@@ -1,17 +1,18 @@
+import { JwtToken } from "@common/enums/jwt-token.enum";
 import { UserRole } from "@common/enums/user-role.enum";
 import { Request as ExpressRequest } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { Socket } from "socket.io";
-import { Seconds, UUID } from "./branded.type";
+import { UUID } from "./branded.type";
 
-type BaseJwtPayload = JwtPayload & {
+export type UserJwtPayload = JwtPayload & {
+	userId: UUID;
 	sessionId: UUID;
-	exp?: Seconds;
-	// jti: UUID;
+	jwtType: JwtToken;
+	role: UserRole;
+	jti: UUID;
 };
-
-export type UserJwtPayload = BaseJwtPayload & { userId: UUID; role: UserRole };
-export type RefreshTokenPayload = UserJwtPayload & { signature: string };
+// export type RefreshTokenPayload = UserJwtPayload & { signature: string };
 export type RequestWithUser = ExpressRequest & {
 	user?: UserJwtPayload;
 };

@@ -1,4 +1,5 @@
 import { type UUID } from "@common/types/branded.type";
+import { createUUID } from "@common/utils";
 import { NullableProperty } from "@common/utils/nullable-property";
 import {
 	Entity,
@@ -9,13 +10,12 @@ import {
 	type Ref,
 	t,
 } from "@mikro-orm/core";
-import { v4 } from "uuid";
 import { User } from "./user.entity";
 
 @Entity()
 export class UserStatistic {
 	@PrimaryKey({ type: t.uuid })
-	id: Opt<UUID> = v4() as UUID;
+	id: Opt<UUID> = createUUID();
 
 	@NullableProperty()
 	lastStudyDate?: Date | null;

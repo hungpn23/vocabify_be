@@ -1,6 +1,7 @@
 import { CardStatus } from "@api/deck/deck.enum";
 import { type LanguageCode } from "@api/deck/deck.type";
 import { type UUID } from "@common/types/branded.type";
+import { createUUID } from "@common/utils";
 import { NullableProperty } from "@common/utils/nullable-property";
 import {
 	BeforeCreate,
@@ -14,13 +15,12 @@ import {
 	type Ref,
 	t,
 } from "@mikro-orm/core";
-import { v4 } from "uuid";
 import { Deck } from "./deck.entity";
 
 @Entity()
 export class Card {
 	@PrimaryKey({ type: t.uuid })
-	id: Opt<UUID> = v4() as UUID;
+	id: Opt<UUID> = createUUID();
 
 	@Property({ type: t.text })
 	term!: string;

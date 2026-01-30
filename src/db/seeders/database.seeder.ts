@@ -220,8 +220,8 @@ export class DatabaseSeeder extends Seeder {
 		console.time("🌱 Seeding database");
 
 		const admin = em.create(User, {
-			username: "admin01",
-			email: "admin01@example.com",
+			username: "hungpn23",
+			email: "hungpn23@gmail.com",
 			password: "Password@123",
 			emailVerified: true,
 		});

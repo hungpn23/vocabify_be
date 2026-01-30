@@ -1,7 +1,13 @@
 import { AuthService } from "@api/auth/auth.service";
 import { MetadataKey } from "@common/enums/reflector-key.enum";
 import { RequestWithUser } from "@common/types/auth.type";
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { extractTokenFromHeader } from "@common/utils";
+import {
+	CanActivate,
+	ExecutionContext,
+	Injectable,
+	UnauthorizedException,
+} from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
 @Injectable()
@@ -19,13 +25,16 @@ export class AuthGuard implements CanActivate {
 			[context.getClass(), context.getHandler()],
 		);
 
-		request.user = await this.authService
-			.verifyAccessToken(request.headers.authorization)
-			.catch((err) => {
-				if (hasPublicDecorator) return undefined;
+		if (hasPublicDecorator) {
+			request.user = undefined;
+			return true;
+		}
 
-				throw err;
-			});
+		const accessToken = extractTokenFromHeader(request.headers.authorization);
+
+		if (!accessToken) throw new UnauthorizedException();
+
+		request.user = await this.authService.verifyJwt(accessToken);
 
 		return true;
 	}
