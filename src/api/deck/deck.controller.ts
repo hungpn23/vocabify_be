@@ -1,4 +1,9 @@
-import { ApiEndpoint, ApiEndpointPublic, User, type UUID } from "@common";
+import {
+	ApiEndpoint,
+	ApiEndpointPublic,
+} from "@common/decorators/api-endpoint.decorator";
+import { User } from "@common/decorators/user.decorator";
+import { type UUID } from "@common/types/branded.type";
 import {
 	Body,
 	Controller,

@@ -1,6 +1,6 @@
 import { ApiModule } from "@api/api.module";
 import { AppController } from "@app.controller";
-import { NodeEnv } from "@common";
+import { NodeEnv } from "@common/enums/node-env.enum";
 import {
 	appConfig,
 	authConfig,
@@ -12,6 +12,7 @@ import {
 	RedisConfig,
 	redisConfig,
 } from "@config";
+import * as entities from "@db/entities";
 import { IntegrationModule } from "@integrations/intergration.module";
 import KeyvRedis from "@keyv/redis";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
@@ -21,7 +22,6 @@ import { BullModule } from "@nestjs/bullmq";
 import { CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import * as entities from "./db/entities";
 
 const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 

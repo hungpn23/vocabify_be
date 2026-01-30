@@ -1,5 +1,5 @@
 import { STATUS_CODES } from "node:http";
-import { ErrorDetailDto, ErrorDto } from "@common";
+import { ErrorDetailDto, ErrorDto } from "@common/dtos/error.dto";
 import { UniqueConstraintViolationException } from "@mikro-orm/postgresql";
 import {
 	ArgumentsHost,

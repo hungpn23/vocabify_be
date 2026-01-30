@@ -1,5 +1,6 @@
-import { QueueName } from "@common";
-import { Session, User } from "@db";
+import { QueueName } from "@common/enums/queue-name.enum";
+import { Session } from "@db/entities/session.entity";
+import { User } from "@db/entities/user.entity";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";

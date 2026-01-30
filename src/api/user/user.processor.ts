@@ -1,6 +1,8 @@
 import fs from "node:fs";
-import { ImageUploadData, JobName, QueueName } from "@common";
-import { User } from "@db";
+import { JobName } from "@common/enums/job-name.enum";
+import { QueueName } from "@common/enums/queue-name.enum";
+import { ImageUploadData } from "@common/types/jobs.type";
+import { User } from "@db/entities/user.entity";
 import ImageKit from "@imagekit/nodejs";
 import { IMAGEKIT_CLIENT } from "@integrations/imagekit/imagekit.provider-token";
 import { EntityManager } from "@mikro-orm/core";

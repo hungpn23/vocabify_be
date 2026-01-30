@@ -1,4 +1,7 @@
-import { ImageUploadData, JobName, QueueName, type UUID } from "@common";
+import { JobName } from "@common/enums/job-name.enum";
+import { QueueName } from "@common/enums/queue-name.enum";
+import { type UUID } from "@common/types/branded.type";
+import { ImageUploadData } from "@common/types/jobs.type";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";

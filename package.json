@@ -1,5 +1,5 @@
 {
-	"name": "vocabify",
+	"name": "vocabify_be",
 	"version": "0.0.1",
 	"description": "",
 	"author": "",
@@ -29,6 +29,7 @@
 		"prepare": "node .husky/install.mjs"
 	},
 	"dependencies": {
+		"@casl/ability": "^6.8.0",
 		"@faker-js/faker": "^10.1.0",
 		"@imagekit/nodejs": "^7.1.1",
 		"@keyv/redis": "^5.1.5",

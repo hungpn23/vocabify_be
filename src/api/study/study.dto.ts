@@ -1,5 +1,5 @@
 import { CardAnswerDto } from "@api/deck/dtos/card.dto";
-import { ClassValidator } from "@common";
+import { ClassValidator } from "@common/decorators/validators.decorator";
 import { Exclude, Expose } from "class-transformer";
 
 export class SaveAnswersDto {

@@ -1,4 +1,7 @@
-import { PasswordValidator, StringValidator } from "@common";
+import {
+	PasswordValidator,
+	StringValidator,
+} from "@common/decorators/validators.decorator";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 

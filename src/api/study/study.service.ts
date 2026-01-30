@@ -1,6 +1,11 @@
 import { CardStatus } from "@api/deck/deck.enum";
-import { JobName, QueueName, UpdateUserStatsData, type UUID } from "@common";
-import { Card, Deck, UserStatistic } from "@db";
+import { JobName } from "@common/enums/job-name.enum";
+import { QueueName } from "@common/enums/queue-name.enum";
+import { type UUID } from "@common/types/branded.type";
+import { UpdateUserStatsData } from "@common/types/jobs.type";
+import { Card } from "@db/entities/card.entity";
+import { Deck } from "@db/entities/deck.entity";
+import { UserStatistic } from "@db/entities/user-statistics.entity";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { InjectQueue } from "@nestjs/bullmq";

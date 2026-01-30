@@ -1,5 +1,8 @@
 import { NotificationModule } from "@api/notification/notification.module";
-import { Card, Deck, Notification, User } from "@db";
+import { Card } from "@db/entities/card.entity";
+import { Deck } from "@db/entities/deck.entity";
+import { Notification } from "@db/entities/notification.entity";
+import { User } from "@db/entities/user.entity";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { Module } from "@nestjs/common";
 import { DeckController } from "./deck.controller";

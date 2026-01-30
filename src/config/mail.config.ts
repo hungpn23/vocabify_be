@@ -3,7 +3,7 @@ import {
 	PortValidatorOptional,
 	StringValidator,
 	StringValidatorOptional,
-} from "@common";
+} from "@common/decorators/validators.decorator";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { validateConfig } from "./validate-config";
 

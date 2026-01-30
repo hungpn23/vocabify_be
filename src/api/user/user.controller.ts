@@ -1,11 +1,9 @@
-import {
-	ApiEndpoint,
-	ApiFile,
-	multerStorage,
-	User,
-	type UUID,
-	validateImagePipe,
-} from "@common";
+import { ApiEndpoint } from "@common/decorators/api-endpoint.decorator";
+import { ApiFile } from "@common/decorators/api-file.decorator";
+import { User } from "@common/decorators/user.decorator";
+import { validateImagePipe } from "@common/pipes/validate-image.pipe";
+import { type UUID } from "@common/types/branded.type";
+import { multerStorage } from "@common/utils/multer-storage";
 import { Controller, Post, UploadedFile } from "@nestjs/common";
 import { UploadAvatarDto } from "./user.dto";
 import { UserService } from "./user.service";

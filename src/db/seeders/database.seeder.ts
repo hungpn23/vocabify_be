@@ -1,5 +1,7 @@
 import { Visibility } from "@api/deck/deck.enum";
-import { Card, Deck, User } from "@db";
+import { Card } from "@db/entities/card.entity";
+import { Deck } from "@db/entities/deck.entity";
+import { User } from "@db/entities/user.entity";
 import { faker } from "@faker-js/faker";
 import { EntityManager } from "@mikro-orm/core";
 import { Seeder } from "@mikro-orm/seeder";

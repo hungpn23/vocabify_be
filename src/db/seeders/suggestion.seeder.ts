@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { CardSuggestion } from "@db";
+import { CardSuggestion } from "@db/entities/card-suggestion.entity";
 import { EntityManager } from "@mikro-orm/core";
 import { Seeder } from "@mikro-orm/seeder";
 import { EntryRecord } from "./type";

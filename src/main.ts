@@ -1,12 +1,10 @@
 import "dotenv/config";
 import { AuthService } from "@api/auth/auth.service";
 import { AppModule } from "@app.module";
-import {
-	AuthGuard,
-	FieldsValidationPipe,
-	GlobalExceptionFilter,
-	NodeEnv,
-} from "@common";
+import { NodeEnv } from "@common/enums";
+import { GlobalExceptionFilter } from "@common/filters";
+import { AuthGuard, RoleBasedAccessControlGuard } from "@common/guards";
+import { FieldsValidationPipe } from "@common/pipes";
 import { getAppConfig } from "@config";
 import { MikroORM } from "@mikro-orm/core";
 import { Logger } from "@nestjs/common";
@@ -34,6 +32,7 @@ async function bootstrap() {
 	// apply nestjs middlewares and components
 	app.useWebSocketAdapter(new SocketIOAdapter(app, authService));
 	app.useGlobalGuards(new AuthGuard(reflector, authService));
+	app.useGlobalGuards(new RoleBasedAccessControlGuard(reflector));
 	app.useGlobalPipes(new FieldsValidationPipe());
 	app.useGlobalFilters(new GlobalExceptionFilter());
 

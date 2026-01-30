@@ -1,4 +1,5 @@
-import { NullableProperty, type UUID } from "@common";
+import { UUID } from "@common/types";
+import { NullableProperty } from "@common/utils";
 import { Opt, PrimaryKey, Property, t } from "@mikro-orm/core";
 import { v4 } from "uuid";
 

@@ -1,4 +1,4 @@
-import { CardSuggestion } from "@db";
+import { CardSuggestion } from "@db/entities/card-suggestion.entity";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { Module } from "@nestjs/common";
 import { SuggestionController } from "./suggestion.controller";

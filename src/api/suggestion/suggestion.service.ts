@@ -1,4 +1,4 @@
-import { CardSuggestion } from "@db";
+import { CardSuggestion } from "@db/entities/card-suggestion.entity";
 import { EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { Injectable, NotFoundException } from "@nestjs/common";

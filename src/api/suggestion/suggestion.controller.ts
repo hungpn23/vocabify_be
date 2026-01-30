@@ -1,4 +1,4 @@
-import { ApiEndpoint } from "@common";
+import { ApiEndpoint } from "@common/decorators/api-endpoint.decorator";
 import { Body, Controller, Post } from "@nestjs/common";
 import { CardSuggestionDto, GetCardSuggestionDto } from "./suggestion.dto";
 import { SuggestionService } from "./suggestion.service";
