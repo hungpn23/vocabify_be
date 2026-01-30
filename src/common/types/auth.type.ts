@@ -6,7 +6,7 @@ import { Seconds, UUID } from "./branded.type";
 
 type BaseJwtPayload = JwtPayload & {
 	sessionId: UUID;
-	exp: Seconds;
+	exp?: Seconds;
 	// jti: UUID;
 };
 
