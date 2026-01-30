@@ -16,22 +16,8 @@ export class MailProcessor extends WorkerHost {
 	async process(job: Job<unknown, void, JobName>) {
 		this.logger.debug(`Processing job ${job.id} of type ${job.name}...`);
 
-		try {
-			if (job.name === JobName.SEND_WELCOME_EMAIL) {
-				const payload = job.data as SendWelcomeEmailDto;
-				await this.mailService.sendWelcomeEmail(payload);
-
-				this.logger.debug(
-					`Successfully processed welcome email for job ${job.id}.`,
-				);
-			}
-		} catch (error) {
-			this.logger.error(
-				`Failed to process welcome email for job ${job.id}:`,
-				error,
-			);
-
-			throw error;
+		if (job.name === JobName.SEND_WELCOME_EMAIL) {
+			await this.mailService.sendWelcomeEmail(job.data as SendWelcomeEmailDto);
 		}
 	}
 

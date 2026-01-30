@@ -1,7 +1,7 @@
 import { QueueName } from "@common/enums/background.enum";
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
-import { MailProcessor } from "./mail.processor";
+import { MailProcessor } from "./mail.consumer";
 import { MailProducer } from "./mail.producer";
 import { MailService } from "./mail.service";
 
