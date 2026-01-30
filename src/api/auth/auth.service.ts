@@ -28,6 +28,7 @@ import {
 	UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { RedisService } from "@redis/redis.service";
 import argon2 from "argon2";
 import type { Cache } from "cache-manager";
 import { plainToInstance } from "class-transformer";
@@ -49,6 +50,7 @@ export class AuthService {
 		private readonly jwtService: JwtService,
 		private readonly em: EntityManager,
 		private readonly mailProducer: MailProducer,
+		private readonly redisService: RedisService,
 		@Inject(authConfig.KEY)
 		private readonly authConf: AuthConfig,
 		@Inject(appConfig.KEY)

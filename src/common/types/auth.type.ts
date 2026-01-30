@@ -1,11 +1,13 @@
 import { UserRole } from "@common/enums/user-role.enum";
 import { Request as ExpressRequest } from "express";
+import { JwtPayload } from "jsonwebtoken";
 import { Socket } from "socket.io";
 import { Seconds, UUID } from "./branded.type";
 
-type BaseJwtPayload = {
+type BaseJwtPayload = JwtPayload & {
 	sessionId: UUID;
-	exp?: Seconds;
+	exp: Seconds;
+	// jti: UUID;
 };
 
 export type UserJwtPayload = BaseJwtPayload & { userId: UUID; role: UserRole };

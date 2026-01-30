@@ -22,6 +22,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { RedisModule } from "./redis/redis.module";
 
 const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 
@@ -77,6 +78,7 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 			useFactory: (redisConf: RedisConfig) => ({ connection: redisConf }),
 		}),
 
+		RedisModule,
 		ApiModule,
 		IntegrationModule,
 	],
