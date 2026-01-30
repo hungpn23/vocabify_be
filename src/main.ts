@@ -20,7 +20,6 @@ async function bootstrap() {
 	const { apiPrefix, host, port, nodeEnv, frontendUrl } = getAppConfig();
 	const authService = app.get(AuthService);
 	const reflector = app.get(Reflector);
-	const isLocalEnv = nodeEnv === NodeEnv.LOCAL;
 
 	app.enableCors({
 		origin: frontendUrl,
@@ -37,6 +36,7 @@ async function bootstrap() {
 	app.useGlobalPipes(new FieldsValidationPipe());
 	app.useGlobalFilters(new GlobalExceptionFilter());
 
+	const isLocalEnv = nodeEnv === NodeEnv.LOCAL;
 	if (isLocalEnv) {
 		const orm = app.get(MikroORM);
 		await orm.schema.updateSchema();

@@ -1,4 +1,4 @@
-import { MetadataKey, RequestWithUser, UserRole } from "@common";
+import { ReflectorKey, RequestWithUser, UserRole } from "@common";
 import {
 	type CanActivate,
 	type ExecutionContext,
@@ -13,7 +13,7 @@ export class RoleGuard implements CanActivate {
 
 	canActivate(context: ExecutionContext): boolean {
 		const requiredRole = this.reflector.getAllAndOverride<UserRole>(
-			MetadataKey.USER_ROLE,
+			ReflectorKey.USER_ROLE,
 			[context.getHandler(), context.getClass()],
 		);
 
