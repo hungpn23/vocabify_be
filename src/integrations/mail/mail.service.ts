@@ -8,6 +8,8 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { toArray } from "lodash";
 import { Resend } from "resend";
 import { SendWelcomeEmailDto } from "./mail.dto";
+import { renderEmail } from "./render-email";
+import { WelcomeEmail, WelcomeEmailProps } from "./templates/welcome";
 
 @Injectable()
 export class MailService {
@@ -23,12 +25,12 @@ export class MailService {
 		this.resend = new Resend(this.integrationConf.resendApiKey);
 	}
 
-	async sendWelcomeEmail({ username: _, email }: SendWelcomeEmailDto) {
+	async sendWelcomeEmail({ username, email }: SendWelcomeEmailDto) {
 		const { data, error } = await this.resend.emails.send({
 			from: this.mailConf.from,
 			to: toArray(email),
 			subject: "Welcome to Vocabify!",
-			html: "<strong>Welcome to Vocabify!</strong>",
+			html: await renderEmail<WelcomeEmailProps>(WelcomeEmail, { username }),
 		});
 
 		if (error) return this.logger.error({ error });
