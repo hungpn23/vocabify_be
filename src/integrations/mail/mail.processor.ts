@@ -2,6 +2,7 @@ import { JobName, QueueName } from "@common/enums/background.enum";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
+import { SendWelcomeEmailDto } from "./mail.dto";
 import { MailService } from "./mail.service";
 
 @Processor(QueueName.EMAIL)
@@ -12,12 +13,13 @@ export class MailProcessor extends WorkerHost {
 		super();
 	}
 
-	async process(job: Job<void, void, JobName>) {
+	async process(job: Job<unknown, void, JobName>) {
 		this.logger.debug(`Processing job ${job.id} of type ${job.name}...`);
 
 		try {
 			if (job.name === JobName.SEND_WELCOME_EMAIL) {
-				await this.mailService.sendWelcomeEmail();
+				const payload = job.data as SendWelcomeEmailDto;
+				await this.mailService.sendWelcomeEmail(payload);
 
 				this.logger.debug(
 					`Successfully processed welcome email for job ${job.id}.`,

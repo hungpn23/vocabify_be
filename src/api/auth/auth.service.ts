@@ -1,6 +1,5 @@
 import crypto from "node:crypto";
 import { UserDto } from "@api/user/user.dto";
-import { JobName, QueueName } from "@common/enums/background.enum";
 import { RefreshTokenPayload, UserJwtPayload } from "@common/types/auth.type";
 import { Milliseconds, type UUID } from "@common/types/branded.type";
 import {
@@ -17,9 +16,9 @@ import {
 } from "@config";
 import { Session } from "@db/entities/session.entity";
 import { User } from "@db/entities/user.entity";
+import { MailProducer } from "@integrations/mail/mail.producer";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
-import { InjectQueue } from "@nestjs/bullmq";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import {
 	BadRequestException,
@@ -30,7 +29,6 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import argon2 from "argon2";
-import { Queue } from "bullmq";
 import type { Cache } from "cache-manager";
 import { plainToInstance } from "class-transformer";
 import { Response } from "express";
@@ -50,8 +48,7 @@ export class AuthService {
 	constructor(
 		private readonly jwtService: JwtService,
 		private readonly em: EntityManager,
-		@InjectQueue(QueueName.EMAIL)
-		private readonly emailQueue: Queue<void, void, JobName>,
+		private readonly mailProducer: MailProducer,
 		@Inject(authConfig.KEY)
 		private readonly authConf: AuthConfig,
 		@Inject(appConfig.KEY)
@@ -143,7 +140,12 @@ export class AuthService {
 
 		await this.em.flush();
 
-		await this.emailQueue.add(JobName.SEND_WELCOME_EMAIL);
+		if (newUser.email) {
+			await this.mailProducer.sendWelcomeEmail({
+				username: newUser.username,
+				email: newUser.email,
+			});
+		}
 
 		return plainToInstance(TokenPairDto, tokenPair);
 	}
