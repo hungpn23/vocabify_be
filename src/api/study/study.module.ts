@@ -1,4 +1,4 @@
-import { QueueName } from "@common/enums/queue-name.enum";
+import { QueueName } from "@common/enums/background.enum";
 import { Card } from "@db/entities/card.entity";
 import { Deck } from "@db/entities/deck.entity";
 import { UserStatistic } from "@db/entities/user-statistics.entity";

@@ -1,6 +1,5 @@
 import fs from "node:fs";
-import { JobName } from "@common/enums/job-name.enum";
-import { QueueName } from "@common/enums/queue-name.enum";
+import { JobName, QueueName } from "@common/enums/background.enum";
 import { ImageUploadData } from "@common/types/jobs.type";
 import { User } from "@db/entities/user.entity";
 import ImageKit from "@imagekit/nodejs";

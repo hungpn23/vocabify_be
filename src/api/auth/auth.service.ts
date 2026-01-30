@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import { UserDto } from "@api/user/user.dto";
-import { JobName } from "@common/enums/job-name.enum";
-import { QueueName } from "@common/enums/queue-name.enum";
+import { JobName, QueueName } from "@common/enums/background.enum";
 import { RefreshTokenPayload, UserJwtPayload } from "@common/types/auth.type";
 import { Milliseconds, type UUID } from "@common/types/branded.type";
 import {

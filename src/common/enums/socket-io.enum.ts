@@ -1,3 +1,3 @@
-export enum Namespace {
+export enum SocketIONamespace {
 	NOTIFICATIONS = "notifications",
 }

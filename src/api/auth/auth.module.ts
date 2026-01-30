@@ -1,4 +1,4 @@
-import { QueueName } from "@common/enums/queue-name.enum";
+import { QueueName } from "@common/enums/background.enum";
 import { Session } from "@db/entities/session.entity";
 import { User } from "@db/entities/user.entity";
 import { MikroOrmModule } from "@mikro-orm/nestjs";

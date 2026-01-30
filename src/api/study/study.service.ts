@@ -1,6 +1,5 @@
 import { CardStatus } from "@api/deck/deck.enum";
-import { JobName } from "@common/enums/job-name.enum";
-import { QueueName } from "@common/enums/queue-name.enum";
+import { JobName, QueueName } from "@common/enums/background.enum";
 import { type UUID } from "@common/types/branded.type";
 import { UpdateUserStatsData } from "@common/types/jobs.type";
 import { Card } from "@db/entities/card.entity";

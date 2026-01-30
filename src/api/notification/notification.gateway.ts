@@ -1,4 +1,4 @@
-import { Namespace } from "@common/enums/namespace.enum";
+import { SocketIONamespace } from "@common/enums/socket-io.enum";
 import { SocketWithUser } from "@common/types/auth.type";
 import { getAppConfig } from "@config";
 import { Logger } from "@nestjs/common";
@@ -12,7 +12,7 @@ import { NotificationDto } from "./notification.dto";
 import { ServerToClientEvents } from "./notification.interface";
 
 @WebSocketGateway({
-	namespace: Namespace.NOTIFICATIONS,
+	namespace: SocketIONamespace.NOTIFICATIONS,
 	cors: {
 		origin: getAppConfig().frontendUrl,
 		credentials: true,
