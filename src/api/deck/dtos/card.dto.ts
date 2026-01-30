@@ -7,7 +7,6 @@ import {
 } from "@common";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
-import { IsUUID } from "class-validator";
 import { CardStatus } from "../deck.enum";
 import type { LanguageCode } from "../deck.type";
 
@@ -33,19 +32,17 @@ export class CreateCardDto {
 	@StringValidatorOptional()
 	usageOrGrammar?: string;
 
-	@StringValidator({ isArray: true })
-	examples!: string[];
+	@StringValidatorOptional({ isArray: true })
+	examples?: string[] | null;
 }
 
 export class UpdateCardDto extends CreateCardDto {
-	@StringValidator()
-	@IsUUID()
+	@StringValidator({ isUUID: true })
 	id!: UUID;
 }
 
 export class CardAnswerDto {
-	@StringValidator()
-	@IsUUID()
+	@StringValidator({ isUUID: true })
 	id!: UUID;
 
 	@NumberValidator()

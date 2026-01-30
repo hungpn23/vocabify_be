@@ -14,7 +14,7 @@ import {
 	ApiResponse,
 	getSchemaPath,
 } from "@nestjs/swagger";
-import { ApiPublic } from "./auth/api-public.decorator";
+import { ApiPublic } from "./api-public.decorator";
 
 type EndpointOptions = Partial<{
 	type: Type<unknown>;
