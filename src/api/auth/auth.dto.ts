@@ -2,7 +2,6 @@ import {
 	PasswordValidator,
 	StringValidator,
 } from "@common/decorators/validators.decorator";
-import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 
 class BaseAuthDto {
@@ -30,6 +29,11 @@ export class ExchangeTokenDto {
 	code!: string;
 }
 
+export class RefreshTokenDto {
+	@StringValidator()
+	refreshToken!: string;
+}
+
 @Exclude()
 export class TokenPairDto {
 	@Expose()
@@ -38,7 +42,3 @@ export class TokenPairDto {
 	@Expose()
 	refreshToken!: string;
 }
-
-export class RefreshTokenDto extends PickType(TokenPairDto, [
-	"refreshToken",
-] as const) {}
