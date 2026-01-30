@@ -1,9 +1,9 @@
-import { ApiPublicEndpoint } from "@common";
+import { ApiEndpointPublic } from "@common";
 import { Controller, Get } from "@nestjs/common";
 
 @Controller()
 export class AppController {
-	@ApiPublicEndpoint()
+	@ApiEndpointPublic()
 	@Get("hello")
 	getHello() {
 		// throw new BadRequestException('No!!!!!!!');

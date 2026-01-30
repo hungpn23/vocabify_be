@@ -1,7 +1,7 @@
 import { UserDto } from "@api/user/user.dto";
 import {
 	ApiEndpoint,
-	ApiPublicEndpoint,
+	ApiEndpointPublic,
 	User,
 	type UserJwtPayload,
 	type UUID,
@@ -22,13 +22,13 @@ import { AuthService } from "./auth.service";
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
-	@ApiPublicEndpoint()
+	@ApiEndpointPublic()
 	@Get("google/callback")
 	async googleCallback(@Query("code") code: string, @Res() res: Response) {
 		return await this.authService.googleCallback(code, res);
 	}
 
-	@ApiPublicEndpoint({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairDto })
 	@Post("google/exchange")
 	async exchange(@Body() { code }: ExchangeTokenDto) {
 		return await this.authService.exchangeOneTimeCodeForTokens(code);
@@ -40,13 +40,13 @@ export class AuthController {
 		return await this.authService.getSession(userId);
 	}
 
-	@ApiPublicEndpoint({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairDto })
 	@Post("register")
 	async register(@Body() dto: RegisterDto) {
 		return await this.authService.register(dto);
 	}
 
-	@ApiPublicEndpoint({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairDto })
 	@Post("login")
 	async login(@Body() dto: LoginDto) {
 		return await this.authService.login(dto);
@@ -58,7 +58,7 @@ export class AuthController {
 		return await this.authService.logout(payload);
 	}
 
-	@ApiPublicEndpoint({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairDto })
 	@Post("refresh")
 	async refresh(@Body() dto: RefreshTokenDto) {
 		return await this.authService.refresh(dto.refreshToken);

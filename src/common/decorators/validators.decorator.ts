@@ -12,6 +12,7 @@ import {
 	IsPositive,
 	IsString,
 	IsUrl,
+	IsUUID,
 	Max,
 	MaxLength,
 	Min,
@@ -28,7 +29,8 @@ type CommonOptions = Partial<{
 	 * @default true
 	 */
 	required: boolean;
-	each: boolean; // if prop is an array --> validate each item in array
+
+	isArray: boolean; // if prop is an array --> validate each item in array
 }>;
 
 type NumberOptions = CommonOptions &
@@ -41,6 +43,7 @@ type NumberOptions = CommonOptions &
 
 type StringOptions = CommonOptions &
 	Partial<{
+		isUUID: boolean;
 		minLength: number;
 		maxLength: number;
 		toLowerCase: boolean;
@@ -58,15 +61,15 @@ type UrlOptions = CommonOptions &
 export function StringValidator(
 	options: StringOptions = {},
 ): PropertyDecorator {
-	const { each, minLength, maxLength, toLowerCase, toUpperCase } = options;
-	let decorators = [Type(() => String), IsString({ each })];
+	const { isArray, isUUID, minLength, maxLength, toLowerCase, toUpperCase } =
+		options;
+	let decorators = [Type(() => String), IsString({ each: isArray })];
 
 	decorators = handleCommonOptions(decorators, options);
 
-	if (minLength) {
-		decorators.push(MinLength(minLength, { each }));
-	}
-	if (maxLength) decorators.push(MaxLength(maxLength, { each }));
+	if (isUUID) decorators.push(IsUUID("4", { each: isArray }));
+	if (minLength) decorators.push(MinLength(minLength, { each: isArray }));
+	if (maxLength) decorators.push(MaxLength(maxLength, { each: isArray }));
 	if (toLowerCase) decorators.push(ToLowerCase());
 	if (toUpperCase) decorators.push(ToUpperCase());
 
@@ -89,11 +92,11 @@ export function EmailValidator(options: StringOptions = {}): PropertyDecorator {
 }
 
 export function UrlValidator(options: UrlOptions = {}): PropertyDecorator {
-	const { each, require_tld } = options;
+	const { isArray, require_tld } = options;
 	let decorators = [
 		Type(() => String),
-		IsString({ each }),
-		IsUrl({ require_tld }, { each }),
+		IsString({ each: isArray }),
+		IsUrl({ require_tld }, { each: isArray }),
 	];
 
 	decorators = handleCommonOptions(decorators, options);
@@ -117,20 +120,22 @@ export function PasswordValidator(
 export function NumberValidator(
 	options: NumberOptions = {},
 ): PropertyDecorator {
-	const { each, isInt, isPositive, minimum, maximum } = options;
+	const { isArray, isInt, isPositive, minimum, maximum } = options;
 	let decorators = [Type(() => Number)];
 
 	decorators = handleCommonOptions(decorators, options);
 
 	if (isInt) {
-		decorators.push(IsInt({ each }));
+		decorators.push(IsInt({ each: isArray }));
 	} else {
-		decorators.push(IsNumber({}, { each }));
+		decorators.push(IsNumber({}, { each: isArray }));
 	}
 
-	if (minimum || minimum === 0) decorators.push(Min(minimum, { each }));
-	if (maximum || maximum === 0) decorators.push(Max(maximum, { each }));
-	if (isPositive) decorators.push(IsPositive({ each }));
+	if (minimum || minimum === 0)
+		decorators.push(Min(minimum, { each: isArray }));
+	if (maximum || maximum === 0)
+		decorators.push(Max(maximum, { each: isArray }));
+	if (isPositive) decorators.push(IsPositive({ each: isArray }));
 
 	return applyDecorators(...decorators);
 }
@@ -142,7 +147,7 @@ export function NumberValidatorOptional(
 }
 
 export function PortValidator(options: CommonOptions = {}): PropertyDecorator {
-	let decorators = [IsPort({ each: options.each })];
+	let decorators = [IsPort({ each: options.isArray })];
 
 	decorators = handleCommonOptions(decorators, options);
 
@@ -161,7 +166,7 @@ export function PortValidatorOptional(
 export function BooleanValidator(
 	options: CommonOptions = {},
 ): PropertyDecorator {
-	let decorators = [ToBoolean(), IsBoolean({ each: options.each })];
+	let decorators = [ToBoolean(), IsBoolean({ each: options.isArray })];
 
 	decorators = handleCommonOptions(decorators, options);
 
@@ -178,7 +183,7 @@ export function EnumValidator<T extends object>(
 	entity: T,
 	options: CommonOptions = {},
 ): PropertyDecorator {
-	let decorators = [IsEnum(entity, { each: options.each })];
+	let decorators = [IsEnum(entity, { each: options.isArray })];
 
 	decorators = handleCommonOptions(decorators, options);
 
@@ -198,7 +203,7 @@ export function ClassValidator<T>(
 ): PropertyDecorator {
 	let decorators = [
 		Type(() => className),
-		ValidateNested({ each: options.each }),
+		ValidateNested({ each: options.isArray }),
 	];
 
 	decorators = handleCommonOptions(decorators, options);
@@ -214,9 +219,7 @@ export function ClassValidatorOptional<T>(
 }
 
 export function DateValidator(options: CommonOptions = {}): PropertyDecorator {
-	const { each } = options;
-
-	let decorators = [Type(() => Date), IsDate({ each })];
+	let decorators = [Type(() => Date), IsDate({ each: options.isArray })];
 
 	decorators = handleCommonOptions(decorators, options);
 
@@ -258,10 +261,12 @@ function handleCommonOptions(
 	decorators: PropertyDecorator[],
 	options: CommonOptions = {},
 ) {
-	const { required = true, each } = options;
+	const { required = true, isArray } = options;
 
 	decorators.push(
-		required ? IsNotEmpty({ each }) : ValidateIf((_obj, value) => !!value),
+		required
+			? IsNotEmpty({ each: isArray })
+			: ValidateIf((_obj, value) => !!value),
 	);
 
 	return decorators;

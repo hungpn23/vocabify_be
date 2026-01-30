@@ -1,4 +1,4 @@
-import { ApiEndpoint, ApiPublicEndpoint, User, type UUID } from "@common";
+import { ApiEndpoint, ApiEndpointPublic, User, type UUID } from "@common";
 import {
 	Body,
 	Controller,
@@ -27,7 +27,7 @@ import {
 export class DeckController {
 	constructor(private readonly deckService: DeckService) {}
 
-	@ApiPublicEndpoint({ type: GetSharedManyResDto, isPaginated: true })
+	@ApiEndpointPublic({ type: GetSharedManyResDto, isPaginated: true })
 	@Get("shared")
 	async getSharedMany(
 		@User("userId") userId: UUID | undefined,
@@ -36,7 +36,7 @@ export class DeckController {
 		return await this.deckService.getSharedMany(userId, query);
 	}
 
-	@ApiPublicEndpoint({ type: GetSharedOneResDto })
+	@ApiEndpointPublic({ type: GetSharedOneResDto })
 	@Get("shared/:deckId")
 	async getSharedOne(
 		@User("userId") userId: UUID | undefined,

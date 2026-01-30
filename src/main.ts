@@ -15,9 +15,10 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { SocketIOAdapter } from "@socket-io.adapter";
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
 	const logger = new Logger("Bootstrap");
 	const { apiPrefix, host, port, nodeEnv, frontendUrl } = getAppConfig();
+
+	const app = await NestFactory.create(AppModule);
 	const authService = app.get(AuthService);
 	const reflector = app.get(Reflector);
 

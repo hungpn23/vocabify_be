@@ -16,22 +16,20 @@ import {
 } from "@nestjs/swagger";
 import { ApiPublic } from "./auth/api-public.decorator";
 
-type EndpointOptions = {
+type EndpointOptions = Partial<{
 	type: Type<unknown>;
 	isPublic: boolean;
 	description: string;
 	statusCode: HttpStatus;
 	errorStatusCodes: HttpStatus[];
 	isPaginated: boolean;
-};
+}>;
 
-type OptionalEndpointOptions = Partial<EndpointOptions>;
-
-export function ApiEndpoint(options: OptionalEndpointOptions = {}) {
+export function ApiEndpoint(options: EndpointOptions = {}) {
 	const {
 		type,
 		isPublic,
-		description = "OK",
+		description,
 		statusCode = HttpStatus.OK,
 		errorStatusCodes,
 		isPaginated,
@@ -69,8 +67,8 @@ export function ApiEndpoint(options: OptionalEndpointOptions = {}) {
 	return applyDecorators(...decorators);
 }
 
-export function ApiPublicEndpoint(
-	options: Omit<OptionalEndpointOptions, "isPublic"> = {},
+export function ApiEndpointPublic(
+	options: Omit<EndpointOptions, "isPublic"> = {},
 ) {
 	return ApiEndpoint({ ...options, isPublic: true });
 }

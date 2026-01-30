@@ -135,12 +135,10 @@ export class AuthService {
 	}
 
 	async register(dto: RegisterDto) {
-		const { username, password, confirmPassword } = dto;
+		const { username, password } = dto;
 		const user = await this.userRepository.findOne({ username });
 
 		if (user) throw new BadRequestException("Username already exists");
-		if (password !== confirmPassword)
-			throw new BadRequestException("Passwords do not match");
 
 		const newUser = this.userRepository.create({ username, password });
 		const tokenPair = await this._createTokenPair(newUser);
@@ -237,10 +235,7 @@ export class AuthService {
 	}
 
 	async changePassword(userId: UUID, dto: ChangePasswordDto) {
-		const { oldPassword, newPassword, confirmPassword } = dto;
-
-		if (newPassword !== confirmPassword)
-			throw new BadRequestException("Passwords do not match");
+		const { oldPassword, newPassword } = dto;
 
 		const user = await this.userRepository.findOne(userId);
 		if (!user) throw new BadRequestException();
