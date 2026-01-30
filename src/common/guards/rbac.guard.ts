@@ -21,12 +21,11 @@ export class RoleBasedAccessControlGuard implements CanActivate {
 
 		if (hasPublicDecorator) return true;
 
-		const allowedRoles = this.reflector.getAllAndOverride<UserRole[]>(
-			MetadataKey.USER_ROLE,
-			[context.getHandler(), context.getClass()],
-		);
+		const allowedRoles = this.reflector.getAllAndOverride<
+			UserRole[] | undefined
+		>(MetadataKey.USER_ROLE, [context.getHandler(), context.getClass()]);
 
-		if (!allowedRoles.length) return true;
+		if (!allowedRoles?.length) return true;
 
 		const request = context.switchToHttp().getRequest<RequestWithUser>();
 		const user = request.user;
