@@ -2,13 +2,13 @@ import { JobName, QueueName } from "@common/enums/background.enum";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
-import { ResendService } from "./resend.service";
+import { MailService } from "./mail.service";
 
 @Processor(QueueName.EMAIL)
-export class ResendProcessor extends WorkerHost {
-	private readonly logger = new Logger(ResendProcessor.name);
+export class MailProcessor extends WorkerHost {
+	private readonly logger = new Logger(MailProcessor.name);
 
-	constructor(private readonly resendService: ResendService) {
+	constructor(private readonly mailService: MailService) {
 		super();
 	}
 
@@ -17,7 +17,7 @@ export class ResendProcessor extends WorkerHost {
 
 		try {
 			if (job.name === JobName.SEND_WELCOME_EMAIL) {
-				await this.resendService.sendEmail();
+				await this.mailService.sendWelcomeEmail();
 
 				this.logger.debug(
 					`Successfully processed welcome email for job ${job.id}.`,

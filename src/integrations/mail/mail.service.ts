@@ -1,31 +1,36 @@
-import { type MailConfig, mailConfig } from "@config";
+import {
+	type IntegrationConfig,
+	integrationConfig,
+	type MailConfig,
+	mailConfig,
+} from "@config";
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { createTransport, Transporter } from "nodemailer";
+import { Resend } from "resend";
 
 @Injectable()
 export class MailService {
 	private readonly logger = new Logger(MailService.name);
-	private readonly transporter: Transporter;
+	private readonly resend: Resend;
 
 	constructor(
+		@Inject(integrationConfig.KEY)
+		private readonly integrationConf: IntegrationConfig,
 		@Inject(mailConfig.KEY)
-		readonly mailConf: MailConfig,
+		private readonly mailConf: MailConfig,
 	) {
-		const { host, port, secure, user, pass } = mailConf;
+		this.resend = new Resend(this.integrationConf.resendApiKey);
+	}
 
-		this.transporter = createTransport({
-			host,
-			port,
-			secure,
-			auth: { user, pass },
+	async sendWelcomeEmail() {
+		const { data, error } = await this.resend.emails.send({
+			from: this.mailConf.from,
+			to: ["hungpn23@gmail.com"],
+			subject: "Welcome to Vocabify!",
+			html: "<strong>Welcome to Vocabify!</strong>",
 		});
 
-		this.transporter.verify((error) => {
-			if (error) {
-				this.logger.error("Error connecting to mail server:", error.message);
-			} else {
-				this.logger.debug("Mail server connection established");
-			}
-		});
+		if (error) return this.logger.error({ error });
+
+		this.logger.debug({ data });
 	}
 }
