@@ -1,12 +1,11 @@
 import { UserRole } from "@common/enums";
-import { HiddenProperty, NullableProperty } from "@common/utils";
+import { NullableProperty } from "@common/utils";
 import {
 	BeforeCreate,
 	BeforeUpdate,
 	Collection,
 	Entity,
 	Enum,
-	Hidden,
 	OneToMany,
 	Opt,
 	Property,
@@ -27,8 +26,8 @@ export class User extends BaseEntity {
 	@Property()
 	emailVerified: Opt<boolean> = false;
 
-	@HiddenProperty()
-	password!: Hidden<string>;
+	@NullableProperty({ hidden: true })
+	password?: string | null;
 
 	@NullableProperty()
 	avatarUrl?: string | null;

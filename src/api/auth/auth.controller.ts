@@ -10,6 +10,7 @@ import {
 	RefreshTokenDto,
 	RefreshTokenResponseDto,
 	RegisterDto,
+	RequestMagicLinkDto,
 	TokenPairDto,
 } from "./auth.dto";
 import { AuthService } from "./auth.service";
@@ -24,8 +25,14 @@ export class AuthController {
 		return await this.authService.googleCallback(code, res);
 	}
 
+	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@Post("magic-link")
+	async requestMagicLink(@Body() dto: RequestMagicLinkDto) {
+		return await this.authService.requestMagicLink(dto);
+	}
+
 	@ApiEndpointPublic({ type: TokenPairDto })
-	@Post("oauth2/verify")
+	@Post("verify-token")
 	async verifyToken(@Query("token") token: string) {
 		return await this.authService.verifyToken(token);
 	}

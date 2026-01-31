@@ -1,3 +1,3 @@
 export enum UserAction {
-	LOGIN_WITH_GOOGLE = "login_with_google",
+	NON_PASSWORD_LOGIN = "non_password_login",
 }

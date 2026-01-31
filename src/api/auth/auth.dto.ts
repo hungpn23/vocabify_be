@@ -3,6 +3,7 @@ import {
 	PasswordValidator,
 	StringValidator,
 } from "@common/decorators";
+import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 
 class BaseAuthDto {
@@ -12,6 +13,10 @@ class BaseAuthDto {
 	@PasswordValidator()
 	password!: string;
 }
+
+export class RequestMagicLinkDto extends PickType(BaseAuthDto, [
+	"email",
+] as const) {}
 
 export class LoginDto extends BaseAuthDto {}
 

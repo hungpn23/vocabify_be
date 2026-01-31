@@ -8,4 +8,5 @@ export enum JobName {
 	UPLOAD_USER_AVATAR = "upload_user_avatar",
 	UPDATE_USER_STATS = "update_user_stats",
 	SEND_WELCOME_EMAIL = "send_welcome_email",
+	SEND_MAGIC_LINK_EMAIL = "send_magic_link_email",
 }

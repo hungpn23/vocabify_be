@@ -4,7 +4,6 @@ import { JwtToken, UserAction, UserRole } from "@common/enums";
 import {
 	GoogleJwtPayload,
 	GoogleTokenResponse,
-	Seconds,
 	UserJwtPayload,
 	type UUID,
 } from "@common/types";
@@ -35,11 +34,11 @@ import { plainToInstance } from "class-transformer";
 import { Response } from "express";
 import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
-import { v4 } from "uuid";
 import {
 	ChangePasswordDto,
 	LoginDto,
 	RegisterDto,
+	RequestMagicLinkDto,
 	TokenPairDto,
 } from "./auth.dto";
 
@@ -101,7 +100,6 @@ export class AuthService {
 				username: generateFromEmail(email, 3),
 				email,
 				emailVerified: email_verified,
-				password: "",
 			});
 		}
 
@@ -111,17 +109,19 @@ export class AuthService {
 			role: user.role,
 		});
 
-		const token = v4();
-		await this.redisService.setValue(
-			this.redisService.getTokenToVerifyKey(token),
-			tokenPair,
-			60 as Seconds,
-		);
+		const token = createUUID();
 
-		await this.em.flush();
+		await Promise.all([
+			this.em.flush(),
+			this.redisService.setValue(
+				this.redisService.getTokenToVerifyKey(token),
+				tokenPair,
+				parseStringValueToSeconds("1m"),
+			),
+		]);
 
 		const searchParams = new URLSearchParams({
-			action: UserAction.LOGIN_WITH_GOOGLE,
+			action: UserAction.NON_PASSWORD_LOGIN,
 			token,
 		}).toString();
 
@@ -148,8 +148,7 @@ export class AuthService {
 		return plainToInstance(UserDto, wrap(user).toPOJO());
 	}
 
-	async register(dto: RegisterDto) {
-		const { email, password } = dto;
+	async register({ email, password }: RegisterDto) {
 		const username = generateFromEmail(email, 3);
 		const user = await this.userRepository.findOne({ username, email });
 
@@ -166,19 +165,18 @@ export class AuthService {
 			this.em.flush(),
 			this.mailProducer.sendWelcomeEmail({
 				username: newUser.username,
-				email: newUser.email,
+				to: newUser.email,
 			}),
 		]);
 
 		return tokenPair;
 	}
 
-	async login(dto: LoginDto) {
-		const { email, password } = dto;
+	async login({ email, password }: LoginDto) {
 		const user = await this.userRepository.findOne({ email });
 
 		const isValidPassword =
-			user && (await argon2.verify(user.password, password));
+			user?.password && (await argon2.verify(user.password, password));
 		if (!isValidPassword) throw new BadRequestException("Invalid credentials");
 
 		return await this._createTokenPair({
@@ -207,11 +205,12 @@ export class AuthService {
 		);
 	}
 
-	async changePassword(userId: UUID, dto: ChangePasswordDto) {
-		const { oldPassword, newPassword } = dto;
-
+	async changePassword(
+		userId: UUID,
+		{ oldPassword, newPassword }: ChangePasswordDto,
+	) {
 		const user = await this.userRepository.findOne(userId);
-		if (!user) throw new BadRequestException();
+		if (!user?.password) throw new BadRequestException();
 
 		const isOldPasswordValid = await argon2.verify(user.password, oldPassword);
 		if (!isOldPasswordValid)
@@ -226,6 +225,45 @@ export class AuthService {
 		this.userRepository.assign(user, { password: newPassword });
 
 		await this.em.flush();
+	}
+
+	async requestMagicLink({ email }: RequestMagicLinkDto) {
+		let user = await this.userRepository.findOne({ email });
+
+		if (!user) {
+			user = this.userRepository.create({
+				username: generateFromEmail(email, 3),
+				email,
+			});
+		}
+
+		const tokenPair = await this._createTokenPair({
+			userId: user.id,
+			sessionId: createUUID(),
+			role: user.role,
+		});
+
+		const token = createUUID();
+
+		const searchParams = new URLSearchParams({
+			action: UserAction.NON_PASSWORD_LOGIN,
+			token,
+		}).toString();
+
+		await Promise.all([
+			this.em.flush(),
+			this.redisService.setValue(
+				this.redisService.getTokenToVerifyKey(token),
+				tokenPair,
+				parseStringValueToSeconds("5m"),
+			),
+			this.mailProducer.sendMagicLinkEmail({
+				to: user.email,
+				magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
+			}),
+		]);
+
+		return { success: true } satisfies SuccessResponseDto;
 	}
 
 	async verifyJwt(jwt: string) {
