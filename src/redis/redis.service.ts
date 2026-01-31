@@ -1,3 +1,4 @@
+import { GetCardSuggestionDto } from "@api/suggestion/suggestion.dto";
 import { Seconds, UUID } from "@common/types";
 import { Inject, Injectable } from "@nestjs/common";
 import { Redis } from "ioredis";
@@ -44,5 +45,14 @@ export class RedisService {
 
 	getTokenToVerifyKey(token: string) {
 		return `token_to_verify:${token}`;
+	}
+
+	getSuggestionKey({
+		term,
+		partOfSpeech,
+		termLanguage,
+		definitionLanguage,
+	}: GetCardSuggestionDto) {
+		return `suggestion:${term}:${partOfSpeech}:termLang:${termLanguage}:defLang:${definitionLanguage}`;
 	}
 }

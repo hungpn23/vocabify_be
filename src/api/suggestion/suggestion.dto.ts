@@ -1,10 +1,13 @@
 import type { LanguageCode } from "@api/deck/deck.type";
-import { StringValidator } from "@common/decorators";
+import { StringValidator, StringValidatorOptional } from "@common/decorators";
 import { Exclude, Expose } from "class-transformer";
 
 export class GetCardSuggestionDto {
 	@StringValidator()
 	term!: string;
+
+	@StringValidatorOptional()
+	partOfSpeech?: string;
 
 	@StringValidator()
 	termLanguage!: LanguageCode;
