@@ -1,4 +1,4 @@
-import { JobName, QueueName } from "@common/enums/background.enum";
+import { JobName, QueueName } from "@common/enums";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";

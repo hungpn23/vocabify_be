@@ -3,8 +3,8 @@ import {
 	PortValidator,
 	StringValidator,
 	UrlValidator,
-} from "@common/decorators/validators.decorator";
-import { NodeEnv } from "@common/enums/node-env.enum";
+} from "@common/decorators";
+import { NodeEnv } from "@common/enums";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { validateConfig } from "./validate-config";
 

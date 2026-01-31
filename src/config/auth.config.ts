@@ -1,4 +1,4 @@
-import { StringValidator } from "@common/decorators/validators.decorator";
+import { StringValidator } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { type Algorithm } from "jsonwebtoken";
 import ms from "ms";

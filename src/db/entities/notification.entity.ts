@@ -1,5 +1,5 @@
-import { type UUID } from "@common/types/branded.type";
-import { NullableProperty } from "@common/utils/nullable-property";
+import { type UUID } from "@common/types";
+import { NullableProperty } from "@common/utils";
 import { Entity, ManyToOne, Property, type Ref, t } from "@mikro-orm/core";
 import { BaseEntity } from "./base.entity";
 import { User } from "./user.entity";

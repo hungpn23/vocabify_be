@@ -1,4 +1,4 @@
-import { UUID } from "@common/types/branded.type";
+import { UUID } from "@common/types";
 import { v4 } from "uuid";
 
 export function createUUID() {

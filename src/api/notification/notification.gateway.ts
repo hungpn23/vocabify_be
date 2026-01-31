@@ -1,5 +1,5 @@
-import { SocketIONamespace } from "@common/enums/socket-io.enum";
-import { SocketWithUser } from "@common/types/auth.type";
+import { SocketIONamespace } from "@common/enums";
+import { SocketWithUser } from "@common/types";
 import { getAppConfig } from "@config";
 import { Logger } from "@nestjs/common";
 import {

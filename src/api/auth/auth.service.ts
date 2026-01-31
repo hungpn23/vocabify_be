@@ -1,14 +1,13 @@
-import crypto from "node:crypto";
 import { UserDto } from "@api/user/user.dto";
 import { SuccessResponseDto } from "@common/dtos";
-import { UserRole } from "@common/enums";
-import { JwtToken } from "@common/enums/jwt-token.enum";
-import { UserJwtPayload } from "@common/types/auth.type";
-import { Milliseconds, type UUID } from "@common/types/branded.type";
+import { JwtToken, UserAction, UserRole } from "@common/enums";
 import {
 	GoogleJwtPayload,
 	GoogleTokenResponse,
-} from "@common/types/google.type";
+	Seconds,
+	UserJwtPayload,
+	type UUID,
+} from "@common/types";
 import { createUUID, parseStringValueToSeconds } from "@common/utils";
 
 import {
@@ -23,7 +22,6 @@ import { User } from "@db/entities/user.entity";
 import { MailProducer } from "@integrations/mail/mail.producer";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import {
 	BadRequestException,
 	Inject,
@@ -33,11 +31,11 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { RedisService } from "@redis/redis.service";
 import argon2 from "argon2";
-import type { Cache } from "cache-manager";
 import { plainToInstance } from "class-transformer";
 import { Response } from "express";
 import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
+import { v4 } from "uuid";
 import {
 	ChangePasswordDto,
 	LoginDto,
@@ -66,7 +64,7 @@ export class AuthService {
 		private readonly appConf: AppConfig,
 		@Inject(googleConfig.KEY)
 		private readonly googleConf: GoogleConfig,
-		@Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+		// @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
 		@InjectRepository(User)
 		private readonly userRepository: EntityRepository<User>,
 	) {}
@@ -112,32 +110,40 @@ export class AuthService {
 			sessionId: createUUID(),
 			role: user.role,
 		});
-		const oneTimeCode = crypto.randomBytes(20).toString("hex");
 
-		await this.cacheManager.set(
-			`one_time_code:${oneTimeCode}`,
+		const token = v4();
+		await this.redisService.setValue(
+			this.redisService.getTokenToVerifyKey(token),
 			tokenPair,
-			(60 * 1000) as Milliseconds,
+			60 as Seconds,
 		);
 
 		await this.em.flush();
 
-		return res.redirect(`${frontendUrl}/login/callback?code=${oneTimeCode}`);
+		const searchParams = new URLSearchParams({
+			action: UserAction.LOGIN_WITH_GOOGLE,
+			token,
+		}).toString();
+
+		return res.redirect(`${frontendUrl}/callback?${searchParams}`);
 	}
 
-	async exchangeOneTimeCodeForTokens(code: string) {
-		const cacheKey = `one_time_code:${code}`;
-		const tokenPair = await this.cacheManager.get<TokenPairDto>(cacheKey);
+	async verifyToken(token: string) {
+		const tokenPair = await this.redisService.getValue<TokenPairDto>(
+			this.redisService.getTokenToVerifyKey(token),
+		);
 
 		if (!tokenPair) throw new UnauthorizedException("Invalid or expired code.");
 
-		await this.cacheManager.del(cacheKey);
+		await this.redisService.deleteKey(token);
 
-		return plainToInstance(TokenPairDto, tokenPair);
+		return tokenPair satisfies TokenPairDto;
 	}
 
-	async getSession(userId: UUID) {
-		const user = await this.userRepository.findOneOrFail(userId);
+	async getMyInfo(userId: UUID) {
+		const user = await this.userRepository.findOne(userId);
+
+		if (!user) throw new UnauthorizedException("User not found.");
 
 		return plainToInstance(UserDto, wrap(user).toPOJO());
 	}

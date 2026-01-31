@@ -2,7 +2,7 @@ import {
 	EmailValidator,
 	PasswordValidator,
 	StringValidator,
-} from "@common/decorators/validators.decorator";
+} from "@common/decorators";
 import { Exclude, Expose } from "class-transformer";
 
 class BaseAuthDto {
@@ -23,11 +23,6 @@ export class ChangePasswordDto {
 
 	@PasswordValidator()
 	newPassword!: string;
-}
-
-export class ExchangeTokenDto {
-	@StringValidator()
-	code!: string;
 }
 
 export class RefreshTokenDto {

@@ -1,5 +1,5 @@
 import type { LanguageCode } from "@api/deck/deck.type";
-import { StringValidator } from "@common/decorators/validators.decorator";
+import { StringValidator } from "@common/decorators";
 import { Exclude, Expose } from "class-transformer";
 
 export class GetCardSuggestionDto {

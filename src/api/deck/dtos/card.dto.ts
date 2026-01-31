@@ -3,8 +3,8 @@ import {
 	NumberValidator,
 	StringValidator,
 	StringValidatorOptional,
-} from "@common/decorators/validators.decorator";
-import { type UUID } from "@common/types/branded.type";
+} from "@common/decorators";
+import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { CardStatus } from "../deck.enum";

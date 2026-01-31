@@ -1,6 +1,6 @@
 import { AuthService } from "@api/auth/auth.service";
-import { MetadataKey } from "@common/enums/reflector-key.enum";
-import { RequestWithUser } from "@common/types/auth.type";
+import { MetadataKey } from "@common/enums";
+import { RequestWithUser } from "@common/types";
 import { extractTokenFromHeader } from "@common/utils";
 import {
 	CanActivate,

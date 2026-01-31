@@ -1,6 +1,6 @@
 import { AuthService } from "@api/auth/auth.service";
-import { SocketIONamespace } from "@common/enums/socket-io.enum";
-import { SocketWithUser } from "@common/types/auth.type";
+import { SocketIONamespace } from "@common/enums";
+import { SocketWithUser } from "@common/types";
 import { extractTokenFromHeader } from "@common/utils";
 import { INestApplication, UnauthorizedException } from "@nestjs/common";
 import { IoAdapter } from "@nestjs/platform-socket.io";

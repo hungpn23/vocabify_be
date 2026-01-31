@@ -1,4 +1,3 @@
 export * from "./error.dto";
-export * from "./offset-pagination/offset-pagination.dto";
-export * from "./offset-pagination/utils";
+export * from "./offset-pagination.dto";
 export * from "./success.dto";

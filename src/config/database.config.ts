@@ -1,7 +1,4 @@
-import {
-	PortValidator,
-	StringValidator,
-} from "@common/decorators/validators.decorator";
+import { PortValidator, StringValidator } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { validateConfig } from "./validate-config";
 

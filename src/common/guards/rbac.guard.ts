@@ -1,6 +1,5 @@
-import { MetadataKey } from "@common/enums/reflector-key.enum";
-import { UserRole } from "@common/enums/user-role.enum";
-import { RequestWithUser } from "@common/types/auth.type";
+import { MetadataKey, UserRole } from "@common/enums";
+import { RequestWithUser } from "@common/types";
 import {
 	type CanActivate,
 	type ExecutionContext,

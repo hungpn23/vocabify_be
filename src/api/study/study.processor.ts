@@ -1,8 +1,7 @@
 import { CardStatus } from "@api/deck/deck.enum";
-import { JobName, QueueName } from "@common/enums/background.enum";
-import { UpdateUserStatsData } from "@common/types/jobs.type";
-import { Card } from "@db/entities/card.entity";
-import { UserStatistic } from "@db/entities/user-statistics.entity";
+import { JobName, QueueName } from "@common/enums";
+import { UpdateUserStatsData } from "@common/types";
+import { Card, UserStatistic } from "@db/entities";
 import { EntityManager } from "@mikro-orm/core";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";

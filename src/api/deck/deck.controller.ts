@@ -1,9 +1,5 @@
-import {
-	ApiEndpoint,
-	ApiEndpointPublic,
-} from "@common/decorators/api-endpoint.decorator";
-import { User } from "@common/decorators/user.decorator";
-import { type UUID } from "@common/types/branded.type";
+import { ApiEndpoint, ApiEndpointPublic, User } from "@common/decorators";
+import { type UUID } from "@common/types";
 import {
 	Body,
 	Controller,

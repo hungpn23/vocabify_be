@@ -2,7 +2,7 @@ import {
 	EnumValidatorOptional,
 	NumberValidatorOptional,
 	StringValidatorOptional,
-} from "@common/decorators/validators.decorator";
+} from "@common/decorators";
 import { QueryOrder } from "@mikro-orm/core";
 import { Exclude, Expose } from "class-transformer";
 

@@ -1,7 +1,5 @@
-import { UserRole } from "@common/enums/user-role.enum";
-import { HiddenProperty } from "@common/utils/hidden-property";
-import { NullableProperty } from "@common/utils/nullable-property";
-
+import { UserRole } from "@common/enums";
+import { HiddenProperty, NullableProperty } from "@common/utils";
 import {
 	BeforeCreate,
 	BeforeUpdate,

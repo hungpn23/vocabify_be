@@ -1,17 +1,11 @@
 import { UserDto } from "@api/user/user.dto";
-import {
-	ApiEndpoint,
-	ApiEndpointPublic,
-} from "@common/decorators/api-endpoint.decorator";
-import { User } from "@common/decorators/user.decorator";
-import { SuccessResponseDto } from "@common/dtos/success.dto";
-import { type UserJwtPayload } from "@common/types/auth.type";
-import { type UUID } from "@common/types/branded.type";
+import { ApiEndpoint, ApiEndpointPublic, User } from "@common/decorators";
+import { SuccessResponseDto } from "@common/dtos";
+import type { UserJwtPayload, UUID } from "@common/types";
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
 import {
 	ChangePasswordDto,
-	ExchangeTokenDto,
 	LoginDto,
 	RefreshTokenDto,
 	RefreshTokenResponseDto,
@@ -31,15 +25,15 @@ export class AuthController {
 	}
 
 	@ApiEndpointPublic({ type: TokenPairDto })
-	@Post("google/exchange")
-	async exchange(@Body() { code }: ExchangeTokenDto) {
-		return await this.authService.exchangeOneTimeCodeForTokens(code);
+	@Post("oauth2/verify")
+	async verifyToken(@Query("token") token: string) {
+		return await this.authService.verifyToken(token);
 	}
 
 	@ApiEndpoint({ type: UserDto })
 	@Get("session")
 	async getSession(@User("userId") userId: UUID) {
-		return await this.authService.getSession(userId);
+		return await this.authService.getMyInfo(userId);
 	}
 
 	@ApiEndpointPublic({ type: TokenPairDto })

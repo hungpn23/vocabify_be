@@ -1,5 +1,5 @@
-import { UserRole } from "@common/enums/user-role.enum";
-import { type UUID } from "@common/types/branded.type";
+import { UserRole } from "@common/enums";
+import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 

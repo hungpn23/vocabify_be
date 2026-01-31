@@ -1,4 +1,4 @@
-import { QueueName } from "@common/enums/background.enum";
+import { QueueName } from "@common/enums";
 import { AuthConfig, authConfig } from "@config";
 import { User } from "@db/entities/user.entity";
 import { MailModule } from "@integrations/mail/mail.module";

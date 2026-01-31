@@ -1,6 +1,6 @@
 import { ApiModule } from "@api/api.module";
 import { AppController } from "@app.controller";
-import { NodeEnv } from "@common/enums/node-env.enum";
+import { NodeEnv } from "@common/enums";
 import {
 	appConfig,
 	authConfig,
@@ -19,7 +19,7 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
 import { BullModule } from "@nestjs/bullmq";
-import { CacheModule } from "@nestjs/cache-manager";
+import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { RedisModule } from "./redis/redis.module";
@@ -68,8 +68,8 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 			inject: [redisConfig.KEY],
 			useFactory: (redisConf: RedisConfig) => {
 				return {
-					stores: new KeyvRedis(redisConf.connectionString),
-				};
+					stores: [new KeyvRedis(redisConf.connectionString)],
+				} satisfies CacheManagerOptions;
 			},
 		}),
 

@@ -1,5 +1,5 @@
-import { QueueName } from "@common/enums/background.enum";
-import { User } from "@db/entities/user.entity";
+import { QueueName } from "@common/enums";
+import { User } from "@db/entities";
 import { ImageKitModule } from "@integrations/imagekit/imagekit.module";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { BullModule } from "@nestjs/bullmq";

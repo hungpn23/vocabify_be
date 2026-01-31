@@ -1,5 +1,4 @@
-import { JwtToken } from "@common/enums/jwt-token.enum";
-import { UserRole } from "@common/enums/user-role.enum";
+import { JwtToken, UserRole } from "@common/enums";
 import { Request as ExpressRequest } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { Socket } from "socket.io";

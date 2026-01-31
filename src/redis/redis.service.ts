@@ -41,4 +41,8 @@ export class RedisService {
 	getUserSessionKey(userId: UUID, sessionId: UUID) {
 		return `user:${userId}:session:${sessionId}`;
 	}
+
+	getTokenToVerifyKey(token: string) {
+		return `token_to_verify:${token}`;
+	}
 }

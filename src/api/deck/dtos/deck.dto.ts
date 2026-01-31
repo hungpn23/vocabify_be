@@ -6,9 +6,9 @@ import {
 	EnumValidatorOptional,
 	StringValidator,
 	StringValidatorOptional,
-} from "@common/decorators/validators.decorator";
-import { QueryDto } from "@common/dtos/offset-pagination/offset-pagination.dto";
-import { type UUID } from "@common/types/branded.type";
+} from "@common/decorators";
+import { QueryDto } from "@common/dtos";
+import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { ArrayMinSize, ValidateIf } from "class-validator";

@@ -1,5 +1,5 @@
 import { ActorDto } from "@api/user/user.dto";
-import type { UUID } from "@common/types/branded.type";
+import type { UUID } from "@common/types";
 
 import { Exclude, Expose } from "class-transformer";
 

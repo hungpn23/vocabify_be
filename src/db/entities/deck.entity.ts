@@ -1,6 +1,6 @@
 import { Visibility } from "@api/deck/deck.enum";
-import { type UUID } from "@common/types/branded.type";
-import { NullableProperty } from "@common/utils/nullable-property";
+import { type UUID } from "@common/types";
+import { NullableProperty } from "@common/utils";
 import {
 	BeforeCreate,
 	BeforeUpdate,
