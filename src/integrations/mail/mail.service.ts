@@ -5,7 +5,6 @@ import {
 	mailConfig,
 } from "@config";
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { toArray } from "lodash";
 import { Resend } from "resend";
 import { SendWelcomeEmailDto } from "./mail.dto";
 import { renderEmail } from "./render-email";
@@ -28,7 +27,7 @@ export class MailService {
 	async sendWelcomeEmail({ username, email }: SendWelcomeEmailDto) {
 		const { data, error } = await this.resend.emails.send({
 			from: this.mailConf.from,
-			to: toArray(email),
+			to: email,
 			subject: "Welcome to Vocabify!",
 			html: await renderEmail<WelcomeEmailProps>(WelcomeEmail, { username }),
 		});

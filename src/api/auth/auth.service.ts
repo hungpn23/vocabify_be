@@ -156,14 +156,13 @@ export class AuthService {
 			role: newUser.role,
 		});
 
-		await this.em.flush();
-
-		if (newUser.email) {
-			await this.mailProducer.sendWelcomeEmail({
+		await Promise.all([
+			this.em.flush(),
+			this.mailProducer.sendWelcomeEmail({
 				username: newUser.username,
 				email: newUser.email,
-			});
-		}
+			}),
+		]);
 
 		return tokenPair;
 	}
@@ -183,9 +182,7 @@ export class AuthService {
 		});
 	}
 
-	async logout(payload: UserJwtPayload) {
-		const { userId, sessionId } = payload;
-
+	async logout({ userId, sessionId }: UserJwtPayload) {
 		const userTokenKey = this.redisService.getUserSessionKey(userId, sessionId);
 		await this.redisService.deleteKey(userTokenKey);
 
