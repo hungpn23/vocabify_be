@@ -1,4 +1,4 @@
-import { GetCardSuggestionDto } from "@api/suggestion/suggestion.dto";
+import { GetTermSuggestionDto } from "@api/suggestion/suggestion.dto";
 import { Seconds, UUID } from "@common/types";
 import { Inject, Injectable } from "@nestjs/common";
 import { Redis } from "ioredis";
@@ -52,7 +52,7 @@ export class RedisService {
 		partOfSpeech,
 		termLanguage,
 		definitionLanguage,
-	}: GetCardSuggestionDto) {
+	}: GetTermSuggestionDto) {
 		return `suggestion:${term}:${partOfSpeech}:termLang:${termLanguage}:defLang:${definitionLanguage}`;
 	}
 }
