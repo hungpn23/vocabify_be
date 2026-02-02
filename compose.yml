@@ -45,9 +45,21 @@ services:
     networks:
       - vocabify_network
 
+  qdrant:
+    extends:
+      file: .docker/compose.base.yml
+      service: qdrant
+    expose:
+      - '6333'
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - vocabify_network
+
 volumes:
   pg_data:
   redis_data:
+  qdrant_data:
 
 networks:
   vocabify_network:

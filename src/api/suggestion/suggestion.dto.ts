@@ -1,8 +1,9 @@
 import type { LanguageCode } from "@api/deck/deck.type";
 import { StringValidator, StringValidatorOptional } from "@common/decorators";
+import { OmitType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 
-export class GetCardSuggestionDto {
+export class GetTermSuggestionDto {
 	@StringValidator()
 	term!: string;
 
@@ -16,8 +17,20 @@ export class GetCardSuggestionDto {
 	definitionLanguage!: LanguageCode;
 }
 
+export class GetCardSuggestionDto extends OmitType(GetTermSuggestionDto, [
+	"partOfSpeech",
+]) {
+	@StringValidator()
+	definition!: string;
+}
+
+/**
+ * @todo implement this
+ */
+export class GetDeckSuggestionDto {}
+
 @Exclude()
-export class CardSuggestionDto {
+export class TermSuggestionResponseDto {
 	@Expose()
 	definition!: string;
 
@@ -33,3 +46,15 @@ export class CardSuggestionDto {
 	@Expose()
 	examples!: string[];
 }
+
+@Exclude()
+export class CardSuggestionResponseDto extends TermSuggestionResponseDto {
+	@Expose()
+	term!: string;
+}
+
+/**
+ * @todo implement this
+ */
+@Exclude()
+export class DeckSuggestionResponseDto {}
