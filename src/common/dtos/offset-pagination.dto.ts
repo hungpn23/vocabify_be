@@ -4,7 +4,7 @@ import {
 	StringValidatorOptional,
 } from "@common/decorators";
 import { QueryOrder } from "@mikro-orm/core";
-import { Exclude, Expose } from "class-transformer";
+import { Expose } from "class-transformer";
 
 export class QueryDto {
 	@NumberValidatorOptional({ isInt: true, minimum: 1 })
@@ -24,7 +24,6 @@ export class QueryDto {
 	}
 }
 
-@Exclude()
 export class MetadataDto {
 	@Expose()
 	limit!: number;
@@ -45,7 +44,6 @@ export class MetadataDto {
 	previousPage?: number | null;
 }
 
-@Exclude()
 export class PaginatedDto<T> {
 	// manually define swagger schema model at ApiPaginatedResponse decorator
 	@Expose()

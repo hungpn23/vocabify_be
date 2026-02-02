@@ -6,7 +6,7 @@ import {
 } from "@common/decorators";
 import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
-import { Exclude, Expose } from "class-transformer";
+import { Expose } from "class-transformer";
 import { CardStatus } from "../deck.enum";
 import type { LanguageCode } from "../deck.type";
 
@@ -52,7 +52,6 @@ export class CardAnswerDto {
 	reviewDate!: Date;
 }
 
-@Exclude()
 export class CardDto {
 	@Expose()
 	id!: UUID;
@@ -91,7 +90,6 @@ export class CardDto {
 	status!: CardStatus;
 }
 
-@Exclude()
 export class PreviewCardDto extends PickType(CardDto, [
 	"id",
 	"term",

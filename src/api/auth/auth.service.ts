@@ -325,6 +325,6 @@ export class AuthService {
 			),
 		]);
 
-		return { accessToken, refreshToken } satisfies TokenPairDto;
+		return plainToInstance(TokenPairDto, { accessToken, refreshToken });
 	}
 }

@@ -8,7 +8,6 @@ import {
 	ChangePasswordDto,
 	LoginDto,
 	RefreshTokenDto,
-	RefreshTokenResponseDto,
 	RegisterDto,
 	RequestMagicLinkDto,
 	TokenPairDto,
@@ -61,7 +60,7 @@ export class AuthController {
 		return await this.authService.logout(payload);
 	}
 
-	@ApiEndpointPublic({ type: RefreshTokenResponseDto })
+	@ApiEndpointPublic({ type: TokenPairDto })
 	@Post("refresh")
 	async refresh(@Body() dto: RefreshTokenDto) {
 		return await this.authService.refresh(dto.refreshToken);

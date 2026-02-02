@@ -3,11 +3,9 @@ import { SuccessResponseDto } from "@common/dtos";
 import { UserRole } from "@common/enums";
 import { Body, Controller, Post } from "@nestjs/common";
 import {
-	CardSuggestionResponseDto,
-	DeckSuggestionResponseDto,
-	GetCardSuggestionDto,
-	GetDeckSuggestionDto,
+	GetNextCardSuggestionDto,
 	GetTermSuggestionDto,
+	NextCardSuggestionResponseDto,
 	TermSuggestionResponseDto,
 } from "./suggestion.dto";
 import { SuggestionService } from "./suggestion.service";
@@ -18,7 +16,7 @@ export class SuggestionController {
 
 	@RoleBaseAccessControl([UserRole.ADMIN])
 	@ApiEndpoint({ type: SuccessResponseDto })
-	@Post("embed")
+	@Post("embed-data")
 	async embedData() {
 		return await this.suggestionService.embedData();
 	}
@@ -26,18 +24,12 @@ export class SuggestionController {
 	@ApiEndpoint({ type: TermSuggestionResponseDto })
 	@Post("term")
 	async getTermSuggestion(@Body() dto: GetTermSuggestionDto) {
-		return await this.suggestionService.getTermSuggestion(dto);
+		return await this.suggestionService.suggestDefinition(dto);
 	}
 
-	@ApiEndpoint({ type: CardSuggestionResponseDto })
-	@Post("card")
-	async getCardSuggestion(@Body() dto: GetCardSuggestionDto) {
-		return await this.suggestionService.getCardSuggestion(dto);
-	}
-
-	@ApiEndpoint({ type: DeckSuggestionResponseDto })
-	@Post("deck")
-	async getDeckSuggestion(@Body() dto: GetDeckSuggestionDto) {
-		return await this.suggestionService.getDeckSuggestion(dto);
+	@ApiEndpoint({ type: NextCardSuggestionResponseDto })
+	@Post("next-card")
+	async getNextCardSuggestion(@Body() dto: GetNextCardSuggestionDto) {
+		return await this.suggestionService.suggestNextCard(dto);
 	}
 }
