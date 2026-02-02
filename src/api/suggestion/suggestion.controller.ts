@@ -1,4 +1,6 @@
-import { ApiEndpoint } from "@common/decorators";
+import { ApiEndpoint, RoleBaseAccessControl } from "@common/decorators";
+import { SuccessResponseDto } from "@common/dtos";
+import { UserRole } from "@common/enums";
 import { Body, Controller, Post } from "@nestjs/common";
 import {
 	CardSuggestionResponseDto,
@@ -13,6 +15,13 @@ import { SuggestionService } from "./suggestion.service";
 @Controller("suggestion")
 export class SuggestionController {
 	constructor(private readonly suggestionService: SuggestionService) {}
+
+	@RoleBaseAccessControl([UserRole.ADMIN])
+	@ApiEndpoint({ type: SuccessResponseDto })
+	@Post("embed")
+	async embedData() {
+		return await this.suggestionService.embedData();
+	}
 
 	@ApiEndpoint({ type: TermSuggestionResponseDto })
 	@Post("term")

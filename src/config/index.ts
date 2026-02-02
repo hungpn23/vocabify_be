@@ -5,3 +5,4 @@ export * from "./google.config";
 export * from "./integration.config";
 export * from "./mail.config";
 export * from "./redis.config";
+export * from "./vector-db.config";

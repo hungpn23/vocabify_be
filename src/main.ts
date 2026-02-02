@@ -5,7 +5,7 @@ import { NodeEnv } from "@common/enums";
 import { GlobalExceptionFilter } from "@common/filters";
 import { AuthGuard, RoleBasedAccessControlGuard } from "@common/guards";
 import { FieldsValidationPipe } from "@common/pipes";
-import { getAppConfig } from "@config";
+import { getAppConfig, VectorDbConfig, vectorDbConfig } from "@config";
 import { MikroORM } from "@mikro-orm/core";
 import { Logger } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
@@ -19,6 +19,9 @@ async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 	const authService = app.get(AuthService);
 	const reflector = app.get(Reflector);
+	const { host: vectorDbHost, port: vectorDbPort } = app.get<VectorDbConfig>(
+		vectorDbConfig.KEY,
+	);
 
 	app.enableCors({
 		origin: frontendUrl,
@@ -55,10 +58,13 @@ async function bootstrap() {
 
 	await app.listen(port, host, () => {
 		if (isLocalEnv) {
-			logger.debug(`Environment: ${nodeEnv}`);
-			logger.debug(`API live at: ${appUrl}`);
-			logger.debug(`Health check: ${appUrl}/hello`);
-			logger.debug(`Swagger docs at: ${appUrl}/docs`);
+			logger.debug(`Current environment: ${nodeEnv}`);
+			logger.debug(`API endpoint: ${appUrl}`);
+			logger.debug(`Health check: ${appUrl}/health-check`);
+			logger.debug(`Swagger docs: ${appUrl}/docs`);
+			logger.debug(
+				`Qdrant dashboard: http://${vectorDbHost}:${vectorDbPort}/dashboard`,
+			);
 		}
 	});
 }

@@ -1,6 +1,6 @@
 import { QueueName } from "@common/enums";
 import { AuthConfig, authConfig } from "@config";
-import { User } from "@db/entities/user.entity";
+import { User } from "@db/entities";
 import { MailModule } from "@integrations/mail/mail.module";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { BullModule } from "@nestjs/bullmq";

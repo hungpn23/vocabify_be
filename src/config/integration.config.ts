@@ -8,6 +8,9 @@ class IntegrationEnvVariables {
 
 	@StringValidator()
 	RESEND_API_KEY!: string;
+
+	@StringValidator()
+	COHERE_API_KEY!: string;
 }
 
 export const integrationConfig = registerAs("integration", () => {
@@ -16,6 +19,7 @@ export const integrationConfig = registerAs("integration", () => {
 	return {
 		imagekitPrivateKey: config.IMAGEKIT_PRIVATE_KEY,
 		resendApiKey: config.RESEND_API_KEY,
+		cohereApiKey: config.COHERE_API_KEY,
 	};
 });
 

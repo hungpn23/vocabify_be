@@ -1,12 +1,26 @@
-import { parseStringValueToSeconds } from "@common/utils";
-import { CardSuggestion } from "@db/entities/card-suggestion.entity";
+import { SuccessResponseDto } from "@common/dtos";
+import { EntryRecord } from "@common/types";
+import { getSampleData, parseStringValueToSeconds } from "@common/utils";
+import {
+	type IntegrationConfig,
+	integrationConfig,
+	type VectorDbConfig,
+	vectorDbConfig,
+} from "@config";
+import { CardSuggestion } from "@db/entities";
+import { CohereEmbeddings } from "@langchain/cohere";
+import { Document } from "@langchain/core/documents";
+import { QdrantVectorStore } from "@langchain/qdrant";
 import { EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import {
 	BadGatewayException,
+	BadRequestException,
+	Inject,
 	Injectable,
 	Logger,
 	NotFoundException,
+	OnModuleInit,
 } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
 import {
@@ -16,14 +30,47 @@ import {
 } from "./suggestion.dto";
 
 @Injectable()
-export class SuggestionService {
+export class SuggestionService implements OnModuleInit {
 	private readonly logger = new Logger(SuggestionService.name);
+	private readonly model: CohereEmbeddings;
+	private _store?: QdrantVectorStore;
 
 	constructor(
 		private readonly redisService: RedisService,
 		@InjectRepository(CardSuggestion)
 		private readonly cardSuggestionRepository: EntityRepository<CardSuggestion>,
-	) {}
+		@Inject(integrationConfig.KEY)
+		private readonly integrationConf: IntegrationConfig,
+		@Inject(vectorDbConfig.KEY)
+		private readonly vectorDbConf: VectorDbConfig,
+	) {
+		this.model = new CohereEmbeddings({
+			model: "embed-multilingual-v3.0",
+			apiKey: this.integrationConf.cohereApiKey,
+		});
+	}
+
+	/**
+	 * @see https://docs.nestjs.com/fundamentals/lifecycle-events
+	 */
+	async onModuleInit() {
+		const { host, port, collectionName } = this.vectorDbConf;
+
+		this._store = await QdrantVectorStore.fromExistingCollection(this.model, {
+			url: `http://${host}:${port}`,
+			collectionName,
+		});
+
+		this.logger.debug("VectorStore initialized.");
+	}
+
+	get store() {
+		if (!this._store) {
+			throw new BadRequestException("VectorStore not initialized");
+		}
+
+		return this._store;
+	}
 
 	async getTermSuggestion({ partOfSpeech, ...rest }: GetTermSuggestionDto) {
 		const where: GetTermSuggestionDto = rest;
@@ -61,5 +108,35 @@ export class SuggestionService {
 
 	async getDeckSuggestion(dto: unknown) {
 		throw new BadGatewayException("Not implemented");
+	}
+
+	async embedData() {
+		const documents = getSampleData().map((d) => this._buildDocument(d));
+
+		await this.store.addDocuments(documents);
+
+		this.logger.debug("Data embedded.");
+		return { success: true } satisfies SuccessResponseDto;
+	}
+
+	async suggest(query: string, k: number = 1) {
+		return await this.store.similaritySearch(query, k);
+	}
+
+	private _buildDocument(record: EntryRecord) {
+		const { term, termLanguageCode, definitionEn, definitionVi, exampleEn } =
+			record;
+
+		const parts: string[] = [];
+
+		parts.push(`Term (${termLanguageCode}): ${term}`);
+		parts.push(`Definition (English): ${definitionEn}`);
+		parts.push(`Definition (Vietnamese): ${definitionVi}`);
+		parts.push(`Example (English): ${exampleEn}`);
+
+		return new Document({
+			pageContent: parts.join("\n"),
+			metadata: record,
+		});
 	}
 }

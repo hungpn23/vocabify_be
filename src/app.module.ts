@@ -11,6 +11,7 @@ import {
 	mailConfig,
 	RedisConfig,
 	redisConfig,
+	vectorDbConfig,
 } from "@config";
 import * as entities from "@db/entities";
 import { IntegrationModule } from "@integrations/intergration.module";
@@ -42,6 +43,7 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 				integrationConfig,
 				mailConfig,
 				redisConfig,
+				vectorDbConfig,
 			],
 		}),
 
