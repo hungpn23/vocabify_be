@@ -1,5 +1,6 @@
-import { NotificationDto } from "@api/notification/notification.dto";
+import { NotificationResponseDto } from "@api/notification/notification.dto";
 import { NotificationGateway } from "@api/notification/notification.gateway";
+import { OwnerResponseDto } from "@api/user/user.res.dto";
 import { PaginatedDto } from "@common/dtos";
 import { UUID } from "@common/types";
 import { createMetadata } from "@common/utils";
@@ -20,19 +21,21 @@ import {
 import { plainToInstance } from "class-transformer";
 import { assign, omit, pick } from "lodash";
 import { Visibility } from "./deck.enum";
-import { CardDto } from "./dtos/card.dto";
+import { CardResponseDto } from "./dtos/card.dto";
 import {
 	CloneDeckDto,
 	CreateDeckDto,
-	CreateDeckResDto,
-	DeckStatsDto,
 	GetManyQueryDto,
-	GetManyResDto,
-	GetOneResDto,
-	GetSharedManyResDto,
-	GetSharedOneResDto,
 	UpdateDeckDto,
 } from "./dtos/deck.dto";
+import {
+	CreateDeckResponseDto,
+	DeckStatsResponseDto,
+	GetManyResponseDto,
+	GetOneResponseDto,
+	GetSharedManyResponseDto,
+	GetSharedOneResponseDto,
+} from "./dtos/deck.res.dto";
 
 @Injectable()
 export class DeckService {
@@ -70,7 +73,7 @@ export class DeckService {
 		const plainDeck = wrap(deck).toPOJO();
 		const cards = plainDeck.cards.map((c) => omit(c, ["deck"]));
 
-		return plainToInstance(GetOneResDto, assign(plainDeck, { cards }));
+		return plainToInstance(GetOneResponseDto, assign(plainDeck, { cards }));
 	}
 
 	async getMany(userId: UUID, query: GetManyQueryDto) {
@@ -93,7 +96,7 @@ export class DeckService {
 		const deckWithCards = decks.map((d) => {
 			const plainDeck = wrap(d).toPOJO();
 
-			return plainToInstance(GetManyResDto, {
+			return plainToInstance(GetManyResponseDto, {
 				...plainDeck,
 				stats: this._getDeckStats(
 					plainDeck.cards.map((c) => pick(c, "status")),
@@ -101,7 +104,7 @@ export class DeckService {
 			});
 		});
 
-		return plainToInstance(PaginatedDto<GetManyResDto>, {
+		return plainToInstance(PaginatedDto<GetManyResponseDto>, {
 			data: deckWithCards,
 			metadata: createMetadata(totalRecords, query),
 		});
@@ -130,7 +133,7 @@ export class DeckService {
 
 		const plainDeck = wrap(deck).toPOJO();
 
-		return plainToInstance(GetSharedOneResDto, {
+		return plainToInstance(GetSharedOneResponseDto, {
 			...plainDeck,
 			totalCards: plainDeck.cards.length,
 		});
@@ -159,16 +162,17 @@ export class DeckService {
 		const data = decks.map((d) => {
 			const plainDeck = wrap(d).toPOJO();
 
-			return plainToInstance(GetSharedManyResDto, {
+			return plainToInstance(GetSharedManyResponseDto, {
 				...plainDeck,
+				owner: plainToInstance(OwnerResponseDto, plainDeck.owner),
 				totalCards: plainDeck.cards.length,
 			});
 		});
 
-		return plainToInstance(PaginatedDto<GetSharedManyResDto>, {
+		return {
 			data,
 			metadata: createMetadata(totalRecords, query),
-		});
+		} satisfies PaginatedDto<GetSharedManyResponseDto>;
 	}
 
 	async create(userId: UUID, dto: CreateDeckDto) {
@@ -199,7 +203,10 @@ export class DeckService {
 
 		await this.em.flush();
 
-		return plainToInstance(CreateDeckResDto, pick(newDeck, ["id", "slug"]));
+		return plainToInstance(
+			CreateDeckResponseDto,
+			pick(newDeck, ["id", "slug"]),
+		);
 	}
 
 	async update(userId: UUID, deckId: UUID, dto: UpdateDeckDto) {
@@ -339,7 +346,7 @@ export class DeckService {
 		await this.em.flush();
 
 		this.notificationGateway.sendNotification(
-			plainToInstance(NotificationDto, wrap(notification).toPOJO()),
+			plainToInstance(NotificationResponseDto, wrap(notification).toPOJO()),
 		);
 	}
 
@@ -364,15 +371,15 @@ export class DeckService {
 		await this.em.flush();
 	}
 
-	private _getDeckStats(cards: Pick<CardDto, "status">[]): DeckStatsDto {
-		const stats: DeckStatsDto = {
+	private _getDeckStats(cards: Pick<CardResponseDto, "status">[]) {
+		const stats: DeckStatsResponseDto = {
 			total: cards.length,
 			known: 0,
 			learning: 0,
 			new: 0,
 		};
 
-		for (const c of cards) stats[c.status as keyof DeckStatsDto]++;
+		for (const c of cards) stats[c.status as keyof DeckStatsResponseDto]++;
 
 		return stats;
 	}

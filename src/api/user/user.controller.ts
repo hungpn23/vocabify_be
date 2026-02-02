@@ -3,7 +3,7 @@ import { validateImagePipe } from "@common/pipes";
 import { type UUID } from "@common/types";
 import { multerStorage } from "@common/utils";
 import { Controller, Post, UploadedFile } from "@nestjs/common";
-import { UploadAvatarDto } from "./user.dto";
+import { UploadAvatarResponseDto } from "./user.res.dto";
 import { UserService } from "./user.service";
 
 @Controller("users")
@@ -11,7 +11,7 @@ export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@ApiFile("avatar", { storage: multerStorage() })
-	@ApiEndpoint({ type: UploadAvatarDto })
+	@ApiEndpoint({ type: UploadAvatarResponseDto })
 	@Post("upload-avatar")
 	async uploadAvatar(
 		@UploadedFile(validateImagePipe())

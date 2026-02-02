@@ -4,7 +4,7 @@ import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { plainToInstance } from "class-transformer";
-import { UploadAvatarDto } from "./user.dto";
+import { UploadAvatarResponseDto } from "./user.res.dto";
 
 @Injectable()
 export class UserService {
@@ -20,7 +20,7 @@ export class UserService {
 			fileName: file.filename,
 		});
 
-		return plainToInstance(UploadAvatarDto, {
+		return plainToInstance(UploadAvatarResponseDto, {
 			status: "Avatar is being processed.",
 		});
 	}

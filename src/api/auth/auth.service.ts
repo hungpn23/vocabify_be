@@ -1,4 +1,4 @@
-import { UserDto } from "@api/user/user.dto";
+import { UserResponseDto } from "@api/user/user.res.dto";
 import { SuccessResponseDto } from "@common/dtos";
 import { JwtToken, UserAction, UserRole } from "@common/enums";
 import {
@@ -35,12 +35,11 @@ import { Response } from "express";
 import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
 import {
+	BaseAuthDto,
 	ChangePasswordDto,
-	LoginDto,
-	RegisterDto,
 	RequestMagicLinkDto,
-	TokenPairDto,
 } from "./auth.dto";
+import { TokenPairResponseDto } from "./auth.res.dto";
 
 type CreateTokenPairOptions = {
 	userId: UUID;
@@ -129,7 +128,7 @@ export class AuthService {
 	}
 
 	async verifyToken(token: string) {
-		const tokenPair = await this.redisService.getValue<TokenPairDto>(
+		const tokenPair = await this.redisService.getValue<TokenPairResponseDto>(
 			this.redisService.getTokenToVerifyKey(token),
 		);
 
@@ -137,7 +136,7 @@ export class AuthService {
 
 		await this.redisService.deleteKey(token);
 
-		return tokenPair satisfies TokenPairDto;
+		return tokenPair satisfies TokenPairResponseDto;
 	}
 
 	async getMyInfo(userId: UUID) {
@@ -145,10 +144,10 @@ export class AuthService {
 
 		if (!user) throw new UnauthorizedException("User not found.");
 
-		return plainToInstance(UserDto, wrap(user).toPOJO());
+		return plainToInstance(UserResponseDto, wrap(user).toPOJO());
 	}
 
-	async register({ email, password }: RegisterDto) {
+	async register({ email, password }: BaseAuthDto) {
 		const username = generateFromEmail(email, 3);
 		const user = await this.userRepository.findOne({ username, email });
 
@@ -172,7 +171,7 @@ export class AuthService {
 		return tokenPair;
 	}
 
-	async login({ email, password }: LoginDto) {
+	async login({ email, password }: BaseAuthDto) {
 		const user = await this.userRepository.findOne({ email });
 
 		const isValidPassword =
@@ -325,6 +324,6 @@ export class AuthService {
 			),
 		]);
 
-		return plainToInstance(TokenPairDto, { accessToken, refreshToken });
+		return plainToInstance(TokenPairResponseDto, { accessToken, refreshToken });
 	}
 }

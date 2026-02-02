@@ -1,5 +1,5 @@
 import { UserRole } from "@common/enums";
-import { NullableProperty } from "@common/utils";
+import { HiddenProperty, NullableProperty } from "@common/utils";
 import {
 	BeforeCreate,
 	BeforeUpdate,
@@ -26,7 +26,7 @@ export class User extends BaseEntity {
 	@Property()
 	emailVerified: Opt<boolean> = false;
 
-	@NullableProperty({ hidden: true })
+	@HiddenProperty({ nullable: true })
 	password?: string | null;
 
 	@NullableProperty()

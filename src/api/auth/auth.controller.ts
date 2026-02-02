@@ -1,17 +1,16 @@
-import { UserDto } from "@api/user/user.dto";
+import { UserResponseDto } from "@api/user/user.res.dto";
 import { ApiEndpoint, ApiEndpointPublic, User } from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
 import type { UserJwtPayload, UUID } from "@common/types";
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
 import {
+	BaseAuthDto,
 	ChangePasswordDto,
-	LoginDto,
 	RefreshTokenDto,
-	RegisterDto,
 	RequestMagicLinkDto,
-	TokenPairDto,
 } from "./auth.dto";
+import { TokenPairResponseDto } from "./auth.res.dto";
 import { AuthService } from "./auth.service";
 
 @Controller({ path: "auth" })
@@ -30,27 +29,27 @@ export class AuthController {
 		return await this.authService.requestMagicLink(dto);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairResponseDto })
 	@Post("verify-token")
 	async verifyToken(@Query("token") token: string) {
 		return await this.authService.verifyToken(token);
 	}
 
-	@ApiEndpoint({ type: UserDto })
+	@ApiEndpoint({ type: UserResponseDto })
 	@Get("session")
 	async getSession(@User("userId") userId: UUID) {
 		return await this.authService.getMyInfo(userId);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairResponseDto })
 	@Post("register")
-	async register(@Body() dto: RegisterDto) {
+	async register(@Body() dto: BaseAuthDto) {
 		return await this.authService.register(dto);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairResponseDto })
 	@Post("login")
-	async login(@Body() dto: LoginDto) {
+	async login(@Body() dto: BaseAuthDto) {
 		return await this.authService.login(dto);
 	}
 
@@ -60,7 +59,7 @@ export class AuthController {
 		return await this.authService.logout(payload);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairDto })
+	@ApiEndpointPublic({ type: TokenPairResponseDto })
 	@Post("refresh")
 	async refresh(@Body() dto: RefreshTokenDto) {
 		return await this.authService.refresh(dto.refreshToken);

@@ -1,4 +1,3 @@
-import { OwnerDto } from "@api/user/user.dto";
 import {
 	ClassValidator,
 	ClassValidatorOptional,
@@ -8,17 +7,10 @@ import {
 	StringValidatorOptional,
 } from "@common/decorators";
 import { QueryDto } from "@common/dtos";
-import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
 import { ArrayMinSize, ValidateIf } from "class-validator";
 import { DeckOrderBy, Visibility } from "../deck.enum";
-import {
-	CardDto,
-	CreateCardDto,
-	PreviewCardDto,
-	UpdateCardDto,
-} from "./card.dto";
+import { CreateCardDto, UpdateCardDto } from "./card.dto";
 
 export class CreateDeckDto {
 	@StringValidator({ minLength: 3 })
@@ -66,104 +58,3 @@ export class GetManyQueryDto extends QueryDto {
 	@EnumValidatorOptional(DeckOrderBy)
 	orderBy: DeckOrderBy = DeckOrderBy.OPENED_AT;
 }
-
-export class DeckDto {
-	@Expose()
-	id!: UUID;
-
-	@Expose()
-	name!: string;
-
-	@Expose()
-	slug!: string;
-
-	@Expose()
-	description?: string | null;
-
-	@Expose()
-	visibility!: Visibility;
-
-	@Expose()
-	viewCount!: number;
-
-	@Expose()
-	learnerCount!: number;
-
-	@Expose()
-	clonedFrom?: Pick<DeckDto, "id" | "name"> | null;
-
-	@Expose()
-	openedAt?: Date | null;
-
-	@Expose()
-	createdAt!: Date;
-}
-
-export class DeckStatsDto {
-	@Expose()
-	total!: number;
-
-	@Expose()
-	known!: number;
-
-	@Expose()
-	learning!: number;
-
-	@Expose()
-	new!: number;
-}
-
-export class GetOneResDto extends PickType(DeckDto, [
-	"id",
-	"name",
-	"slug",
-	"description",
-]) {
-	@Expose()
-	cards!: CardDto[];
-}
-
-export class GetManyResDto extends PickType(DeckDto, [
-	"id",
-	"name",
-	"slug",
-	"visibility",
-	"openedAt",
-]) {
-	@Expose()
-	stats!: DeckStatsDto;
-}
-
-export class GetSharedOneResDto extends PickType(DeckDto, [
-	"id",
-	"name",
-	"description",
-	"visibility",
-]) {
-	@Expose()
-	totalCards!: number;
-
-	@Expose()
-	owner!: OwnerDto;
-
-	@Expose()
-	cards!: PreviewCardDto[];
-}
-
-export class GetSharedManyResDto extends PickType(DeckDto, [
-	"id",
-	"name",
-	"slug",
-	"visibility",
-	"viewCount",
-	"learnerCount",
-	"createdAt",
-]) {
-	@Expose()
-	totalCards!: number;
-
-	@Expose()
-	owner!: OwnerDto;
-}
-
-export class CreateDeckResDto extends PickType(DeckDto, ["id", "slug"]) {}
