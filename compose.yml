@@ -23,7 +23,7 @@ services:
       file: .docker/compose.base.yml
       service: db
     expose:
-      - '5432'
+      - '${DB_PORT}'
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file:
@@ -36,7 +36,7 @@ services:
       file: .docker/compose.base.yml
       service: redis
     expose:
-      - '6379'
+      - '${REDIS_PORT}'
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes", "--dir", "/data"]
@@ -50,7 +50,7 @@ services:
       file: .docker/compose.base.yml
       service: qdrant
     expose:
-      - '6333'
+      - '${VECTOR_DB_PORT}'
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
