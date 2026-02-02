@@ -18,24 +18,25 @@ export class AuthGuard implements CanActivate {
 	) {}
 
 	async canActivate(context: ExecutionContext) {
-		const request = context.switchToHttp().getRequest<RequestWithUser>();
+		try {
+			const request = context.switchToHttp().getRequest<RequestWithUser>();
 
-		const hasPublicDecorator = this.reflector.getAllAndOverride<boolean>(
-			MetadataKey.PUBLIC_ROUTE,
-			[context.getClass(), context.getHandler()],
-		);
+			const hasPublicDecorator = this.reflector.getAllAndOverride<boolean>(
+				MetadataKey.PUBLIC_ROUTE,
+				[context.getClass(), context.getHandler()],
+			);
 
-		if (hasPublicDecorator) {
-			request.user = undefined;
+			if (hasPublicDecorator) {
+				request.user = undefined;
+				return true;
+			}
+
+			const accessToken = extractTokenFromHeader(request.headers.authorization);
+			request.user = await this.authService.verifyJwt(accessToken);
+
 			return true;
+		} catch {
+			throw new UnauthorizedException();
 		}
-
-		const accessToken = extractTokenFromHeader(request.headers.authorization);
-
-		if (!accessToken) throw new UnauthorizedException();
-
-		request.user = await this.authService.verifyJwt(accessToken);
-
-		return true;
 	}
 }

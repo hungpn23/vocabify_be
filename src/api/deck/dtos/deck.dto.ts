@@ -10,7 +10,7 @@ import {
 import { QueryDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
-import { Exclude, Expose } from "class-transformer";
+import { Expose } from "class-transformer";
 import { ArrayMinSize, ValidateIf } from "class-validator";
 import { DeckOrderBy, Visibility } from "../deck.enum";
 import {
@@ -67,7 +67,6 @@ export class GetManyQueryDto extends QueryDto {
 	orderBy: DeckOrderBy = DeckOrderBy.OPENED_AT;
 }
 
-@Exclude()
 export class DeckDto {
 	@Expose()
 	id!: UUID;
@@ -100,7 +99,6 @@ export class DeckDto {
 	createdAt!: Date;
 }
 
-@Exclude()
 export class DeckStatsDto {
 	@Expose()
 	total!: number;
@@ -115,7 +113,6 @@ export class DeckStatsDto {
 	new!: number;
 }
 
-@Exclude()
 export class GetOneResDto extends PickType(DeckDto, [
 	"id",
 	"name",
@@ -126,7 +123,6 @@ export class GetOneResDto extends PickType(DeckDto, [
 	cards!: CardDto[];
 }
 
-@Exclude()
 export class GetManyResDto extends PickType(DeckDto, [
 	"id",
 	"name",
@@ -138,7 +134,6 @@ export class GetManyResDto extends PickType(DeckDto, [
 	stats!: DeckStatsDto;
 }
 
-@Exclude()
 export class GetSharedOneResDto extends PickType(DeckDto, [
 	"id",
 	"name",
@@ -155,7 +150,6 @@ export class GetSharedOneResDto extends PickType(DeckDto, [
 	cards!: PreviewCardDto[];
 }
 
-@Exclude()
 export class GetSharedManyResDto extends PickType(DeckDto, [
 	"id",
 	"name",
@@ -172,5 +166,4 @@ export class GetSharedManyResDto extends PickType(DeckDto, [
 	owner!: OwnerDto;
 }
 
-@Exclude()
 export class CreateDeckResDto extends PickType(DeckDto, ["id", "slug"]) {}

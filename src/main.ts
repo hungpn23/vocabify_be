@@ -7,7 +7,7 @@ import { AuthGuard, RoleBasedAccessControlGuard } from "@common/guards";
 import { FieldsValidationPipe } from "@common/pipes";
 import { getAppConfig, VectorDbConfig, vectorDbConfig } from "@config";
 import { MikroORM } from "@mikro-orm/core";
-import { Logger } from "@nestjs/common";
+import { ClassSerializerInterceptor, Logger } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { SocketIOAdapter } from "@socket-io.adapter";
@@ -34,6 +34,13 @@ async function bootstrap() {
 
 	// apply nestjs middlewares and components
 	app.useWebSocketAdapter(new SocketIOAdapter(app, authService));
+	app.useGlobalInterceptors(
+		new ClassSerializerInterceptor(reflector, {
+			strategy: "excludeAll",
+			enableCircularCheck: true,
+			excludeExtraneousValues: true,
+		}),
+	);
 	app.useGlobalGuards(new AuthGuard(reflector, authService));
 	app.useGlobalGuards(new RoleBasedAccessControlGuard(reflector));
 	app.useGlobalPipes(new FieldsValidationPipe());

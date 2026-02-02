@@ -14,7 +14,6 @@ import { QdrantVectorStore } from "@langchain/qdrant";
 import { EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import {
-	BadGatewayException,
 	BadRequestException,
 	Inject,
 	Injectable,
@@ -24,10 +23,12 @@ import {
 } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
 import {
-	GetCardSuggestionDto,
+	GetNextCardSuggestionDto,
 	GetTermSuggestionDto,
+	NextCardSuggestionResponseDto,
 	TermSuggestionResponseDto,
 } from "./suggestion.dto";
+import { SearchResult } from "./suggestion.type";
 
 @Injectable()
 export class SuggestionService implements OnModuleInit {
@@ -72,7 +73,7 @@ export class SuggestionService implements OnModuleInit {
 		return this._store;
 	}
 
-	async getTermSuggestion({ partOfSpeech, ...rest }: GetTermSuggestionDto) {
+	async suggestDefinition({ partOfSpeech, ...rest }: GetTermSuggestionDto) {
 		const where: GetTermSuggestionDto = rest;
 		if (partOfSpeech) where.partOfSpeech = partOfSpeech;
 
@@ -102,25 +103,44 @@ export class SuggestionService implements OnModuleInit {
 		return suggestionDto;
 	}
 
-	async getCardSuggestion(dto: GetCardSuggestionDto) {
-		throw new BadGatewayException("Not implemented");
-	}
+	async suggestNextCard(dto: GetNextCardSuggestionDto, k: number = 2) {
+		const query = `${dto.term} ${dto.definition}`;
 
-	async getDeckSuggestion(dto: unknown) {
-		throw new BadGatewayException("Not implemented");
+		const records = await this._similaritySearch(query, k);
+
+		const cards = await this.cardSuggestionRepository.find({
+			term: { $in: records.map((r) => r.term) },
+			termLanguage: { $in: records.map((r) => r.termLanguageCode) },
+		});
+
+		return cards.map((c) =>
+			wrap(c).toPOJO(),
+		) satisfies NextCardSuggestionResponseDto[];
 	}
 
 	async embedData() {
 		const documents = getSampleData().map((d) => this._buildDocument(d));
 
-		await this.store.addDocuments(documents);
+		const batchSize = 1000;
+		for (let i = 0; i < documents.length; i += batchSize) {
+			const batch = documents.slice(i, i + batchSize);
+			this.logger.debug(
+				`Embedding batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(documents.length / batchSize)}`,
+			);
+			await this.store.addDocuments(batch);
+		}
 
-		this.logger.debug("Data embedded.");
+		this.logger.debug(`Total ${documents.length} documents embedded.`);
 		return { success: true } satisfies SuccessResponseDto;
 	}
 
-	async suggest(query: string, k: number = 1) {
-		return await this.store.similaritySearch(query, k);
+	private async _similaritySearch(query: string, k: number) {
+		const points = (await this.store.similaritySearch(
+			query,
+			k,
+		)) as SearchResult[];
+
+		return points.map((p) => p.metadata);
 	}
 
 	private _buildDocument(record: EntryRecord) {
@@ -129,10 +149,10 @@ export class SuggestionService implements OnModuleInit {
 
 		const parts: string[] = [];
 
-		parts.push(`Term (${termLanguageCode}): ${term}`);
-		parts.push(`Definition (English): ${definitionEn}`);
-		parts.push(`Definition (Vietnamese): ${definitionVi}`);
-		parts.push(`Example (English): ${exampleEn}`);
+		parts.push(`Term in ${termLanguageCode}: ${term}`);
+		parts.push(`Definition in English: ${definitionEn}`);
+		parts.push(`Definition in Vietnamese: ${definitionVi}`);
+		parts.push(`Example in English: ${exampleEn}`);
 
 		return new Document({
 			pageContent: parts.join("\n"),

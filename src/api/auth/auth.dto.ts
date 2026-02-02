@@ -4,7 +4,7 @@ import {
 	StringValidator,
 } from "@common/decorators";
 import { PickType } from "@nestjs/swagger";
-import { Exclude, Expose } from "class-transformer";
+import { Expose } from "class-transformer";
 
 class BaseAuthDto {
 	@EmailValidator()
@@ -35,17 +35,10 @@ export class RefreshTokenDto {
 	refreshToken!: string;
 }
 
-@Exclude()
 export class TokenPairDto {
 	@Expose()
 	accessToken!: string;
 
 	@Expose()
 	refreshToken!: string;
-}
-
-@Exclude()
-export class RefreshTokenResponseDto {
-	@Expose()
-	accessToken!: string;
 }
