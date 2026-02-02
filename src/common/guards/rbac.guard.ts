@@ -26,8 +26,7 @@ export class RoleBasedAccessControlGuard implements CanActivate {
 
 		if (!allowedRoles?.length) return true;
 
-		const request = context.switchToHttp().getRequest<RequestWithUser>();
-		const user = request.user;
+		const user = context.switchToHttp().getRequest<RequestWithUser>().user;
 		if (!user) throw new UnauthorizedException();
 
 		return allowedRoles.includes(user.role);
