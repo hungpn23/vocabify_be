@@ -17,7 +17,7 @@ import {
 	type GoogleConfig,
 	googleConfig,
 } from "@config";
-import { User } from "@db/entities/user.entity";
+import { User } from "@db/entities";
 import { MailProducer } from "@integrations/mail/mail.producer";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";

@@ -1,7 +1,4 @@
-import {
-	PortValidatorOptional,
-	StringValidatorOptional,
-} from "@common/decorators";
+import { PortValidator, StringValidatorOptional } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { ValidateIf } from "class-validator";
 import { validateConfig } from "./validate-config";
@@ -14,9 +11,11 @@ class RedisEnvVariables {
 	@StringValidatorOptional()
 	REDIS_HOST?: string;
 
-	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
-	@PortValidatorOptional()
-	REDIS_PORT?: number;
+	/**
+	 * @description this field is required for port mapping and exposing in docker compose
+	 */
+	@PortValidator()
+	REDIS_PORT!: number;
 
 	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
 	@StringValidatorOptional()

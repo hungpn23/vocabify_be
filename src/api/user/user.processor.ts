@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { JobName, QueueName } from "@common/enums";
 import { ImageUploadData } from "@common/types";
-import { User } from "@db/entities/user.entity";
+import { User } from "@db/entities";
 import ImageKit from "@imagekit/nodejs";
 import { IMAGEKIT_CLIENT } from "@integrations/imagekit/imagekit.provider-token";
 import { EntityManager } from "@mikro-orm/core";
