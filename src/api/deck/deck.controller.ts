@@ -1,4 +1,5 @@
 import { ApiEndpoint, ApiEndpointPublic, User } from "@common/decorators";
+import { SuccessResponseDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import {
 	Body,
@@ -79,7 +80,7 @@ export class DeckController {
 		return await this.deckService.update(userId, deckId, dto);
 	}
 
-	@ApiEndpoint()
+	@ApiEndpoint({ type: SuccessResponseDto })
 	@Delete(":deckId")
 	async delete(
 		@User("userId") userId: UUID,
@@ -88,7 +89,7 @@ export class DeckController {
 		return await this.deckService.delete(userId, deckId);
 	}
 
-	@ApiEndpoint()
+	@ApiEndpoint({ type: SuccessResponseDto })
 	@Post("clone/:deckId")
 	async clone(
 		@User("userId") userId: UUID,
@@ -98,7 +99,7 @@ export class DeckController {
 		return await this.deckService.clone(userId, deckId, dto);
 	}
 
-	@ApiEndpoint()
+	@ApiEndpoint({ type: SuccessResponseDto })
 	@Post("restart/:deckId")
 	async restart(
 		@User("userId") userId: UUID,

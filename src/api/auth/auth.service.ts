@@ -136,7 +136,7 @@ export class AuthService {
 
 		await this.redisService.deleteKey(token);
 
-		return tokenPair satisfies TokenPairResponseDto;
+		return tokenPair;
 	}
 
 	async getMyInfo(userId: UUID) {
@@ -189,7 +189,9 @@ export class AuthService {
 		const userTokenKey = this.redisService.getUserSessionKey(userId, sessionId);
 		await this.redisService.deleteKey(userTokenKey);
 
-		return { success: true } satisfies SuccessResponseDto;
+		return plainToInstance(SuccessResponseDto, {
+			success: true,
+		});
 	}
 
 	async refresh(refreshToken: string) {
@@ -224,6 +226,10 @@ export class AuthService {
 		this.userRepository.assign(user, { password: newPassword });
 
 		await this.em.flush();
+
+		return plainToInstance(SuccessResponseDto, {
+			success: true,
+		});
 	}
 
 	async requestMagicLink({ email }: RequestMagicLinkDto) {
@@ -262,25 +268,32 @@ export class AuthService {
 			}),
 		]);
 
-		return { success: true } satisfies SuccessResponseDto;
+		return plainToInstance(SuccessResponseDto, {
+			success: true,
+		});
 	}
 
 	async verifyJwt(jwt: string) {
-		const payload = await this.jwtService.verifyAsync<UserJwtPayload>(jwt);
-		const { userId, sessionId, jti } = payload;
+		try {
+			const payload = await this.jwtService.verifyAsync<UserJwtPayload>(jwt);
+			const { userId, sessionId, jti } = payload;
 
-		const userSessionKey = this.redisService.getUserSessionKey(
-			userId,
-			sessionId,
-		);
+			const userSessionKey = this.redisService.getUserSessionKey(
+				userId,
+				sessionId,
+			);
 
-		const currentJti = await this.redisService.getValue<string>(userSessionKey);
+			const currentJti =
+				await this.redisService.getValue<string>(userSessionKey);
 
-		if (currentJti !== jti) {
+			if (currentJti !== jti) {
+				throw new UnauthorizedException();
+			}
+
+			return payload;
+		} catch {
 			throw new UnauthorizedException();
 		}
-
-		return payload;
 	}
 
 	private async _createTokenPair({

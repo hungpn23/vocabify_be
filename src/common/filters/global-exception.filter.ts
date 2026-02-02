@@ -1,5 +1,5 @@
 import { STATUS_CODES } from "node:http";
-import { ErrorDetailDto, ErrorDto } from "@common/dtos";
+import { ErrorDetailResponseDto, ErrorResponseDto } from "@common/dtos";
 import { UniqueConstraintViolationException } from "@mikro-orm/postgresql";
 import {
 	ArgumentsHost,
@@ -9,6 +9,7 @@ import {
 	HttpStatus,
 	UnprocessableEntityException,
 } from "@nestjs/common";
+import { plainToInstance } from "class-transformer";
 import { ValidationError } from "class-validator";
 import { Response } from "express";
 
@@ -18,7 +19,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 		const ctx = host.switchToHttp();
 		const response: Response = ctx.getResponse();
 
-		let error: ErrorDto;
+		let error: ErrorResponseDto;
 
 		if (exception instanceof UnprocessableEntityException) {
 			// this exception is thrown from main.ts (ValidationPipe)
@@ -47,18 +48,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 			details: this._handleValidationErrors(response.message),
 		};
 
-		return errorResponse satisfies ErrorDto;
+		return plainToInstance(ErrorResponseDto, errorResponse);
 	}
 
 	private _handleHttpException(exception: HttpException) {
 		const statusCode = exception.getStatus();
 
-		return {
+		return plainToInstance(ErrorResponseDto, {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage: STATUS_CODES[statusCode],
 			message: exception.message,
-		} satisfies ErrorDto;
+		});
 	}
 
 	private _handleUniqueConstraintException(
@@ -66,12 +67,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 	) {
 		const statusCode = HttpStatus.CONFLICT;
 
-		return {
+		return plainToInstance(ErrorResponseDto, {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage: STATUS_CODES[statusCode],
 			message: JSON.stringify(exception.name),
-		} satisfies ErrorDto;
+		});
 	}
 
 	private _handleUnknownError(error: unknown) {
@@ -79,17 +80,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 		const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 		const statusMessage = STATUS_CODES[statusCode] || "Internal Server Error";
 
-		return {
+		return plainToInstance(ErrorResponseDto, {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage,
 			message: err.message || statusMessage,
-		} satisfies ErrorDto;
+		});
 	}
 
 	// ref: https://www.yasint.dev/flatten-error-constraints
 	private _handleValidationErrors(errors: ValidationError[]) {
-		const results: ErrorDetailDto[] = [];
+		const results: ErrorDetailResponseDto[] = [];
 		for (const error of errors) {
 			this._flattenError(error, results);
 		}
@@ -98,7 +99,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
 	private _flattenError(
 		error: ValidationError,
-		results: ErrorDetailDto[],
+		results: ErrorDetailResponseDto[],
 		parentPath?: string,
 	) {
 		const propertyPath = parentPath

@@ -1,6 +1,7 @@
-import { Expose } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 
-export class ErrorDetailDto {
+@Exclude()
+export class ErrorDetailResponseDto {
 	@Expose()
 	property!: string;
 
@@ -11,7 +12,8 @@ export class ErrorDetailDto {
 	message!: string;
 }
 
-export class ErrorDto {
+@Exclude()
+export class ErrorResponseDto {
 	@Expose()
 	timestamp!: string;
 
@@ -25,5 +27,5 @@ export class ErrorDto {
 	message!: string;
 
 	@Expose()
-	details?: ErrorDetailDto[] | null;
+	details?: ErrorDetailResponseDto[] | null;
 }

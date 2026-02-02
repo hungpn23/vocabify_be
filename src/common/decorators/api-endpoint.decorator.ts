@@ -1,5 +1,5 @@
 import { STATUS_CODES } from "node:http";
-import { ErrorDto, PaginatedDto } from "@common/dtos";
+import { ErrorResponseDto, PaginatedDto } from "@common/dtos";
 import {
 	applyDecorators,
 	HttpCode,
@@ -57,7 +57,7 @@ export function ApiEndpoint(options: EndpointOptions = {}) {
 	handleErrorResponse(errorStatusCodes, isPublic).forEach((statusCode) => {
 		decorators.push(
 			ApiResponse({
-				type: ErrorDto,
+				type: ErrorResponseDto,
 				status: statusCode,
 				description: STATUS_CODES[statusCode],
 			}),

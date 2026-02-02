@@ -2,12 +2,7 @@ import { AuthService } from "@api/auth/auth.service";
 import { MetadataKey } from "@common/enums";
 import { RequestWithUser } from "@common/types";
 import { extractTokenFromHeader } from "@common/utils";
-import {
-	CanActivate,
-	ExecutionContext,
-	Injectable,
-	UnauthorizedException,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
 @Injectable()
@@ -18,25 +13,23 @@ export class AuthGuard implements CanActivate {
 	) {}
 
 	async canActivate(context: ExecutionContext) {
-		try {
-			const request = context.switchToHttp().getRequest<RequestWithUser>();
+		const request = context.switchToHttp().getRequest<RequestWithUser>();
 
-			const hasPublicDecorator = this.reflector.getAllAndOverride<boolean>(
-				MetadataKey.PUBLIC_ROUTE,
-				[context.getClass(), context.getHandler()],
-			);
+		const hasPublicDecorator = this.reflector.getAllAndOverride<boolean>(
+			MetadataKey.PUBLIC_ROUTE,
+			[context.getClass(), context.getHandler()],
+		);
 
-			if (hasPublicDecorator) {
-				request.user = undefined;
-				return true;
-			}
+		const accessToken = extractTokenFromHeader(request.headers.authorization);
 
-			const accessToken = extractTokenFromHeader(request.headers.authorization);
-			request.user = await this.authService.verifyJwt(accessToken);
+		request.user = await this.authService
+			.verifyJwt(accessToken)
+			.catch((err) => {
+				if (hasPublicDecorator) return undefined;
 
-			return true;
-		} catch {
-			throw new UnauthorizedException();
-		}
+				throw err;
+			});
+
+		return true;
 	}
 }

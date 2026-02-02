@@ -1,9 +1,9 @@
 import { NotificationResponseDto } from "@api/notification/notification.dto";
 import { NotificationGateway } from "@api/notification/notification.gateway";
 import { OwnerResponseDto } from "@api/user/user.res.dto";
-import { PaginatedDto } from "@common/dtos";
+import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
 import { UUID } from "@common/types";
-import { createMetadata } from "@common/utils";
+import { getMetadataResponseDto } from "@common/utils";
 import { Card, Deck, Notification } from "@db/entities";
 import {
 	EntityRepository,
@@ -106,7 +106,7 @@ export class DeckService {
 
 		return plainToInstance(PaginatedDto<GetManyResponseDto>, {
 			data: deckWithCards,
-			metadata: createMetadata(totalRecords, query),
+			metadata: getMetadataResponseDto(totalRecords, query),
 		});
 	}
 
@@ -140,6 +140,7 @@ export class DeckService {
 	}
 
 	async getSharedMany(userId: UUID | undefined, query: GetManyQueryDto) {
+		console.log("🚀 ~ DeckService ~ getSharedMany ~ userId:", userId);
 		const { limit, offset, search, orderBy, order } = query;
 
 		const where: FilterQuery<Deck> = {
@@ -169,10 +170,10 @@ export class DeckService {
 			});
 		});
 
-		return {
+		return plainToInstance(PaginatedDto<GetSharedManyResponseDto>, {
 			data,
-			metadata: createMetadata(totalRecords, query),
-		} satisfies PaginatedDto<GetSharedManyResponseDto>;
+			metadata: getMetadataResponseDto(totalRecords, query),
+		});
 	}
 
 	async create(userId: UUID, dto: CreateDeckDto) {
@@ -295,6 +296,8 @@ export class DeckService {
 			throw new NotFoundException(`Deck with id "${deckId}" not found.`);
 
 		await this.em.remove(deck).flush();
+
+		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
 	async clone(userId: UUID, deckId: UUID, dto: CloneDeckDto) {
@@ -348,6 +351,8 @@ export class DeckService {
 		this.notificationGateway.sendNotification(
 			plainToInstance(NotificationResponseDto, wrap(notification).toPOJO()),
 		);
+
+		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
 	async restart(userId: UUID, deckId: UUID) {
@@ -369,6 +374,8 @@ export class DeckService {
 		}
 
 		await this.em.flush();
+
+		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
 	private _getDeckStats(cards: Pick<CardResponseDto, "status">[]) {

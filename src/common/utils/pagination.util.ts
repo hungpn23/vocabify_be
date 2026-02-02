@@ -1,7 +1,7 @@
-import { MetadataDto, QueryDto } from "@common/dtos";
+import { MetadataResponseDto, QueryDto } from "@common/dtos";
 import { plainToInstance } from "class-transformer";
 
-export function createMetadata(totalRecords: number, query: QueryDto) {
+export function getMetadataResponseDto(totalRecords: number, query: QueryDto) {
 	const limit = query.limit;
 
 	const totalPages = limit > 0 ? Math.ceil(totalRecords / limit) : 0;
@@ -15,7 +15,7 @@ export function createMetadata(totalRecords: number, query: QueryDto) {
 			? currentPage - 1
 			: undefined;
 
-	return plainToInstance(MetadataDto, {
+	return plainToInstance(MetadataResponseDto, {
 		limit,
 		totalRecords,
 		totalPages,

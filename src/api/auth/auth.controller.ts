@@ -65,7 +65,7 @@ export class AuthController {
 		return await this.authService.refresh(dto.refreshToken);
 	}
 
-	@ApiEndpoint()
+	@ApiEndpoint({ type: SuccessResponseDto })
 	@Post("password/change")
 	async changePassword(
 		@User("userId") userId: UUID,

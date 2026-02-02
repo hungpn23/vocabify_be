@@ -22,6 +22,7 @@ import {
 	OnModuleInit,
 } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
+import { plainToInstance } from "class-transformer";
 import {
 	GetNextCardSuggestionDto,
 	GetTermSuggestionDto,
@@ -86,15 +87,16 @@ export class SuggestionService implements OnModuleInit {
 
 		if (cachedSuggestion) {
 			this.logger.debug("Found cached suggestion");
-			return cachedSuggestion satisfies TermSuggestionResponseDto;
+			return plainToInstance(TermSuggestionResponseDto, cachedSuggestion);
 		}
 
 		const suggestion = await this.cardSuggestionRepository.findOne(where);
 		if (!suggestion) throw new NotFoundException();
 
-		const suggestionDto = wrap(
-			suggestion,
-		).toPOJO() satisfies TermSuggestionResponseDto;
+		const suggestionDto = plainToInstance(
+			TermSuggestionResponseDto,
+			wrap(suggestion).toPOJO(),
+		);
 
 		await this.redisService.setValue(
 			this.redisService.getSuggestionKey(where),
@@ -116,8 +118,8 @@ export class SuggestionService implements OnModuleInit {
 		});
 
 		return cards.map((c) =>
-			wrap(c).toPOJO(),
-		) satisfies NextCardSuggestionResponseDto[];
+			plainToInstance(NextCardSuggestionResponseDto, wrap(c).toPOJO()),
+		);
 	}
 
 	async embedData() {
@@ -133,7 +135,9 @@ export class SuggestionService implements OnModuleInit {
 		}
 
 		this.logger.debug(`Total ${documents.length} documents embedded.`);
-		return { success: true } satisfies SuccessResponseDto;
+		return plainToInstance(SuccessResponseDto, {
+			success: true,
+		});
 	}
 
 	private async _similaritySearch(query: string, k: number) {
