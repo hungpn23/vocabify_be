@@ -5,9 +5,11 @@ import { Body, Controller, Post } from "@nestjs/common";
 import {
 	GetNextCardSuggestionDto,
 	GetTermSuggestionDto,
+} from "./suggestion.dto";
+import {
 	NextCardSuggestionResponseDto,
 	TermSuggestionResponseDto,
-} from "./suggestion.dto";
+} from "./suggestion.res.dto";
 import { SuggestionService } from "./suggestion.service";
 
 @Controller("suggestion")

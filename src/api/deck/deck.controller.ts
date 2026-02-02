@@ -15,20 +15,22 @@ import { DeckService } from "./deck.service";
 import {
 	CloneDeckDto,
 	CreateDeckDto,
-	DeckDto,
 	GetManyQueryDto,
-	GetManyResDto,
-	GetOneResDto,
-	GetSharedManyResDto,
-	GetSharedOneResDto,
 	UpdateDeckDto,
 } from "./dtos/deck.dto";
+import {
+	DeckResponseDto,
+	GetManyResponseDto,
+	GetOneResponseDto,
+	GetSharedManyResponseDto,
+	GetSharedOneResponseDto,
+} from "./dtos/deck.res.dto";
 
 @Controller("decks")
 export class DeckController {
 	constructor(private readonly deckService: DeckService) {}
 
-	@ApiEndpointPublic({ type: GetSharedManyResDto, isPaginated: true })
+	@ApiEndpointPublic({ type: GetSharedManyResponseDto, isPaginated: true })
 	@Get("shared")
 	async getSharedMany(
 		@User("userId") userId: UUID | undefined,
@@ -37,7 +39,7 @@ export class DeckController {
 		return await this.deckService.getSharedMany(userId, query);
 	}
 
-	@ApiEndpointPublic({ type: GetSharedOneResDto })
+	@ApiEndpointPublic({ type: GetSharedOneResponseDto })
 	@Get("shared/:deckId")
 	async getSharedOne(
 		@User("userId") userId: UUID | undefined,
@@ -46,13 +48,13 @@ export class DeckController {
 		return await this.deckService.getSharedOne(userId, deckId);
 	}
 
-	@ApiEndpoint({ type: GetManyResDto, isPaginated: true })
+	@ApiEndpoint({ type: GetManyResponseDto, isPaginated: true })
 	@Get()
 	async getMany(@User("userId") userId: UUID, @Query() query: GetManyQueryDto) {
 		return await this.deckService.getMany(userId, query);
 	}
 
-	@ApiEndpoint({ type: GetOneResDto })
+	@ApiEndpoint({ type: GetOneResponseDto })
 	@Get(":deckId")
 	async getOne(
 		@User("userId") userId: UUID,
@@ -61,13 +63,13 @@ export class DeckController {
 		return await this.deckService.getOne(userId, deckId);
 	}
 
-	@ApiEndpoint({ type: DeckDto })
+	@ApiEndpoint({ type: DeckResponseDto })
 	@Post()
 	async create(@User("userId") userId: UUID, @Body() dto: CreateDeckDto) {
 		return await this.deckService.create(userId, dto);
 	}
 
-	@ApiEndpoint({ type: DeckDto })
+	@ApiEndpoint({ type: DeckResponseDto })
 	@Patch(":deckId")
 	async update(
 		@User("userId") userId: UUID,

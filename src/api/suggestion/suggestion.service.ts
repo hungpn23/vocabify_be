@@ -25,9 +25,11 @@ import { RedisService } from "@redis/redis.service";
 import {
 	GetNextCardSuggestionDto,
 	GetTermSuggestionDto,
+} from "./suggestion.dto";
+import {
 	NextCardSuggestionResponseDto,
 	TermSuggestionResponseDto,
-} from "./suggestion.dto";
+} from "./suggestion.res.dto";
 import { SearchResult } from "./suggestion.type";
 
 @Injectable()

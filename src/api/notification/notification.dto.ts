@@ -1,9 +1,10 @@
-import { ActorDto } from "@api/user/user.dto";
+import { ActorResponseDto } from "@api/user/user.res.dto";
 import type { UUID } from "@common/types";
 
-import { Expose } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 
-export class NotificationDto {
+@Exclude()
+export class NotificationResponseDto {
 	@Expose()
 	id!: UUID;
 
@@ -17,7 +18,7 @@ export class NotificationDto {
 	readAt?: Date | null;
 
 	@Expose()
-	actor?: ActorDto | null;
+	actor?: ActorResponseDto | null;
 
 	@Expose()
 	createdAt!: Date;

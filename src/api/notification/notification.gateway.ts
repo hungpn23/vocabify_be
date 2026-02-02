@@ -8,7 +8,7 @@ import {
 	WebSocketServer,
 } from "@nestjs/websockets";
 import { DefaultEventsMap, Server } from "socket.io";
-import { NotificationDto } from "./notification.dto";
+import { NotificationResponseDto } from "./notification.dto";
 import { ServerToClientEvents } from "./notification.interface";
 
 @WebSocketGateway({
@@ -41,7 +41,7 @@ export class NotificationGateway implements OnGatewayConnection {
 			.emit("socketConnected", "Welcome to Notification Service!");
 	}
 
-	sendNotification(payload: NotificationDto) {
+	sendNotification(payload: NotificationResponseDto) {
 		this.server.emit("notificationAdded", payload);
 	}
 }

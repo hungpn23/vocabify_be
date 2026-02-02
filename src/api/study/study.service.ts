@@ -8,7 +8,8 @@ import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { plainToInstance } from "class-transformer";
-import { SaveAnswersDto, UserStatsDto } from "./study.dto";
+import { SaveAnswersDto } from "./study.dto";
+import { UserStatsResponseDto } from "./study.res.dto";
 
 @Injectable()
 export class StudyService {
@@ -33,7 +34,7 @@ export class StudyService {
 			await this.em.flush();
 		}
 
-		return plainToInstance(UserStatsDto, wrap(stats).toPOJO());
+		return plainToInstance(UserStatsResponseDto, wrap(stats).toPOJO());
 	}
 
 	async saveAnswers(userId: UUID, deckId: UUID, dto: SaveAnswersDto) {

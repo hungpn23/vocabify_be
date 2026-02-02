@@ -52,7 +52,7 @@ export class CardAnswerDto {
 	reviewDate!: Date;
 }
 
-export class CardDto {
+export class CardResponseDto {
 	@Expose()
 	id!: UUID;
 
@@ -90,7 +90,7 @@ export class CardDto {
 	status!: CardStatus;
 }
 
-export class PreviewCardDto extends PickType(CardDto, [
+export class PreviewCardResponseDto extends PickType(CardResponseDto, [
 	"id",
 	"term",
 	"definition",

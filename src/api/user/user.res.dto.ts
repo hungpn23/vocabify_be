@@ -1,9 +1,9 @@
 import { UserRole } from "@common/enums";
 import { type UUID } from "@common/types";
-import { PickType } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 
-export class UserDto {
+@Exclude()
+export class UserResponseDto {
 	@Expose()
 	id!: UUID;
 
@@ -29,15 +29,23 @@ export class UserDto {
 	updatedAt?: Date | null;
 }
 
-export class OwnerDto extends PickType(UserDto, [
-	"id",
-	"username",
-	"avatarUrl",
-]) {}
+@Exclude()
+export class OwnerResponseDto {
+	@Expose()
+	id!: UUID;
 
-export class ActorDto extends OwnerDto {}
+	@Expose()
+	username!: string;
 
-export class UploadAvatarDto {
+	@Expose()
+	avatarUrl?: string | null;
+}
+
+@Exclude()
+export class ActorResponseDto extends OwnerResponseDto {}
+
+@Exclude()
+export class UploadAvatarResponseDto {
 	@Expose()
 	status!: string;
 }
