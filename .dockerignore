@@ -11,7 +11,7 @@ build
 .env.*.local
 .env.development
 .env.test
-!.env.production
+.env.production
 
 # Git
 .git
@@ -34,7 +34,6 @@ compose.*.yml
 .dockerignore
 
 # Misc
-.husky
 .github
 test
 uploads
@@ -44,4 +43,3 @@ biome.json
 commitlint.config.ts
 data.json
 jest.config.js
-tsconfig*.json

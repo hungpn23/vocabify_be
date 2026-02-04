@@ -4,7 +4,8 @@ services:
   node:
     build:
       context: .
-      dockerfile: .docker/Dockerfile.dev
+      dockerfile: .docker/Dockerfile
+      target: development
     extends:
       file: .docker/compose.base.yml
       service: node
@@ -15,6 +16,7 @@ services:
     depends_on:
       - db
       - redis
+      - qdrant
     networks:
       - vocabify_network
 

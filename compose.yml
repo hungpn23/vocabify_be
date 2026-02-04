@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile
+      target: production
     extends:
       file: .docker/compose.base.yml
       service: node
