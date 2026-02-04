@@ -53,7 +53,6 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 
 				return {
 					...dbConfig,
-
 					...(!isProduction && {
 						debug: true,
 						highlighter: new SqlHighlighter(),

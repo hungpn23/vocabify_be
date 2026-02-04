@@ -8,7 +8,7 @@ import { SeedManager } from "@mikro-orm/seeder";
 const isProduction = process.env.NODE_ENV === "production";
 
 export default defineConfig({
-	clientUrl: process.env.DB_CLIENT_URL,
+	clientUrl: process.env.DB_CONNECTION_STRING,
 	host: process.env.DB_HOST,
 	port: Number(process.env.DB_PORT),
 	user: process.env.DB_USER,
