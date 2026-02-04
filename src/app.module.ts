@@ -53,12 +53,21 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 
 				return {
 					...dbConfig,
+
+					...(!isProduction && {
+						debug: true,
+						highlighter: new SqlHighlighter(),
+						logger: (msg) => logger.debug(msg),
+					}),
+
+					driverOptions: isProduction
+						? {
+								connection: { ssl: { rejectUnauthorized: false } },
+							}
+						: undefined,
+
 					driver: PostgreSqlDriver,
 					entities: Object.values(entities),
-
-					debug: !isProduction,
-					highlighter: new SqlHighlighter(),
-					logger: (msg) => logger.debug(msg),
 				};
 			},
 			inject: [databaseConfig.KEY],

@@ -10,56 +10,10 @@ services:
       service: node
     ports:
       - '${APP_PORT}:${APP_PORT}'
-    depends_on:
-      - db
-      - redis
     env_file:
       - .env.production
     networks:
       - vocabify_network
-
-  db:
-    extends:
-      file: .docker/compose.base.yml
-      service: db
-    expose:
-      - '${DB_PORT}'
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    env_file:
-      - .env.production
-    networks:
-      - vocabify_network
-    
-  redis:
-    extends:
-      file: .docker/compose.base.yml
-      service: redis
-    expose:
-      - '${REDIS_PORT}'
-    volumes:
-      - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes", "--dir", "/data"]
-    env_file:
-      - .env.production
-    networks:
-      - vocabify_network
-
-  qdrant:
-    extends:
-      file: .docker/compose.base.yml
-      service: qdrant
-    expose:
-      - '${VECTOR_DB_PORT}'
-    volumes:
-      - qdrant_data:/qdrant/storage
-    networks:
-      - vocabify_network
-
-volumes:
-  pg_data:
-  redis_data:
-  qdrant_data:
 
 networks:
   vocabify_network:

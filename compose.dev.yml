@@ -55,6 +55,7 @@ services:
 volumes:
   pg_data:
   redis_data:
+  qdrant_data:
 
 networks:
   vocabify_network:
