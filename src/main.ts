@@ -11,6 +11,8 @@ import { Logger } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { SocketIOAdapter } from "@socket-io.adapter";
+import compression from "compression";
+import helmet from "helmet";
 
 async function bootstrap() {
 	const logger = new Logger("Bootstrap");
@@ -33,6 +35,8 @@ async function bootstrap() {
 	app.setGlobalPrefix(apiPrefix);
 
 	// apply nestjs middlewares and components
+	app.use(compression());
+	app.use(helmet());
 	app.useWebSocketAdapter(new SocketIOAdapter(app, authService));
 	app.useGlobalGuards(new AuthGuard(reflector, authService));
 	app.useGlobalGuards(new RoleBasedAccessControlGuard(reflector));
