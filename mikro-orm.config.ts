@@ -6,14 +6,18 @@ import { defineConfig } from "@mikro-orm/postgresql";
 import { SeedManager } from "@mikro-orm/seeder";
 
 const isProduction = process.env.NODE_ENV === "production";
+const connectionOptions = process.env.DB_CONNECTION_STRING
+	? { clientUrl: process.env.DB_CONNECTION_STRING }
+	: {
+			host: process.env.DB_HOST,
+			port: Number(process.env.DB_PORT),
+			user: process.env.DB_USER,
+			password: process.env.DB_PASSWORD,
+			dbName: process.env.DB_DATABASE,
+		};
 
 export default defineConfig({
-	clientUrl: process.env.DB_CONNECTION_STRING,
-	host: process.env.DB_HOST,
-	port: Number(process.env.DB_PORT),
-	user: process.env.DB_USER,
-	password: process.env.DB_PASSWORD,
-	dbName: process.env.DB_DATABASE,
+	...connectionOptions,
 	schema: process.env.DB_SCHEMA,
 	entities: Object.values(entities),
 	extensions: [SeedManager, Migrator],

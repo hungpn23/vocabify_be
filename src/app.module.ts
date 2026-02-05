@@ -85,7 +85,9 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 
 		BullModule.forRootAsync({
 			inject: [redisConfig.KEY],
-			useFactory: (redisConf: RedisConfig) => ({ connection: redisConf }),
+			useFactory: (redisConf: RedisConfig) => ({
+				connection: { url: redisConf.connectionString },
+			}),
 		}),
 
 		RedisModule,

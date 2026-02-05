@@ -38,5 +38,4 @@ FROM gcr.io/distroless/nodejs24-debian12 AS production
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-USER node
-CMD ["node", "dist/src/main.js"]
+CMD ["dist/main.js"]

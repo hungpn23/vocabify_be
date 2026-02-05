@@ -58,14 +58,12 @@ export class SuggestionService implements OnModuleInit {
 	 * @see https://docs.nestjs.com/fundamentals/lifecycle-events
 	 */
 	async onModuleInit() {
-		const { host, port, collectionName } = this.vectorDbConf;
-
-		this._store = await QdrantVectorStore.fromExistingCollection(this.model, {
-			url: `http://${host}:${port}`,
-			collectionName,
-		});
-
-		this.logger.debug("VectorStore initialized.");
+		// const { host, port, collectionName } = this.vectorDbConf;
+		// this._store = await QdrantVectorStore.fromExistingCollection(this.model, {
+		// 	url: `http://${host}:${port}`,
+		// 	collectionName,
+		// });
+		// this.logger.debug("VectorStore initialized.");
 	}
 
 	get store() {
