@@ -1,7 +1,7 @@
 # ================================
 # Stage 1: Base - Common setup
 # ================================
-FROM --platform=linux/amd64 node:24-alpine3.23 AS base
+FROM node:24-alpine3.23 AS base
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
@@ -34,7 +34,7 @@ RUN pnpm prune --prod
 # ================================
 # Stage 4: Production
 # ================================
-FROM --platform=linux/amd64 gcr.io/distroless/nodejs24-debian12 AS production
+FROM gcr.io/distroless/nodejs24-debian12 AS production
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
