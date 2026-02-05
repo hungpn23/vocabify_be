@@ -1,18 +1,14 @@
 name: vocabify
 
 services:
-  node:
-    build:
-      context: .
-      dockerfile: .docker/Dockerfile
-      target: production
-    extends:
-      file: .docker/compose.base.yml
-      service: node
+  api:
+    image: ghcr.io/hungpn23/vocabify_be
+    container_name: api
+    restart: unless-stopped
     ports:
-      - '${APP_PORT}:${APP_PORT}'
+      - "${APP_PORT}:${APP_PORT}"
     env_file:
-      - .env.production
+      - .env
     networks:
       - vocabify_network
 

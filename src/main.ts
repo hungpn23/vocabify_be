@@ -39,9 +39,13 @@ async function bootstrap() {
 	app.useGlobalPipes(new FieldsValidationPipe());
 	app.useGlobalFilters(new GlobalExceptionFilter());
 
-	const isLocalEnv = nodeEnv === NodeEnv.LOCAL;
-	if (isLocalEnv) {
-		const orm = app.get(MikroORM);
+	const isProduction = nodeEnv === NodeEnv.PRODUCTION;
+	const orm = app.get(MikroORM);
+
+	if (isProduction) {
+		await orm.migrator.up();
+		logger.log("Migrations completed");
+	} else {
 		await orm.schema.updateSchema();
 	}
 
@@ -57,8 +61,9 @@ async function bootstrap() {
 	const appUrl = `http://${host}:${port}/${apiPrefix}`;
 
 	await app.listen(port, host, () => {
-		if (isLocalEnv) {
-			logger.debug(`Current environment: ${nodeEnv}`);
+		logger.debug(`Current environment: ${nodeEnv}`);
+
+		if (!isProduction) {
 			logger.debug(`API endpoint: ${appUrl}`);
 			logger.debug(`Health check: ${appUrl}/health-check`);
 			logger.debug(`Swagger docs: ${appUrl}/docs`);
