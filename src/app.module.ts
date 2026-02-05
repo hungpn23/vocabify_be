@@ -31,7 +31,7 @@ const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath: isProduction ? ".env.production" : ".env",
+			envFilePath: isProduction ? ".env" : ".env.local",
 			cache: true,
 			expandVariables: true, // support ${<ENV_KEY>} in .env file
 			skipProcessEnv: true,
