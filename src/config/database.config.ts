@@ -38,15 +38,18 @@ class DatabaseEnvVariables {
 export const databaseConfig = registerAs("database", () => {
 	const config = validateConfig(DatabaseEnvVariables);
 
-	return {
-		clientUrl: config.DB_CONNECTION_STRING,
-		host: config.DB_HOST,
-		port: config.DB_PORT,
-		user: config.DB_USER,
-		password: config.DB_PASSWORD,
-		dbName: config.DB_DATABASE,
-		schema: config.DB_SCHEMA,
-	};
+	return config.DB_CONNECTION_STRING
+		? {
+				clientUrl: config.DB_CONNECTION_STRING,
+			}
+		: {
+				host: config.DB_HOST,
+				port: config.DB_PORT,
+				user: config.DB_USER,
+				password: config.DB_PASSWORD,
+				dbName: config.DB_DATABASE,
+				schema: config.DB_SCHEMA,
+			};
 });
 
 export type DatabaseConfig = ConfigType<typeof databaseConfig>;

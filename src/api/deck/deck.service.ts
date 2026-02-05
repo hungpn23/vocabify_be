@@ -140,7 +140,6 @@ export class DeckService {
 	}
 
 	async getSharedMany(userId: UUID | undefined, query: GetManyQueryDto) {
-		console.log("🚀 ~ DeckService ~ getSharedMany ~ userId:", userId);
 		const { limit, offset, search, orderBy, order } = query;
 
 		const where: FilterQuery<Deck> = {

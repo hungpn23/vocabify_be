@@ -27,16 +27,22 @@ class RedisEnvVariables {
 	REDIS_PASSWORD?: string;
 }
 
+/**
+ * @description this project always require REDIS_CONNECTION_STRING to run correctly
+ */
 export const redisConfig = registerAs("redis", () => {
 	const config = validateConfig(RedisEnvVariables);
 
-	return {
-		connectionString: config.REDIS_CONNECTION_STRING,
-		host: config.REDIS_HOST,
-		port: config.REDIS_PORT,
-		username: config.REDIS_USERNAME,
-		password: config.REDIS_PASSWORD,
-	};
+	return config.REDIS_CONNECTION_STRING
+		? {
+				connectionString: config.REDIS_CONNECTION_STRING,
+			}
+		: {
+				host: config.REDIS_HOST,
+				port: config.REDIS_PORT,
+				username: config.REDIS_USERNAME,
+				password: config.REDIS_PASSWORD,
+			};
 });
 
 export type RedisConfig = ConfigType<typeof redisConfig>;
