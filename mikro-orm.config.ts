@@ -5,7 +5,6 @@ import { Migrator } from "@mikro-orm/migrations";
 import { defineConfig } from "@mikro-orm/postgresql";
 import { SeedManager } from "@mikro-orm/seeder";
 
-const isProduction = process.env.NODE_ENV === "production";
 const connectionOptions = process.env.DB_CONNECTION_STRING
 	? { clientUrl: process.env.DB_CONNECTION_STRING }
 	: {
@@ -26,10 +25,7 @@ export default defineConfig({
 		path: path.join(process.cwd(), "dist/db/migrations"),
 		pathTs: path.join(process.cwd(), "src/db/migrations"),
 	},
-
-	driverOptions: isProduction
-		? {
-				connection: { ssl: { rejectUnauthorized: false } },
-			}
-		: undefined,
+	driverOptions: {
+		connection: { ssl: { rejectUnauthorized: false } },
+	},
 });

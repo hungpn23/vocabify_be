@@ -6,6 +6,7 @@ import {
 	authConfig,
 	DatabaseConfig,
 	databaseConfig,
+	getAppConfig,
 	googleConfig,
 	integrationConfig,
 	mailConfig,
@@ -25,7 +26,7 @@ import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { RedisModule } from "./redis/redis.module";
 
-const isProduction = process.env.NODE_ENV === NodeEnv.PRODUCTION;
+const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 
 @Module({
 	imports: [
