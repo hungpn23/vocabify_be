@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { AuthService } from "@api/auth/auth.service";
 import { AppModule } from "@app.module";
 import { NodeEnv } from "@common/enums";

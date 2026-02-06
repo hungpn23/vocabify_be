@@ -1,5 +1,6 @@
 import {
-	PortValidatorOptional,
+	PortValidator,
+	StringValidator,
 	StringValidatorOptional,
 } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
@@ -11,28 +12,28 @@ class DatabaseEnvVariables {
 	DB_CONNECTION_STRING?: string;
 
 	@ValidateIf((obj: DatabaseEnvVariables) => !obj.DB_CONNECTION_STRING)
-	@StringValidatorOptional()
-	DB_HOST?: string;
+	@StringValidator()
+	DB_HOST!: string;
 
 	@ValidateIf((obj: DatabaseEnvVariables) => !obj.DB_CONNECTION_STRING)
-	@PortValidatorOptional()
-	DB_PORT?: number;
+	@PortValidator()
+	DB_PORT!: number;
 
 	@ValidateIf((obj: DatabaseEnvVariables) => !obj.DB_CONNECTION_STRING)
-	@StringValidatorOptional()
-	DB_USER?: string;
+	@StringValidator()
+	DB_USER!: string;
 
 	@ValidateIf((obj: DatabaseEnvVariables) => !obj.DB_CONNECTION_STRING)
-	@StringValidatorOptional()
-	DB_PASSWORD?: string;
+	@StringValidator()
+	DB_PASSWORD!: string;
 
 	@ValidateIf((obj: DatabaseEnvVariables) => !obj.DB_CONNECTION_STRING)
-	@StringValidatorOptional()
-	DB_DATABASE?: string;
+	@StringValidator()
+	DB_DATABASE!: string;
 
 	@ValidateIf((obj: DatabaseEnvVariables) => !obj.DB_CONNECTION_STRING)
-	@StringValidatorOptional()
-	DB_SCHEMA?: string;
+	@StringValidator()
+	DB_SCHEMA!: string;
 }
 
 export const databaseConfig = registerAs("database", () => {

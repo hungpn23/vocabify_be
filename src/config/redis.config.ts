@@ -1,5 +1,6 @@
 import {
-	PortValidatorOptional,
+	PortValidator,
+	StringValidator,
 	StringValidatorOptional,
 } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
@@ -11,20 +12,20 @@ class RedisEnvVariables {
 	REDIS_CONNECTION_STRING?: string;
 
 	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
-	@StringValidatorOptional()
-	REDIS_HOST?: string;
+	@StringValidator()
+	REDIS_HOST!: string;
 
 	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
-	@PortValidatorOptional()
-	REDIS_PORT?: number;
+	@PortValidator()
+	REDIS_PORT!: number;
 
 	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
-	@StringValidatorOptional()
-	REDIS_USERNAME?: string;
+	@StringValidator()
+	REDIS_USERNAME!: string;
 
 	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
-	@StringValidatorOptional()
-	REDIS_PASSWORD?: string;
+	@StringValidator()
+	REDIS_PASSWORD!: string;
 }
 
 /**
