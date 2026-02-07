@@ -39,6 +39,7 @@ import {
 	ChangePasswordDto,
 	RequestMagicLinkDto,
 } from "./auth.dto";
+import { TokenToVerifyData } from "./auth.interface";
 import { TokenPairResponseDto } from "./auth.res.dto";
 
 type CreateTokenPairOptions = {
@@ -49,8 +50,6 @@ type CreateTokenPairOptions = {
 
 @Injectable()
 export class AuthService {
-	// private readonly logger = new Logger(AuthService.name);
-
 	constructor(
 		private readonly jwtService: JwtService,
 		private readonly em: EntityManager,
@@ -62,7 +61,6 @@ export class AuthService {
 		private readonly appConf: AppConfig,
 		@Inject(googleConfig.KEY)
 		private readonly googleConf: GoogleConfig,
-		// @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
 		@InjectRepository(User)
 		private readonly userRepository: EntityRepository<User>,
 	) {}
@@ -88,36 +86,16 @@ export class AuthService {
 			},
 		);
 
-		const data = (await response.json()) as GoogleTokenResponse;
-		const { email, email_verified } = this.jwtService.decode<GoogleJwtPayload>(
-			data.id_token,
-		);
-
-		let user = await this.userRepository.findOne({ email });
-		if (!user) {
-			user = this.userRepository.create({
-				username: generateFromEmail(email, 3),
-				email,
-				emailVerified: email_verified,
-			});
-		}
-
-		const tokenPair = await this._createTokenPair({
-			userId: user.id,
-			sessionId: createUUID(),
-			role: user.role,
-		});
+		const { id_token } = (await response.json()) as GoogleTokenResponse;
+		const { email } = this.jwtService.decode<GoogleJwtPayload>(id_token);
 
 		const token = createUUID();
 
-		await Promise.all([
-			this.em.flush(),
-			this.redisService.setValue(
-				this.redisService.getTokenToVerifyKey(token),
-				tokenPair,
-				parseStringValueToSeconds("1m"),
-			),
-		]);
+		await this.redisService.setValue<TokenToVerifyData>(
+			this.redisService.getTokenToVerifyKey(token),
+			{ email },
+			parseStringValueToSeconds("1m"),
+		);
 
 		const searchParams = new URLSearchParams({
 			action: UserAction.NON_PASSWORD_LOGIN,
@@ -128,13 +106,31 @@ export class AuthService {
 	}
 
 	async verifyToken(token: string) {
-		const tokenPair = await this.redisService.getValue<TokenPairResponseDto>(
+		const data = await this.redisService.getValue<TokenToVerifyData>(
 			this.redisService.getTokenToVerifyKey(token),
 		);
 
-		if (!tokenPair) throw new UnauthorizedException("Invalid or expired code.");
+		if (!data) throw new UnauthorizedException("Invalid or expired code.");
 
-		await this.redisService.deleteKey(token);
+		const { email } = data;
+		let user = await this.userRepository.findOne({ email });
+		if (!user) {
+			user = this.userRepository.create({
+				username: generateFromEmail(email, 3),
+				email,
+				emailVerified: true,
+			});
+		}
+
+		const [tokenPair] = await Promise.all([
+			this._createTokenPair({
+				userId: user.id,
+				sessionId: createUUID(),
+				role: user.role,
+			}),
+			this.redisService.deleteKey(token),
+			this.em.flush(),
+		]);
 
 		return tokenPair;
 	}
@@ -233,21 +229,6 @@ export class AuthService {
 	}
 
 	async requestMagicLink({ email }: RequestMagicLinkDto) {
-		let user = await this.userRepository.findOne({ email });
-
-		if (!user) {
-			user = this.userRepository.create({
-				username: generateFromEmail(email, 3),
-				email,
-			});
-		}
-
-		const tokenPair = await this._createTokenPair({
-			userId: user.id,
-			sessionId: createUUID(),
-			role: user.role,
-		});
-
 		const token = createUUID();
 
 		const searchParams = new URLSearchParams({
@@ -256,14 +237,13 @@ export class AuthService {
 		}).toString();
 
 		await Promise.all([
-			this.em.flush(),
-			this.redisService.setValue(
+			this.redisService.setValue<TokenToVerifyData>(
 				this.redisService.getTokenToVerifyKey(token),
-				tokenPair,
+				{ email },
 				parseStringValueToSeconds("5m"),
 			),
 			this.mailProducer.sendMagicLinkEmail({
-				to: user.email,
+				to: email,
 				magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
 			}),
 		]);
