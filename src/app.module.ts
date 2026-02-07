@@ -54,11 +54,10 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 
 				return {
 					...dbConfig,
-					...(!isProduction && {
-						debug: true,
-						highlighter: new SqlHighlighter(),
-						logger: (msg) => logger.debug(msg),
-					}),
+
+					debug: true,
+					highlighter: new SqlHighlighter(),
+					logger: (msg) => logger.debug(msg),
 
 					driver: PostgreSqlDriver,
 					entities: Object.values(entities),
