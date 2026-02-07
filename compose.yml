@@ -1,16 +1,79 @@
 name: vocabify
 
 services:
-  api:
-    image: ghcr.io/hungpn23/vocabify_be
-    container_name: api
-    restart: unless-stopped
+  caddy:
+    extends:
+      file: .docker/compose.base.yml
+      service: caddy
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ${PWD}/caddy:/etc/caddy
+      - ${PWD}/site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - default_network
+
+  node:
+    build:
+      target: production
+    extends:
+      file: .docker/compose.base.yml
+      service: node
+    expose:
+      - '${APP_PORT}'
     env_file:
       - .env
+    depends_on:
+      - db
+      - redis
+      - qdrant
     networks:
-      - vocabify_network
+      - default_network
+
+  db:
+    extends:
+      file: .docker/compose.base.yml
+      service: db
+    expose:
+      - '${DB_PORT}'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - default_network
+    
+  redis:
+    extends:
+      file: .docker/compose.base.yml
+      service: redis
+    expose:
+      - '${REDIS_PORT}'
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--dir", "/data"]
+    networks:
+      - default_network
+
+  qdrant:
+    extends:
+      file: .docker/compose.base.yml
+      service: qdrant
+    expose:
+      - '${VECTOR_DB_PORT}'
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - default_network
+
+volumes:
+  pg_data:
+  redis_data:
+  qdrant_data:
+  caddy_data:
+  caddy_config:
 
 networks:
-  vocabify_network:
+  default_network:

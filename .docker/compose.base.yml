@@ -23,3 +23,8 @@ services:
     image: qdrant/qdrant:dev
     container_name: qdrant
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2.11-alpine
+    container_name: caddy
+    restart: unless-stopped

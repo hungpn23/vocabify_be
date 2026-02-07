@@ -3,8 +3,6 @@ name: vocabify
 services:
   node:
     build:
-      context: .
-      dockerfile: .docker/Dockerfile
       target: development
     extends:
       file: .docker/compose.base.yml

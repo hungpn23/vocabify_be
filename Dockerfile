@@ -26,7 +26,6 @@ COPY --from=development /app/tsconfig.json ./tsconfig.json
 COPY --from=development /app/tsconfig.build.json ./tsconfig.build.json
 COPY --from=development /app/nest-cli.json ./nest-cli.json
 COPY --from=development /app/mikro-orm.config.ts ./mikro-orm.config.ts
-COPY --from=development /app/.husky ./.husky
 RUN pnpm build
 RUN pnpm prune --prod
 
@@ -37,4 +36,5 @@ FROM node:24-alpine3.23 AS production
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
 CMD ["npm", "run", "start:prod"]

@@ -25,7 +25,4 @@ export default defineConfig({
 		path: path.join(process.cwd(), "dist/db/migrations"),
 		pathTs: path.join(process.cwd(), "src/db/migrations"),
 	},
-	driverOptions: {
-		connection: { ssl: { rejectUnauthorized: false } },
-	},
 });

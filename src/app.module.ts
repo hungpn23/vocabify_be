@@ -60,12 +60,6 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 						logger: (msg) => logger.debug(msg),
 					}),
 
-					driverOptions: isProduction
-						? {
-								connection: { ssl: { rejectUnauthorized: false } },
-							}
-						: undefined,
-
 					driver: PostgreSqlDriver,
 					entities: Object.values(entities),
 				};

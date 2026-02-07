@@ -29,7 +29,7 @@
 		"schema:fresh": "npx mikro-orm schema:fresh --config mikro-orm.config.ts --run",
 		"migration:create": "npx mikro-orm migration:create --config mikro-orm.config.ts",
 		"migration:up": "npx mikro-orm migration:up",
-		"prepare": "node .husky/install.mjs"
+		"prepare": "node .husky/install.mjs || true"
 	},
 	"dependencies": {
 		"@casl/ability": "^6.8.0",
