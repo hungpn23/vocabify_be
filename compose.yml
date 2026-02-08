@@ -40,10 +40,13 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
-      - qdrant
-      - migration:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      qdrant:
+        condition: service_started
+      migration:
         condition: service_completed_successfully
     networks:
       - default_network

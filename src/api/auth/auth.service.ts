@@ -253,6 +253,19 @@ export class AuthService {
 		});
 	}
 
+	async verifyEmail(email: string) {
+		const user = await this.userRepository.findOne({ email });
+		if (!user || user.emailVerified) throw new BadRequestException();
+
+		this.userRepository.assign(user, { emailVerified: true });
+
+		await this.em.flush();
+
+		return plainToInstance(SuccessResponseDto, {
+			success: true,
+		});
+	}
+
 	async verifyJwt(jwt: string) {
 		try {
 			const payload = await this.jwtService.verifyAsync<UserJwtPayload>(jwt);
