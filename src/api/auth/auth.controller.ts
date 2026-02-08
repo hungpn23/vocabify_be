@@ -13,7 +13,7 @@ import {
 	SignUpDto,
 	VerifyEmailDto,
 } from "./auth.dto";
-import { TokenPairResponseDto } from "./auth.res.dto";
+import { TokenPairResponseDto, VerifyEmailResponseDto } from "./auth.res.dto";
 import { AuthService } from "./auth.service";
 
 @Controller({ path: "auth" })
@@ -43,12 +43,6 @@ export class AuthController {
 	async getSession(@User("userId") userId: UUID) {
 		return await this.authService.getMyInfo(userId);
 	}
-
-	// @ApiEndpointPublic({ type: TokenPairResponseDto })
-	// @Post("register")
-	// async register(@Body() dto: BaseAuthDto) {
-	// 	return await this.authService.register(dto);
-	// }
 
 	@ApiEndpointPublic({ type: TokenPairResponseDto })
 	@Post("sign-up")
@@ -89,7 +83,7 @@ export class AuthController {
 		return await this.authService.requestEmailVerification(dto);
 	}
 
-	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@ApiEndpointPublic({ type: VerifyEmailResponseDto })
 	@Post("email-verification/verify")
 	async verifyEmail(@Body() dto: VerifyEmailDto) {
 		return await this.authService.verifyEmail(dto);

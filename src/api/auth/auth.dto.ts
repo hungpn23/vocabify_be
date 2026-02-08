@@ -26,7 +26,7 @@ export class SignUpDto extends PickType(BaseAuthDto, [
 	"username",
 	"password",
 ] as const) {
-	@StringValidator()
+	@StringValidator({ isUUID: true })
 	verifiedToken!: string;
 }
 

@@ -12,9 +12,11 @@ import {
 import {
 	createUUID,
 	getEmailVerificationKey,
+	getEmailVerificationRequestAttemptsKey,
 	getSignUpSessionKey,
 	getUserSessionKey,
 	getVerificationTokenKey,
+	getVerifyEmailAttemptsKey,
 	parseStringValueToSeconds,
 } from "@common/utils";
 import {
@@ -50,8 +52,8 @@ import {
 	SignUpDto,
 	VerifyEmailDto,
 } from "./auth.dto";
-import { OtpData, VerificationTokenData } from "./auth.interface";
-import { TokenPairResponseDto, VerifyEmailResposneDto } from "./auth.res.dto";
+import { OtpData } from "./auth.interface";
+import { TokenPairResponseDto, VerifyEmailResponseDto } from "./auth.res.dto";
 
 type CreateTokenPairOptions = {
 	userId: UUID;
@@ -102,9 +104,9 @@ export class AuthService {
 
 		const token = createUUID();
 
-		await this.redisService.setValue<VerificationTokenData>(
+		await this.redisService.setValue(
 			getVerificationTokenKey(token),
-			{ email },
+			email,
 			parseStringValueToSeconds("1m"),
 		);
 
@@ -124,17 +126,16 @@ export class AuthService {
 			token,
 		}).toString();
 
-		await Promise.all([
-			this.redisService.setValue<VerificationTokenData>(
-				getVerificationTokenKey(token),
-				{ email },
-				parseStringValueToSeconds("5m"),
-			),
-			this.mailProducer.sendMagicLinkEmail({
-				to: email,
-				magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
-			}),
-		]);
+		await this.redisService.setValue<string>(
+			getVerificationTokenKey(token),
+			email,
+			parseStringValueToSeconds("5m"),
+		);
+
+		await this.mailProducer.sendMagicLinkEmail({
+			to: email,
+			magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
+		});
 
 		return plainToInstance(SuccessResponseDto, {
 			success: true,
@@ -142,13 +143,12 @@ export class AuthService {
 	}
 
 	async verifyToken(token: string) {
-		const data = await this.redisService.getValue<VerificationTokenData>(
+		const email = await this.redisService.getValue<string>(
 			getVerificationTokenKey(token),
 		);
 
-		if (!data) throw new UnauthorizedException("Invalid or expired code.");
+		if (!email) throw new UnauthorizedException("Invalid or expired code.");
 
-		const { email } = data;
 		let user = await this.userRepository.findOne({ email });
 		if (!user) {
 			user = this.userRepository.create({
@@ -158,15 +158,14 @@ export class AuthService {
 			});
 		}
 
-		const [tokenPair] = await Promise.all([
-			this._createTokenPair({
-				userId: user.id,
-				sessionId: createUUID(),
-				role: user.role,
-			}),
-			this.redisService.deleteKey(token),
-			this.em.flush(),
-		]);
+		const tokenPair = await this._createTokenPair({
+			userId: user.id,
+			sessionId: createUUID(),
+			role: user.role,
+		});
+
+		await this.redisService.deleteKey(token);
+		await this.em.flush();
 
 		return tokenPair;
 	}
@@ -178,30 +177,6 @@ export class AuthService {
 
 		return plainToInstance(UserResponseDto, wrap(user).toPOJO());
 	}
-
-	// async register({ email, password }: BaseAuthDto) {
-	// 	const username = generateFromEmail(email, 3);
-	// 	const user = await this.userRepository.findOne({ username, email });
-
-	// 	if (user) throw new BadRequestException("Username or email already exists");
-
-	// 	const newUser = this.userRepository.create({ username, email, password });
-	// 	const tokenPair = await this._createTokenPair({
-	// 		userId: newUser.id,
-	// 		sessionId: createUUID(),
-	// 		role: newUser.role,
-	// 	});
-
-	// 	await Promise.all([
-	// 		this.em.flush(),
-	// 		this.mailProducer.sendWelcomeEmail({
-	// 			username: newUser.username,
-	// 			to: newUser.email,
-	// 		}),
-	// 	]);
-
-	// 	return tokenPair;
-	// }
 
 	async signUp({ username, password, verifiedToken }: SignUpDto) {
 		const email = await this.redisService.getValue<string>(
@@ -296,8 +271,13 @@ export class AuthService {
 	}
 
 	async requestEmailVerification({ email }: EmailVerificationDto) {
+		const user = await this.userRepository.findOne({ email });
+		if (user?.emailVerified) {
+			return plainToInstance(SuccessResponseDto, { success: true });
+		}
+
 		const attempts = await this.redisService.increaseAttempts(
-			getEmailVerificationKey(email),
+			getEmailVerificationRequestAttemptsKey(email),
 			RATE_LIMIT.EMAIL_VERIFICATION.WINDOW_SECONDS,
 		);
 
@@ -308,23 +288,33 @@ export class AuthService {
 		}
 
 		const otp = this._createOtp();
-		const otpData: OtpData = {
+		const data: OtpData = {
 			hashedOtp: await argon2.hash(otp),
 		};
 
-		await Promise.all([
-			this.redisService.setValue(
-				getEmailVerificationKey(email),
-				otpData,
-				parseStringValueToSeconds("5m"),
-			),
-			this.mailProducer.sendEmailVerificationEmail({ to: email, otp }),
-		]);
+		await this.redisService.setValue(
+			getEmailVerificationKey(email),
+			data,
+			parseStringValueToSeconds("5m"),
+		);
+
+		await this.mailProducer.sendEmailVerificationEmail({ to: email, otp });
 
 		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
 	async verifyEmail({ email, otp }: VerifyEmailDto) {
+		const attempts = await this.redisService.increaseAttempts(
+			getVerifyEmailAttemptsKey(email),
+			RATE_LIMIT.VERIFY_EMAIL.WINDOW_SECONDS,
+		);
+
+		if (attempts > RATE_LIMIT.VERIFY_EMAIL.MAX_ATTEMPTS) {
+			throw new BadRequestException(
+				"Too many attempts, please try again later",
+			);
+		}
+
 		const data = await this.redisService.getValue<OtpData>(
 			getEmailVerificationKey(email),
 		);
@@ -333,7 +323,10 @@ export class AuthService {
 		const isOtpValid = await argon2.verify(data.hashedOtp, otp.toString());
 		if (!isOtpValid) throw new BadRequestException();
 
-		await this.redisService.deleteKey(getEmailVerificationKey(email));
+		await Promise.all([
+			this.redisService.deleteKey(getEmailVerificationKey(email)),
+			this.redisService.deleteKey(getVerifyEmailAttemptsKey(email)),
+		]);
 
 		const user = await this.userRepository.findOne({ email });
 		if (user?.emailVerified) {
@@ -347,7 +340,7 @@ export class AuthService {
 			parseStringValueToSeconds("5m"),
 		);
 
-		return plainToInstance(VerifyEmailResposneDto, { verifiedToken });
+		return plainToInstance(VerifyEmailResponseDto, { verifiedToken });
 	}
 
 	async verifyJwt(jwt: string) {
