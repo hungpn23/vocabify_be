@@ -1,6 +1,10 @@
 import { SuccessResponseDto } from "@common/dtos";
 import { EntryRecord } from "@common/types";
-import { getSampleData, parseStringValueToSeconds } from "@common/utils";
+import {
+	getSampleData,
+	getSuggestionKey,
+	parseStringValueToSeconds,
+} from "@common/utils";
 import {
 	type IntegrationConfig,
 	integrationConfig,
@@ -80,7 +84,7 @@ export class SuggestionService implements OnModuleInit {
 
 		const cachedSuggestion =
 			await this.redisService.getValue<TermSuggestionResponseDto>(
-				this.redisService.getSuggestionKey(where),
+				getSuggestionKey(where),
 			);
 
 		if (cachedSuggestion) {
@@ -97,7 +101,7 @@ export class SuggestionService implements OnModuleInit {
 		);
 
 		await this.redisService.setValue(
-			this.redisService.getSuggestionKey(where),
+			getSuggestionKey(where),
 			suggestionDto,
 			parseStringValueToSeconds("5m"),
 		);

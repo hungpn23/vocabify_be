@@ -2,7 +2,11 @@ import { JobName, QueueName } from "@common/enums";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
-import { SendMagicLinkEmailDto, SendWelcomeEmailDto } from "./mail.dto";
+import {
+	SendEmailVerificationEmailDto,
+	SendMagicLinkEmailDto,
+	SendWelcomeEmailDto,
+} from "./mail.dto";
 import { MailService } from "./mail.service";
 
 @Processor(QueueName.EMAIL)
@@ -16,12 +20,22 @@ export class MailProcessor extends WorkerHost {
 	async process(job: Job<unknown, void, JobName>) {
 		this.logger.debug(`Processing job ${job.id} of type ${job.name}...`);
 
-		if (job.name === JobName.SEND_WELCOME_EMAIL) {
-			await this.mailService.sendWelcomeEmail(job.data as SendWelcomeEmailDto);
-		} else if (job.name === JobName.SEND_MAGIC_LINK_EMAIL) {
-			await this.mailService.sendMagicLinkEmail(
-				job.data as SendMagicLinkEmailDto,
-			);
+		switch (job.name) {
+			case JobName.SEND_WELCOME_EMAIL:
+				await this.mailService.sendWelcomeEmail(
+					job.data as SendWelcomeEmailDto,
+				);
+				break;
+			case JobName.SEND_MAGIC_LINK_EMAIL:
+				await this.mailService.sendMagicLinkEmail(
+					job.data as SendMagicLinkEmailDto,
+				);
+				break;
+			case JobName.SEND_EMAIL_VERIFICATION_EMAIL:
+				await this.mailService.sendEmailVerificationEmail(
+					job.data as SendEmailVerificationEmailDto,
+				);
+				break;
 		}
 	}
 

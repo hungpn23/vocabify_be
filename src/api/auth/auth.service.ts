@@ -1,4 +1,6 @@
+import { randomInt } from "node:crypto";
 import { UserResponseDto } from "@api/user/user.res.dto";
+import { RATE_LIMIT } from "@common/constants";
 import { SuccessResponseDto } from "@common/dtos";
 import { JwtToken, UserAction, UserRole } from "@common/enums";
 import {
@@ -7,8 +9,14 @@ import {
 	UserJwtPayload,
 	type UUID,
 } from "@common/types";
-import { createUUID, parseStringValueToSeconds } from "@common/utils";
-
+import {
+	createUUID,
+	getEmailVerificationKey,
+	getSignUpSessionKey,
+	getUserSessionKey,
+	getVerificationTokenKey,
+	parseStringValueToSeconds,
+} from "@common/utils";
 import {
 	type AppConfig,
 	type AuthConfig,
@@ -35,12 +43,15 @@ import { Response } from "express";
 import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
 import {
-	BaseAuthDto,
 	ChangePasswordDto,
+	EmailVerificationDto,
+	LoginDto,
 	RequestMagicLinkDto,
+	SignUpDto,
+	VerifyEmailDto,
 } from "./auth.dto";
-import { TokenToVerifyData } from "./auth.interface";
-import { TokenPairResponseDto } from "./auth.res.dto";
+import { OtpData, VerificationTokenData } from "./auth.interface";
+import { TokenPairResponseDto, VerifyEmailResposneDto } from "./auth.res.dto";
 
 type CreateTokenPairOptions = {
 	userId: UUID;
@@ -91,8 +102,8 @@ export class AuthService {
 
 		const token = createUUID();
 
-		await this.redisService.setValue<TokenToVerifyData>(
-			this.redisService.getTokenToVerifyKey(token),
+		await this.redisService.setValue<VerificationTokenData>(
+			getVerificationTokenKey(token),
 			{ email },
 			parseStringValueToSeconds("1m"),
 		);
@@ -105,9 +116,34 @@ export class AuthService {
 		return res.redirect(`${frontendUrl}/callback?${searchParams}`);
 	}
 
+	async requestMagicLink({ email }: RequestMagicLinkDto) {
+		const token = createUUID();
+
+		const searchParams = new URLSearchParams({
+			action: UserAction.NON_PASSWORD_LOGIN,
+			token,
+		}).toString();
+
+		await Promise.all([
+			this.redisService.setValue<VerificationTokenData>(
+				getVerificationTokenKey(token),
+				{ email },
+				parseStringValueToSeconds("5m"),
+			),
+			this.mailProducer.sendMagicLinkEmail({
+				to: email,
+				magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
+			}),
+		]);
+
+		return plainToInstance(SuccessResponseDto, {
+			success: true,
+		});
+	}
+
 	async verifyToken(token: string) {
-		const data = await this.redisService.getValue<TokenToVerifyData>(
-			this.redisService.getTokenToVerifyKey(token),
+		const data = await this.redisService.getValue<VerificationTokenData>(
+			getVerificationTokenKey(token),
 		);
 
 		if (!data) throw new UnauthorizedException("Invalid or expired code.");
@@ -143,31 +179,62 @@ export class AuthService {
 		return plainToInstance(UserResponseDto, wrap(user).toPOJO());
 	}
 
-	async register({ email, password }: BaseAuthDto) {
-		const username = generateFromEmail(email, 3);
-		const user = await this.userRepository.findOne({ username, email });
+	// async register({ email, password }: BaseAuthDto) {
+	// 	const username = generateFromEmail(email, 3);
+	// 	const user = await this.userRepository.findOne({ username, email });
 
-		if (user) throw new BadRequestException("Username or email already exists");
+	// 	if (user) throw new BadRequestException("Username or email already exists");
 
-		const newUser = this.userRepository.create({ username, email, password });
-		const tokenPair = await this._createTokenPair({
-			userId: newUser.id,
-			sessionId: createUUID(),
-			role: newUser.role,
+	// 	const newUser = this.userRepository.create({ username, email, password });
+	// 	const tokenPair = await this._createTokenPair({
+	// 		userId: newUser.id,
+	// 		sessionId: createUUID(),
+	// 		role: newUser.role,
+	// 	});
+
+	// 	await Promise.all([
+	// 		this.em.flush(),
+	// 		this.mailProducer.sendWelcomeEmail({
+	// 			username: newUser.username,
+	// 			to: newUser.email,
+	// 		}),
+	// 	]);
+
+	// 	return tokenPair;
+	// }
+
+	async signUp({ username, password, verifiedToken }: SignUpDto) {
+		const email = await this.redisService.getValue<string>(
+			getSignUpSessionKey(verifiedToken),
+		);
+		if (!email) throw new BadRequestException();
+
+		let user = await this.userRepository.findOne({ email });
+		if (user?.emailVerified) {
+			await this.redisService.deleteKey(getSignUpSessionKey(verifiedToken));
+			throw new BadRequestException();
+		}
+
+		user = this.userRepository.create({
+			username,
+			email,
+			password: await argon2.hash(password),
+			emailVerified: true,
 		});
 
-		await Promise.all([
-			this.em.flush(),
-			this.mailProducer.sendWelcomeEmail({
-				username: newUser.username,
-				to: newUser.email,
-			}),
-		]);
+		const tokenPair = await this._createTokenPair({
+			userId: user.id,
+			sessionId: createUUID(),
+			role: user.role,
+		});
+
+		await this.redisService.deleteKey(getSignUpSessionKey(verifiedToken));
+		await this.em.flush();
 
 		return tokenPair;
 	}
 
-	async login({ email, password }: BaseAuthDto) {
+	async login({ email, password }: LoginDto) {
 		const user = await this.userRepository.findOne({ email });
 
 		const isValidPassword =
@@ -182,7 +249,7 @@ export class AuthService {
 	}
 
 	async logout({ userId, sessionId }: UserJwtPayload) {
-		const userTokenKey = this.redisService.getUserSessionKey(userId, sessionId);
+		const userTokenKey = getUserSessionKey(userId, sessionId);
 		await this.redisService.deleteKey(userTokenKey);
 
 		return plainToInstance(SuccessResponseDto, {
@@ -228,42 +295,59 @@ export class AuthService {
 		});
 	}
 
-	async requestMagicLink({ email }: RequestMagicLinkDto) {
-		const token = createUUID();
+	async requestEmailVerification({ email }: EmailVerificationDto) {
+		const attempts = await this.redisService.increaseAttempts(
+			getEmailVerificationKey(email),
+			RATE_LIMIT.EMAIL_VERIFICATION.WINDOW_SECONDS,
+		);
 
-		const searchParams = new URLSearchParams({
-			action: UserAction.NON_PASSWORD_LOGIN,
-			token,
-		}).toString();
+		if (attempts > RATE_LIMIT.EMAIL_VERIFICATION.MAX_ATTEMPTS) {
+			throw new BadRequestException(
+				"Too many attempts, please try again later",
+			);
+		}
+
+		const otp = this._createOtp();
+		const otpData: OtpData = {
+			hashedOtp: await argon2.hash(otp),
+		};
 
 		await Promise.all([
-			this.redisService.setValue<TokenToVerifyData>(
-				this.redisService.getTokenToVerifyKey(token),
-				{ email },
+			this.redisService.setValue(
+				getEmailVerificationKey(email),
+				otpData,
 				parseStringValueToSeconds("5m"),
 			),
-			this.mailProducer.sendMagicLinkEmail({
-				to: email,
-				magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
-			}),
+			this.mailProducer.sendEmailVerificationEmail({ to: email, otp }),
 		]);
 
-		return plainToInstance(SuccessResponseDto, {
-			success: true,
-		});
+		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
-	async verifyEmail(email: string) {
+	async verifyEmail({ email, otp }: VerifyEmailDto) {
+		const data = await this.redisService.getValue<OtpData>(
+			getEmailVerificationKey(email),
+		);
+		if (!data) throw new BadRequestException();
+
+		const isOtpValid = await argon2.verify(data.hashedOtp, otp.toString());
+		if (!isOtpValid) throw new BadRequestException();
+
+		await this.redisService.deleteKey(getEmailVerificationKey(email));
+
 		const user = await this.userRepository.findOne({ email });
-		if (!user || user.emailVerified) throw new BadRequestException();
+		if (user?.emailVerified) {
+			throw new BadRequestException("Email already verified");
+		}
 
-		this.userRepository.assign(user, { emailVerified: true });
+		const verifiedToken = createUUID();
+		await this.redisService.setValue(
+			getSignUpSessionKey(verifiedToken),
+			email,
+			parseStringValueToSeconds("5m"),
+		);
 
-		await this.em.flush();
-
-		return plainToInstance(SuccessResponseDto, {
-			success: true,
-		});
+		return plainToInstance(VerifyEmailResposneDto, { verifiedToken });
 	}
 
 	async verifyJwt(jwt: string) {
@@ -271,17 +355,11 @@ export class AuthService {
 			const payload = await this.jwtService.verifyAsync<UserJwtPayload>(jwt);
 			const { userId, sessionId, jti } = payload;
 
-			const userSessionKey = this.redisService.getUserSessionKey(
-				userId,
-				sessionId,
+			const currentJti = await this.redisService.getValue<string>(
+				getUserSessionKey(userId, sessionId),
 			);
 
-			const currentJti =
-				await this.redisService.getValue<string>(userSessionKey);
-
-			if (currentJti !== jti) {
-				throw new UnauthorizedException();
-			}
+			if (currentJti !== jti) throw new UnauthorizedException();
 
 			return payload;
 		} catch {
@@ -309,11 +387,6 @@ export class AuthService {
 			jwtType: JwtToken.RefreshToken,
 		};
 
-		const userSessionKey = this.redisService.getUserSessionKey(
-			userId,
-			sessionId,
-		);
-
 		const [accessToken, refreshToken] = await Promise.all([
 			this.jwtService.signAsync(jwtPayload, {
 				expiresIn: this.authConf.jwtExpiresIn,
@@ -324,12 +397,19 @@ export class AuthService {
 			}),
 
 			this.redisService.setValue(
-				userSessionKey,
+				getUserSessionKey(userId, sessionId),
 				jti,
 				parseStringValueToSeconds(this.authConf.refreshTokenExpiresIn),
 			),
 		]);
 
-		return plainToInstance(TokenPairResponseDto, { accessToken, refreshToken });
+		return plainToInstance(TokenPairResponseDto, {
+			accessToken,
+			refreshToken,
+		});
+	}
+
+	private _createOtp() {
+		return randomInt(100000, 1000000).toString();
 	}
 }

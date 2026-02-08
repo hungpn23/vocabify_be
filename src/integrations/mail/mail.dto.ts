@@ -9,3 +9,7 @@ export class SendWelcomeEmailDto extends SendMailDto {
 export class SendMagicLinkEmailDto extends SendMailDto {
 	magicLink!: string;
 }
+
+export class SendEmailVerificationEmailDto extends SendMailDto {
+	otp!: string;
+}

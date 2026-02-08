@@ -1,5 +1,4 @@
-import { GetTermSuggestionDto } from "@api/suggestion/suggestion.dto";
-import { Seconds, UUID } from "@common/types";
+import { Seconds } from "@common/types";
 import { Inject, Injectable } from "@nestjs/common";
 import { Redis } from "ioredis";
 import { REDIS_CLIENT } from "./redis.constant";
@@ -39,20 +38,14 @@ export class RedisService {
 		await this.redis.del(key);
 	}
 
-	getUserSessionKey(userId: UUID, sessionId: UUID) {
-		return `user:${userId}:session:${sessionId}`;
-	}
+	async increaseAttempts(key: string, ttlInSeconds: Seconds): Promise<number> {
+		const count = await this.redis.incr(key);
 
-	getTokenToVerifyKey(token: string) {
-		return `token_to_verify:${token}`;
-	}
+		// set ttl if first attempt
+		if (count === 1) {
+			await this.redis.expire(key, ttlInSeconds);
+		}
 
-	getSuggestionKey({
-		term,
-		partOfSpeech,
-		termLanguage,
-		definitionLanguage,
-	}: GetTermSuggestionDto) {
-		return `suggestion:${term}:${partOfSpeech}:termLang:${termLanguage}:defLang:${definitionLanguage}`;
+		return count;
 	}
 }

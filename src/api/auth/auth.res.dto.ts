@@ -7,3 +7,8 @@ export class TokenPairResponseDto {
 	@Expose()
 	refreshToken!: string;
 }
+
+export class VerifyEmailResposneDto {
+	@Expose()
+	verifiedToken!: string;
+}

@@ -6,8 +6,16 @@ import {
 } from "@config";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Resend } from "resend";
-import { SendMagicLinkEmailDto, SendWelcomeEmailDto } from "./mail.dto";
+import {
+	SendEmailVerificationEmailDto,
+	SendMagicLinkEmailDto,
+	SendWelcomeEmailDto,
+} from "./mail.dto";
 import { renderEmail } from "./render-email";
+import {
+	EmailVerificationEmail,
+	EmailVerificationProps,
+} from "./templates/email-verification";
 import { MagicLinkEmail, MagicLinkEmailProps } from "./templates/magic-link";
 import { WelcomeEmail, WelcomeEmailProps } from "./templates/welcome";
 
@@ -44,7 +52,22 @@ export class MailService {
 			to,
 			subject: "Login to Vocabify with magic link",
 			html: await renderEmail<MagicLinkEmailProps>(MagicLinkEmail, {
-				magicLink,
+				link: magicLink,
+			}),
+		});
+
+		if (error) return this.logger.error({ error });
+
+		this.logger.debug({ data });
+	}
+
+	async sendEmailVerificationEmail({ to, otp }: SendEmailVerificationEmailDto) {
+		const { data, error } = await this.resend.emails.send({
+			from: this.mailConf.from,
+			to,
+			subject: "Verify your email in Vocabify",
+			html: await renderEmail<EmailVerificationProps>(EmailVerificationEmail, {
+				otp,
 			}),
 		});
 

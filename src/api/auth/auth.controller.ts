@@ -5,10 +5,13 @@ import type { UserJwtPayload, UUID } from "@common/types";
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
 import {
-	BaseAuthDto,
 	ChangePasswordDto,
+	EmailVerificationDto,
+	LoginDto,
 	RefreshTokenDto,
 	RequestMagicLinkDto,
+	SignUpDto,
+	VerifyEmailDto,
 } from "./auth.dto";
 import { TokenPairResponseDto } from "./auth.res.dto";
 import { AuthService } from "./auth.service";
@@ -41,15 +44,21 @@ export class AuthController {
 		return await this.authService.getMyInfo(userId);
 	}
 
+	// @ApiEndpointPublic({ type: TokenPairResponseDto })
+	// @Post("register")
+	// async register(@Body() dto: BaseAuthDto) {
+	// 	return await this.authService.register(dto);
+	// }
+
 	@ApiEndpointPublic({ type: TokenPairResponseDto })
-	@Post("register")
-	async register(@Body() dto: BaseAuthDto) {
-		return await this.authService.register(dto);
+	@Post("sign-up")
+	async signUp(@Body() dto: SignUpDto) {
+		return await this.authService.signUp(dto);
 	}
 
 	@ApiEndpointPublic({ type: TokenPairResponseDto })
 	@Post("login")
-	async login(@Body() dto: BaseAuthDto) {
+	async login(@Body() dto: LoginDto) {
 		return await this.authService.login(dto);
 	}
 
@@ -72,6 +81,18 @@ export class AuthController {
 		@Body() dto: ChangePasswordDto,
 	) {
 		return await this.authService.changePassword(userId, dto);
+	}
+
+	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@Post("email-verification/request")
+	async requestEmailVerification(@Body() dto: EmailVerificationDto) {
+		return await this.authService.requestEmailVerification(dto);
+	}
+
+	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@Post("email-verification/verify")
+	async verifyEmail(@Body() dto: VerifyEmailDto) {
+		return await this.authService.verifyEmail(dto);
 	}
 
 	// TODO auth api
