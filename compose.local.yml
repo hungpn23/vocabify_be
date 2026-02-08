@@ -6,7 +6,7 @@ services:
       file: .docker/compose.base.yml
       service: db
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '${DB_PORT}:5432'
     volumes:
       - ${PWD}/.docker/volumes/pg_data:/var/lib/postgresql/data
     networks:
@@ -17,7 +17,7 @@ services:
       file: .docker/compose.base.yml
       service: redis
     ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+      - '${REDIS_PORT}:6379'
     volumes:
       - ${PWD}/.docker/volumes/redis_data:/data
     command: ["redis-server", "--appendonly", "yes", "--dir", "/data"]
@@ -29,7 +29,7 @@ services:
       file: .docker/compose.base.yml
       service: qdrant
     ports:
-      - '${VECTOR_DB_PORT}:${VECTOR_DB_PORT}'
+      - '${VECTOR_DB_PORT}:6333'
     volumes:
       - ${PWD}/.docker/volumes/qdrant_data:/qdrant/storage
     networks:
