@@ -45,10 +45,7 @@ async function bootstrap() {
 	const isProduction = nodeEnv === NodeEnv.PRODUCTION;
 	const orm = app.get(MikroORM);
 
-	if (isProduction) {
-		await orm.migrator.up();
-		logger.log("Migrations completed");
-	} else {
+	if (!isProduction) {
 		await orm.schema.updateSchema();
 	}
 

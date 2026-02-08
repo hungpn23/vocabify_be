@@ -17,6 +17,18 @@ services:
     networks:
       - default_network
 
+  migration:
+    build:
+      target: development
+    command: pnpm migration:up
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default_network
+
   node:
     build:
       target: production
@@ -28,9 +40,11 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
-      - qdrant
+      db:
+      redis:
+      qdrant:
+      migration:
+        condition: service_completed_successfully
     networks:
       - default_network
 
