@@ -55,8 +55,8 @@ services:
     extends:
       file: .docker/compose.base.yml
       service: db
-    expose:
-      - '${DB_PORT}'
+    ports:
+      - "127.0.0.1:${DB_PORT}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
