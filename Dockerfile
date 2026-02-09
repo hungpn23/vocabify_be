@@ -1,37 +1,26 @@
-# ================================
-# Stage 1: Base - Common setup
-# ================================
+# Base
 FROM node:24-alpine3.23 AS base
 RUN corepack enable
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
 RUN corepack prepare pnpm@10.28.0 --activate
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# ================================
-# Stage 2: Development
-# ================================
+# Development
 FROM base AS development
 COPY --chown=node:node . .
 USER node
 CMD ["tail", "-f", "/dev/null"]
 
-# ================================
-# Stage 3: Builder - Build for production
-# ================================
+# Builder
 FROM base AS builder
-COPY --from=development /app/node_modules ./node_modules
-COPY --from=development /app/src ./src
-COPY --from=development /app/tsconfig.json ./tsconfig.json
-COPY --from=development /app/tsconfig.build.json ./tsconfig.build.json
-COPY --from=development /app/nest-cli.json ./nest-cli.json
-COPY --from=development /app/mikro-orm.config.ts ./mikro-orm.config.ts
+WORKDIR /app
+COPY tsconfig*.json nest-cli.json mikro-orm.config.ts ./
+COPY src ./src
 RUN pnpm build
 RUN pnpm prune --prod
 
-# ================================
-# Stage 4: Production
-# ================================
+# Production
 FROM node:24-alpine3.23 AS production
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
