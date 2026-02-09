@@ -12,11 +12,9 @@ import {
 import {
 	createUUID,
 	getEmailVerificationKey,
-	getEmailVerificationRequestAttemptsKey,
 	getSignUpSessionKey,
 	getUserSessionKey,
 	getVerificationTokenKey,
-	getVerifyEmailAttemptsKey,
 	parseStringValueToSeconds,
 } from "@common/utils";
 import {
@@ -46,14 +44,17 @@ import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
 import {
 	ChangePasswordDto,
-	EmailVerificationDto,
+	ConfirmEmailVerificationDto,
 	LoginDto,
+	RequestEmailVerificationDto,
 	RequestMagicLinkDto,
 	SignUpDto,
-	VerifyEmailDto,
 } from "./auth.dto";
 import { OtpData } from "./auth.interface";
-import { TokenPairResponseDto, VerifyEmailResponseDto } from "./auth.res.dto";
+import {
+	ConfirmEmailVerificationResponseDto,
+	TokenPairResponseDto,
+} from "./auth.res.dto";
 
 type CreateTokenPairOptions = {
 	userId: UUID;
@@ -270,18 +271,18 @@ export class AuthService {
 		});
 	}
 
-	async requestEmailVerification({ email }: EmailVerificationDto) {
+	async requestEmailVerification({ email }: RequestEmailVerificationDto) {
 		const user = await this.userRepository.findOne({ email });
 		if (user?.emailVerified) {
 			return plainToInstance(SuccessResponseDto, { success: true });
 		}
 
 		const attempts = await this.redisService.increaseAttempts(
-			getEmailVerificationRequestAttemptsKey(email),
-			RATE_LIMIT.EMAIL_VERIFICATION.WINDOW_SECONDS,
+			getEmailVerificationKey(email, "request_attempts"),
+			RATE_LIMIT.REQUEST_EMAIL_VERIFICATION.WINDOW_SECONDS,
 		);
 
-		if (attempts > RATE_LIMIT.EMAIL_VERIFICATION.MAX_ATTEMPTS) {
+		if (attempts > RATE_LIMIT.REQUEST_EMAIL_VERIFICATION.MAX_ATTEMPTS) {
 			throw new BadRequestException(
 				"Too many attempts, please try again later",
 			);
@@ -293,30 +294,30 @@ export class AuthService {
 		};
 
 		await this.redisService.setValue(
-			getEmailVerificationKey(email),
+			getEmailVerificationKey(email, "otp"),
 			data,
 			parseStringValueToSeconds("5m"),
 		);
 
-		await this.mailProducer.sendEmailVerificationEmail({ to: email, otp });
+		await this.mailProducer.sendOtpEmail({ to: email, otp });
 
 		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
-	async verifyEmail({ email, otp }: VerifyEmailDto) {
+	async confirmEmailVerification({ email, otp }: ConfirmEmailVerificationDto) {
 		const attempts = await this.redisService.increaseAttempts(
-			getVerifyEmailAttemptsKey(email),
-			RATE_LIMIT.VERIFY_EMAIL.WINDOW_SECONDS,
+			getEmailVerificationKey(email, "confirm_attempts"),
+			RATE_LIMIT.CONFIRM_EMAIL_VERIFICATION.WINDOW_SECONDS,
 		);
 
-		if (attempts > RATE_LIMIT.VERIFY_EMAIL.MAX_ATTEMPTS) {
+		if (attempts > RATE_LIMIT.CONFIRM_EMAIL_VERIFICATION.MAX_ATTEMPTS) {
 			throw new BadRequestException(
 				"Too many attempts, please try again later",
 			);
 		}
 
 		const data = await this.redisService.getValue<OtpData>(
-			getEmailVerificationKey(email),
+			getEmailVerificationKey(email, "otp"),
 		);
 		if (!data) throw new BadRequestException();
 
@@ -324,8 +325,10 @@ export class AuthService {
 		if (!isOtpValid) throw new BadRequestException();
 
 		await Promise.all([
-			this.redisService.deleteKey(getEmailVerificationKey(email)),
-			this.redisService.deleteKey(getVerifyEmailAttemptsKey(email)),
+			this.redisService.deleteKey(getEmailVerificationKey(email, "otp")),
+			this.redisService.deleteKey(
+				getEmailVerificationKey(email, "confirm_attempts"),
+			),
 		]);
 
 		const user = await this.userRepository.findOne({ email });
@@ -340,7 +343,9 @@ export class AuthService {
 			parseStringValueToSeconds("5m"),
 		);
 
-		return plainToInstance(VerifyEmailResponseDto, { verifiedToken });
+		return plainToInstance(ConfirmEmailVerificationResponseDto, {
+			verifiedToken,
+		});
 	}
 
 	async verifyJwt(jwt: string) {

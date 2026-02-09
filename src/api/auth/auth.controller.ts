@@ -6,14 +6,17 @@ import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
 import {
 	ChangePasswordDto,
-	EmailVerificationDto,
+	ConfirmEmailVerificationDto,
 	LoginDto,
 	RefreshTokenDto,
+	RequestEmailVerificationDto,
 	RequestMagicLinkDto,
 	SignUpDto,
-	VerifyEmailDto,
 } from "./auth.dto";
-import { TokenPairResponseDto, VerifyEmailResponseDto } from "./auth.res.dto";
+import {
+	ConfirmEmailVerificationResponseDto,
+	TokenPairResponseDto,
+} from "./auth.res.dto";
 import { AuthService } from "./auth.service";
 
 @Controller({ path: "auth" })
@@ -79,14 +82,14 @@ export class AuthController {
 
 	@ApiEndpointPublic({ type: SuccessResponseDto })
 	@Post("email-verification/request")
-	async requestEmailVerification(@Body() dto: EmailVerificationDto) {
+	async requestEmailVerification(@Body() dto: RequestEmailVerificationDto) {
 		return await this.authService.requestEmailVerification(dto);
 	}
 
-	@ApiEndpointPublic({ type: VerifyEmailResponseDto })
-	@Post("email-verification/verify")
-	async verifyEmail(@Body() dto: VerifyEmailDto) {
-		return await this.authService.verifyEmail(dto);
+	@ApiEndpointPublic({ type: ConfirmEmailVerificationResponseDto })
+	@Post("email-verification/confirm")
+	async confirmEmailVerification(@Body() dto: ConfirmEmailVerificationDto) {
+		return await this.authService.confirmEmailVerification(dto);
 	}
 
 	// TODO auth api

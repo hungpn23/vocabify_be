@@ -30,11 +30,13 @@ export class SignUpDto extends PickType(BaseAuthDto, [
 	verifiedToken!: string;
 }
 
-export class EmailVerificationDto extends PickType(BaseAuthDto, [
+export class RequestEmailVerificationDto extends PickType(BaseAuthDto, [
 	"email",
 ] as const) {}
 
-export class VerifyEmailDto extends PickType(BaseAuthDto, ["email"] as const) {
+export class ConfirmEmailVerificationDto extends PickType(BaseAuthDto, [
+	"email",
+] as const) {
 	@NumberValidator({ isInt: true, minimum: 100000, maximum: 999999 })
 	otp!: number;
 }

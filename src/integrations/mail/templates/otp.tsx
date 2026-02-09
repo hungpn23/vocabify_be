@@ -9,11 +9,11 @@ import {
 	Text,
 } from "@react-email/components";
 
-export type EmailVerificationProps = {
+export type OtpEmailProps = {
 	otp: string;
 };
 
-export const EmailVerificationEmail = ({ otp }: EmailVerificationProps) => (
+export const OtpEmail = ({ otp }: OtpEmailProps) => (
 	<Html>
 		<Head />
 		<Tailwind>
@@ -21,8 +21,11 @@ export const EmailVerificationEmail = ({ otp }: EmailVerificationProps) => (
 				<Preview>Verify your email in Vocabify</Preview>
 				<Container className="px-3 mx-auto">
 					<Heading className="text-[#333] text-[24px] my-10 mx-0 p-0">
-						Enter this code in sign up page to verify your email: {otp}
+						Enter this code to verify your email: {otp}
 					</Heading>
+					<Text className="text-[#ababab] text-[14px] mt-3.5 mb-4">
+						This code will expire in 5 minutes.
+					</Text>
 					<Text className="text-[#ababab] text-[14px] mt-3.5 mb-4">
 						If you didn&apos;t try to sign up, you can safely ignore this email.
 					</Text>
@@ -32,4 +35,4 @@ export const EmailVerificationEmail = ({ otp }: EmailVerificationProps) => (
 	</Html>
 );
 
-export default EmailVerificationEmail;
+export default OtpEmail;

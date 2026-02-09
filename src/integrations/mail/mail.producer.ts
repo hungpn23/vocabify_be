@@ -2,11 +2,7 @@ import { JobName, QueueName } from "@common/enums";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";
-import {
-	SendEmailVerificationEmailDto,
-	SendMagicLinkEmailDto,
-	SendWelcomeEmailDto,
-} from "./mail.dto";
+import { SendMagicLinkDto, SendOtpDto, SendWelcomeDto } from "./mail.dto";
 
 @Injectable()
 export class MailProducer {
@@ -15,15 +11,15 @@ export class MailProducer {
 		private readonly emailQueue: Queue<unknown, void, JobName>,
 	) {}
 
-	async sendWelcomeEmail(payload: SendWelcomeEmailDto) {
+	async sendWelcomeEmail(payload: SendWelcomeDto) {
 		await this.emailQueue.add(JobName.SEND_WELCOME_EMAIL, payload);
 	}
 
-	async sendMagicLinkEmail(payload: SendMagicLinkEmailDto) {
+	async sendMagicLinkEmail(payload: SendMagicLinkDto) {
 		await this.emailQueue.add(JobName.SEND_MAGIC_LINK_EMAIL, payload);
 	}
 
-	async sendEmailVerificationEmail(payload: SendEmailVerificationEmailDto) {
-		await this.emailQueue.add(JobName.SEND_EMAIL_VERIFICATION_EMAIL, payload);
+	async sendOtpEmail(payload: SendOtpDto) {
+		await this.emailQueue.add(JobName.SEND_OTP_EMAIL, payload);
 	}
 }

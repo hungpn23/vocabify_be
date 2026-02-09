@@ -1,15 +1,15 @@
-export class SendMailDto {
+export class SendEmailDto {
 	to!: string;
 }
 
-export class SendWelcomeEmailDto extends SendMailDto {
+export class SendWelcomeDto extends SendEmailDto {
 	username!: string;
 }
 
-export class SendMagicLinkEmailDto extends SendMailDto {
+export class SendMagicLinkDto extends SendEmailDto {
 	magicLink!: string;
 }
 
-export class SendEmailVerificationEmailDto extends SendMailDto {
+export class SendOtpDto extends SendEmailDto {
 	otp!: string;
 }

@@ -9,16 +9,11 @@ export function getVerificationTokenKey(token: string) {
 	return `verification_token:${token}`;
 }
 
-export function getEmailVerificationKey(email: string) {
-	return `email_verification:${email}`;
-}
-
-export function getEmailVerificationRequestAttemptsKey(email: string) {
-	return `email_verification_request_attempts:${email}`;
-}
-
-export function getVerifyEmailAttemptsKey(email: string) {
-	return `verify_email_attempts:${email}`;
+export function getEmailVerificationKey(
+	email: string,
+	type: "otp" | "request_attempts" | "confirm_attempts",
+) {
+	return `email_verification:${type}:${email}`;
 }
 
 export function getSignUpSessionKey(token: string) {
