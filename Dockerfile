@@ -6,13 +6,13 @@ RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN corepack prepare pnpm@10.28.0 --activate
+RUN pnpm install --frozen-lockfile
 
 # ================================
 # Stage 2: Development
 # ================================
 FROM base AS development
 COPY --chown=node:node . .
-RUN pnpm install --frozen-lockfile
 USER node
 CMD ["tail", "-f", "/dev/null"]
 
