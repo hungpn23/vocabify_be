@@ -1,4 +1,3 @@
-import { AuthService } from "@api/auth/auth.service";
 import { AppModule } from "@app.module";
 import { NodeEnv } from "@common/enums";
 import { GlobalExceptionFilter } from "@common/filters";
@@ -6,6 +5,7 @@ import { AuthGuard, RoleBasedAccessControlGuard } from "@common/guards";
 import { FieldsValidationPipe } from "@common/pipes";
 import { getAppConfig, VectorDbConfig, vectorDbConfig } from "@config";
 import { MikroORM } from "@mikro-orm/core";
+import { AuthService } from "@modules/auth/auth.service";
 import { Logger } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";

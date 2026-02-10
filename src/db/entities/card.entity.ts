@@ -1,5 +1,3 @@
-import { CardStatus } from "@api/deck/deck.enum";
-import { type LanguageCode } from "@api/deck/deck.type";
 import { type UUID } from "@common/types";
 import { createUUID, NullableProperty } from "@common/utils";
 import {
@@ -14,6 +12,8 @@ import {
 	type Ref,
 	t,
 } from "@mikro-orm/core";
+import { CardStatus } from "@modules/deck/deck.enum";
+import { type LanguageCode } from "@modules/deck/deck.type";
 import { Deck } from "./deck.entity";
 
 @Entity()

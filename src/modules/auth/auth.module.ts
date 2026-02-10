@@ -1,8 +1,8 @@
 import { QueueName } from "@common/enums";
 import { AuthConfig, authConfig } from "@config";
 import { User } from "@db/entities";
-import { MailModule } from "@integrations/mail/mail.module";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
+import { MailModule } from "@modules/mail/mail.module";
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";

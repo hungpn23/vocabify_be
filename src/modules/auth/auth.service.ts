@@ -1,5 +1,4 @@
 import { randomInt } from "node:crypto";
-import { UserResponseDto } from "@api/user/user.res.dto";
 import { RATE_LIMIT } from "@common/constants";
 import { SuccessResponseDto } from "@common/dtos";
 import { JwtToken, UserAction, UserRole } from "@common/enums";
@@ -28,9 +27,11 @@ import {
 	googleConfig,
 } from "@config";
 import { User } from "@db/entities";
-import { MailProducer } from "@integrations/mail/mail.producer";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
+import { MailProducer } from "@modules/mail/mail.producer";
+import { RedisService } from "@modules/redis/redis.service";
+import { UserResponseDto } from "@modules/user/user.res.dto";
 import {
 	BadRequestException,
 	Inject,
@@ -38,7 +39,6 @@ import {
 	UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { RedisService } from "@redis/redis.service";
 import argon2 from "argon2";
 import { plainToInstance } from "class-transformer";
 import { Response } from "express";

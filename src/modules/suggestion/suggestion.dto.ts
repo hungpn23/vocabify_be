@@ -1,5 +1,5 @@
-import type { LanguageCode } from "@api/deck/deck.type";
 import { StringValidator, StringValidatorOptional } from "@common/decorators";
+import type { LanguageCode } from "@modules/deck/deck.type";
 
 export class GetTermSuggestionDto {
 	@StringValidator()

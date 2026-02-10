@@ -1,7 +1,7 @@
-import type { LanguageCode } from "@api/deck/deck.type";
 import { type UUID } from "@common/types";
 import { createUUID, NullableProperty } from "@common/utils";
 import { Entity, Opt, PrimaryKey, Property, t } from "@mikro-orm/core";
+import type { LanguageCode } from "@modules/deck/deck.type";
 
 @Entity()
 export class CardSuggestion {

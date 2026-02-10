@@ -1,5 +1,5 @@
-import { ActorResponseDto } from "@api/user/user.res.dto";
 import type { UUID } from "@common/types";
+import { ActorResponseDto } from "@modules/user/user.res.dto";
 
 import { Exclude, Expose } from "class-transformer";
 

@@ -1,5 +1,5 @@
-import { GetTermSuggestionDto } from "@api/suggestion/suggestion.dto";
 import { UUID } from "@common/types";
+import { GetTermSuggestionDto } from "@modules/suggestion/suggestion.dto";
 
 export function getUserSessionKey(userId: UUID, sessionId: UUID) {
 	return `user:${userId}:session:${sessionId}`;
