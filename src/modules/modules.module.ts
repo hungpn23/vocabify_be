@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "./auth/auth.module";
 import { DeckModule } from "./deck/deck.module";
-import { ImageKitModule } from "./imagekit/imagekit.module";
+import { ImageKitModule } from "./image-kit/image-kit.module";
 import { MailModule } from "./mail/mail.module";
 import { NotificationModule } from "./notification/notification.module";
 import { RedisModule } from "./redis/redis.module";

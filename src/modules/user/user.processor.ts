@@ -4,7 +4,7 @@ import { ImageUploadData } from "@common/types";
 import { User } from "@db/entities";
 import ImageKit from "@imagekit/nodejs";
 import { EntityManager } from "@mikro-orm/core";
-import { IMAGEKIT_CLIENT } from "@modules/imagekit/imagekit.provider-token";
+import { IMAGEKIT_CLIENT } from "@modules/image-kit/image-kit.const";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Inject, Logger } from "@nestjs/common";
 import { Job } from "bullmq";
