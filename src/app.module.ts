@@ -1,4 +1,3 @@
-import { ApiModule } from "@api/api.module";
 import { AppController } from "@app.controller";
 import { NodeEnv } from "@common/enums";
 import {
@@ -15,16 +14,15 @@ import {
 	vectorDbConfig,
 } from "@config";
 import * as entities from "@db/entities";
-import { IntegrationModule } from "@integrations/intergration.module";
 import KeyvRedis from "@keyv/redis";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
+import { Modules } from "@modules/modules.module";
 import { BullModule } from "@nestjs/bullmq";
 import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { RedisModule } from "./redis/redis.module";
 
 const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 
@@ -84,9 +82,7 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 			}),
 		}),
 
-		RedisModule,
-		ApiModule,
-		IntegrationModule,
+		Modules,
 	],
 	controllers: [AppController],
 })

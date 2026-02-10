@@ -1,4 +1,3 @@
-import { Visibility } from "@api/deck/deck.enum";
 import { type UUID } from "@common/types";
 import { NullableProperty } from "@common/utils";
 import {
@@ -16,6 +15,7 @@ import {
 	t,
 	Unique,
 } from "@mikro-orm/core";
+import { Visibility } from "@modules/deck/deck.enum";
 import slugify from "slugify";
 import { SoftDeleteBaseEntity } from "./base.entity";
 import { Card } from "./card.entity";

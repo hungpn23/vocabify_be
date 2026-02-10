@@ -1,8 +1,8 @@
-import { Visibility } from "@api/deck/deck.enum";
 import { Card, Deck, User } from "@db/entities";
 import { faker } from "@faker-js/faker";
 import { EntityManager } from "@mikro-orm/core";
 import { Seeder } from "@mikro-orm/seeder";
+import { Visibility } from "@modules/deck/deck.enum";
 
 const cardResources = [
 	{ term: "Ability", definition: "Khả năng, năng lực" },

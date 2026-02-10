@@ -1,7 +1,7 @@
-import { AuthService } from "@api/auth/auth.service";
 import { MetadataKey } from "@common/enums";
 import { RequestWithUser } from "@common/types";
 import { extractTokenFromHeader } from "@common/utils";
+import { AuthService } from "@modules/auth/auth.service";
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 

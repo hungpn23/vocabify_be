@@ -1,5 +1,5 @@
-import { OwnerResponseDto } from "@api/user/user.res.dto";
 import { type UUID } from "@common/types";
+import { OwnerResponseDto } from "@modules/user/user.res.dto";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { Visibility } from "../deck.enum";

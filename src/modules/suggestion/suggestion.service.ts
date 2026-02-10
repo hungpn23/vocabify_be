@@ -17,6 +17,7 @@ import { Document } from "@langchain/core/documents";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
+import { RedisService } from "@modules/redis/redis.service";
 import {
 	BadRequestException,
 	Inject,
@@ -25,7 +26,6 @@ import {
 	NotFoundException,
 	OnModuleInit,
 } from "@nestjs/common";
-import { RedisService } from "@redis/redis.service";
 import { plainToInstance } from "class-transformer";
 import {
 	GetNextCardSuggestionDto,

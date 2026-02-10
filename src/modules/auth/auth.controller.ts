@@ -1,7 +1,7 @@
-import { UserResponseDto } from "@api/user/user.res.dto";
 import { ApiEndpoint, ApiEndpointPublic, User } from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
 import type { UserJwtPayload, UUID } from "@common/types";
+import { UserResponseDto } from "@modules/user/user.res.dto";
 import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
 import {

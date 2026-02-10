@@ -1,4 +1,4 @@
-import type { LanguageCode } from "@api/deck/deck.type";
+import type { LanguageCode } from "@modules/deck/deck.type";
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()

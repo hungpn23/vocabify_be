@@ -1,9 +1,9 @@
-import { CardStatus } from "@api/deck/deck.enum";
 import { JobName, QueueName } from "@common/enums";
 import { UpdateUserStatsData, type UUID } from "@common/types";
 import { Card, Deck, UserStatistic } from "@db/entities";
 import { EntityManager, EntityRepository, wrap } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
+import { CardStatus } from "@modules/deck/deck.enum";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Queue } from "bullmq";

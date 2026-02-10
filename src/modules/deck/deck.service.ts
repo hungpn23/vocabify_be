@@ -1,6 +1,3 @@
-import { NotificationResponseDto } from "@api/notification/notification.dto";
-import { NotificationGateway } from "@api/notification/notification.gateway";
-import { OwnerResponseDto } from "@api/user/user.res.dto";
 import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
 import { UUID } from "@common/types";
 import { getMetadataResponseDto } from "@common/utils";
@@ -13,6 +10,9 @@ import {
 } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
+import { NotificationResponseDto } from "@modules/notification/notification.dto";
+import { NotificationGateway } from "@modules/notification/notification.gateway";
+import { OwnerResponseDto } from "@modules/user/user.res.dto";
 import {
 	BadRequestException,
 	Injectable,
