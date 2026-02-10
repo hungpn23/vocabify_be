@@ -12,6 +12,8 @@ import {
 import {
 	createUUID,
 	getEmailVerificationKey,
+	getPasswordResetKey,
+	getResetPasswordSessionKey,
 	getSignUpSessionKey,
 	getUserSessionKey,
 	getVerificationTokenKey,
@@ -45,14 +47,18 @@ import { generateFromEmail } from "unique-username-generator";
 import {
 	ChangePasswordDto,
 	ConfirmEmailVerificationDto,
+	ConfirmPasswordResetDto,
 	LoginDto,
 	RequestEmailVerificationDto,
 	RequestMagicLinkDto,
+	RequestPasswordResetDto,
+	ResetPasswordDto,
 	SignUpDto,
 } from "./auth.dto";
 import { OtpData } from "./auth.interface";
 import {
 	ConfirmEmailVerificationResponseDto,
+	ConfirmPasswordResetResponseDto,
 	TokenPairResponseDto,
 } from "./auth.res.dto";
 
@@ -346,6 +352,103 @@ export class AuthService {
 		return plainToInstance(ConfirmEmailVerificationResponseDto, {
 			verifiedToken,
 		});
+	}
+
+	async requestPasswordReset({ email }: RequestPasswordResetDto) {
+		const user = await this.userRepository.findOne({ email });
+		if (!user) {
+			return plainToInstance(SuccessResponseDto, { success: true });
+		}
+
+		const attempts = await this.redisService.increaseAttempts(
+			getPasswordResetKey(email, "request_attempts"),
+			RATE_LIMIT.REQUEST_PASSWORD_RESET.WINDOW_SECONDS,
+		);
+
+		if (attempts > RATE_LIMIT.REQUEST_PASSWORD_RESET.MAX_ATTEMPTS) {
+			throw new BadRequestException(
+				"Too many attempts, please try again later",
+			);
+		}
+
+		const otp = this._createOtp();
+		const data: OtpData = {
+			hashedOtp: await argon2.hash(otp),
+		};
+
+		await this.redisService.setValue(
+			getPasswordResetKey(email, "otp"),
+			data,
+			parseStringValueToSeconds("5m"),
+		);
+
+		await this.mailProducer.sendOtpEmail({ to: email, otp });
+
+		return plainToInstance(SuccessResponseDto, { success: true });
+	}
+
+	async confirmPasswordReset({ email, otp }: ConfirmPasswordResetDto) {
+		const attempts = await this.redisService.increaseAttempts(
+			getPasswordResetKey(email, "confirm_attempts"),
+			RATE_LIMIT.CONFIRM_PASSWORD_RESET.WINDOW_SECONDS,
+		);
+
+		if (attempts > RATE_LIMIT.CONFIRM_PASSWORD_RESET.MAX_ATTEMPTS) {
+			throw new BadRequestException(
+				"Too many attempts, please try again later",
+			);
+		}
+
+		const data = await this.redisService.getValue<OtpData>(
+			getPasswordResetKey(email, "otp"),
+		);
+		if (!data) throw new BadRequestException();
+
+		const isOtpValid = await argon2.verify(data.hashedOtp, otp.toString());
+		if (!isOtpValid) throw new BadRequestException();
+
+		await Promise.all([
+			this.redisService.deleteKey(getPasswordResetKey(email, "otp")),
+			this.redisService.deleteKey(
+				getPasswordResetKey(email, "confirm_attempts"),
+			),
+		]);
+
+		const resetToken = createUUID();
+		await this.redisService.setValue(
+			getResetPasswordSessionKey(resetToken),
+			email,
+			parseStringValueToSeconds("5m"),
+		);
+
+		return plainToInstance(ConfirmPasswordResetResponseDto, { resetToken });
+	}
+
+	async resetPassword({ resetToken, newPassword }: ResetPasswordDto) {
+		const email = await this.redisService.getValue<string>(
+			getResetPasswordSessionKey(resetToken),
+		);
+		if (!email) throw new BadRequestException();
+
+		const user = await this.userRepository.findOne({ email });
+		if (!user) throw new BadRequestException();
+
+		const isSamePassword =
+			user.password && (await argon2.verify(user.password, newPassword));
+		if (isSamePassword) {
+			throw new BadRequestException(
+				"New password must be different from current password",
+			);
+		}
+
+		this.userRepository.assign(user, {
+			password: await argon2.hash(newPassword),
+		});
+
+		await this.redisService.deleteKey(getResetPasswordSessionKey(resetToken));
+		await this.em.flush();
+
+		return plainToInstance(SuccessResponseDto, { success: true });
 	}
 
 	async verifyJwt(jwt: string) {

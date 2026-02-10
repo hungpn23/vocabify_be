@@ -57,3 +57,22 @@ export class RefreshTokenDto {
 	@StringValidator()
 	refreshToken!: string;
 }
+
+export class RequestPasswordResetDto extends PickType(BaseAuthDto, [
+	"email",
+] as const) {}
+
+export class ConfirmPasswordResetDto extends PickType(BaseAuthDto, [
+	"email",
+] as const) {
+	@NumberValidator({ isInt: true, minimum: 100000, maximum: 999999 })
+	otp!: number;
+}
+
+export class ResetPasswordDto {
+	@StringValidator({ isUUID: true })
+	resetToken!: string;
+
+	@PasswordValidator()
+	newPassword!: string;
+}

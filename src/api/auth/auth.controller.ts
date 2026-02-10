@@ -7,14 +7,18 @@ import type { Response } from "express";
 import {
 	ChangePasswordDto,
 	ConfirmEmailVerificationDto,
+	ConfirmPasswordResetDto,
 	LoginDto,
 	RefreshTokenDto,
 	RequestEmailVerificationDto,
 	RequestMagicLinkDto,
+	RequestPasswordResetDto,
+	ResetPasswordDto,
 	SignUpDto,
 } from "./auth.dto";
 import {
 	ConfirmEmailVerificationResponseDto,
+	ConfirmPasswordResetResponseDto,
 	TokenPairResponseDto,
 } from "./auth.res.dto";
 import { AuthService } from "./auth.service";
@@ -92,24 +96,21 @@ export class AuthController {
 		return await this.authService.confirmEmailVerification(dto);
 	}
 
-	// TODO auth api
-	// @Post('forgot-password')
-	// async forgotPassword() {
-	//   return 'forgot-password';
-	// }
+	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@Post("password/reset/request")
+	async requestPasswordReset(@Body() dto: RequestPasswordResetDto) {
+		return await this.authService.requestPasswordReset(dto);
+	}
 
-	// @Post('verify/forgot-password')
-	// async verifyForgotPassword() {
-	//   return 'verify-forgot-password';
-	// }
+	@ApiEndpointPublic({ type: ConfirmPasswordResetResponseDto })
+	@Post("password/reset/confirm")
+	async confirmPasswordReset(@Body() dto: ConfirmPasswordResetDto) {
+		return await this.authService.confirmPasswordReset(dto);
+	}
 
-	// @Get('verify/email')
-	// async verifyEmail() {
-	//   return 'verify-email';
-	// }
-
-	// @Post('verify/email/resend')
-	// async resendVerifyEmail() {
-	//   return 'resend-verify-email';
-	// }
+	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@Post("password/reset")
+	async resetPassword(@Body() dto: ResetPasswordDto) {
+		return await this.authService.resetPassword(dto);
+	}
 }

@@ -12,3 +12,8 @@ export class ConfirmEmailVerificationResponseDto {
 	@Expose()
 	verifiedToken!: string;
 }
+
+export class ConfirmPasswordResetResponseDto {
+	@Expose()
+	resetToken!: string;
+}

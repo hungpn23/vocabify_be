@@ -16,8 +16,19 @@ export function getEmailVerificationKey(
 	return `email_verification:${type}:${email}`;
 }
 
+export function getPasswordResetKey(
+	email: string,
+	type: "otp" | "request_attempts" | "confirm_attempts",
+) {
+	return `password_reset:${type}:${email}`;
+}
+
 export function getSignUpSessionKey(token: string) {
 	return `sign_up_session:${token}`;
+}
+
+export function getResetPasswordSessionKey(token: string) {
+	return `reset_password_session:${token}`;
 }
 
 export function getSuggestionKey({

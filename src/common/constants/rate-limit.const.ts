@@ -9,4 +9,12 @@ export const RATE_LIMIT = {
 		MAX_ATTEMPTS: 5,
 		WINDOW_SECONDS: (5 * 60) as Seconds,
 	},
+	REQUEST_PASSWORD_RESET: {
+		MAX_ATTEMPTS: 5,
+		WINDOW_SECONDS: (24 * 60 * 60) as Seconds,
+	},
+	CONFIRM_PASSWORD_RESET: {
+		MAX_ATTEMPTS: 5,
+		WINDOW_SECONDS: (5 * 60) as Seconds,
+	},
 } as const;
