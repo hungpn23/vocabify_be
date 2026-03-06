@@ -23,7 +23,11 @@ export class RedisService {
 		}
 	}
 
-	async setValue<T = unknown>(key: string, value: T, ttlInSeconds?: Seconds) {
+	async setValue<TValue = unknown>(
+		key: string,
+		value: TValue,
+		ttlInSeconds?: Seconds,
+	) {
 		const serialized =
 			typeof value === "string" ? value : JSON.stringify(value);
 

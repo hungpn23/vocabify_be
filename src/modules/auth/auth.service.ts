@@ -86,8 +86,6 @@ export class AuthService {
 	) {}
 
 	async googleCallback(code: string, res: Response) {
-		const frontendUrl = this.appConf.frontendUrl;
-
 		const params = new URLSearchParams({
 			code,
 			client_id: this.googleConf.clientId,
@@ -122,7 +120,7 @@ export class AuthService {
 			token,
 		}).toString();
 
-		return res.redirect(`${frontendUrl}/callback?${searchParams}`);
+		return res.redirect(`${this.appConf.frontendUrl}/redirect?${searchParams}`);
 	}
 
 	async requestMagicLink({ email }: RequestMagicLinkDto) {
@@ -141,7 +139,7 @@ export class AuthService {
 
 		await this.mailProducer.sendMagicLinkEmail({
 			to: email,
-			magicLink: `${this.appConf.frontendUrl}/callback?${searchParams}`,
+			magicLink: `${this.appConf.frontendUrl}/redirect?${searchParams}`,
 		});
 
 		return plainToInstance(SuccessResponseDto, {
