@@ -1,4 +1,5 @@
 import { ApiEndpoint, User } from "@common/decorators";
+import { SuccessResponseDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import {
 	Body,
@@ -15,8 +16,8 @@ import { StudyService } from "./study.service";
 export class StudyController {
 	constructor(private readonly studyService: StudyService) {}
 
-	@ApiEndpoint()
-	@Post("save-answer/:deckId")
+	@ApiEndpoint({ type: SuccessResponseDto })
+	@Post("save-answers/:deckId")
 	async saveAnswers(
 		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,

@@ -1,3 +1,4 @@
+import { SuccessResponseDto } from "@common/dtos";
 import { JobName, QueueName } from "@common/enums";
 import { UpdateUserStatsData, type UUID } from "@common/types";
 import { Card, Deck, UserStatistic } from "@db/entities";
@@ -74,5 +75,7 @@ export class StudyService {
 			userId,
 			learnedCount,
 		});
+
+		return { success: true } satisfies SuccessResponseDto;
 	}
 }
