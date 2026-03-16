@@ -3,7 +3,7 @@ import { OwnerResponseDto } from "@modules/user/user.res.dto";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { Visibility } from "../deck.enum";
-import { CardResponseDto, PreviewCardResponseDto } from "./card.dto";
+import { CardResponseDto, PreviewCardResponseDto } from "./card.res.dto";
 
 @Exclude()
 export class DeckResponseDto {

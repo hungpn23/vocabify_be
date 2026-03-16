@@ -21,7 +21,7 @@ import {
 import { plainToInstance } from "class-transformer";
 import { assign, omit, pick } from "lodash";
 import { Visibility } from "./deck.enum";
-import { CardResponseDto } from "./dtos/card.dto";
+import { CardResponseDto } from "./dtos/card.res.dto";
 import {
 	CloneDeckDto,
 	CreateDeckDto,

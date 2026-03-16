@@ -31,7 +31,7 @@ export class CardResponseDto {
 	usageOrGrammar?: string;
 
 	@Expose()
-	examples!: string[];
+	examples?: string[] | null;
 
 	@Expose()
 	streak!: number;

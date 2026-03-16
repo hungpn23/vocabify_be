@@ -30,5 +30,5 @@ export class CardSuggestion {
 	usageOrGrammar?: string;
 
 	@Property({ type: t.array })
-	examples!: string[];
+	examples: Opt<string[]> = [];
 }

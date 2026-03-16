@@ -42,8 +42,8 @@ export class Card {
 	@NullableProperty()
 	usageOrGrammar?: string;
 
-	@NullableProperty({ type: t.array })
-	examples?: string[] | null;
+	@Property({ type: t.array })
+	examples: Opt<string[]> = [];
 
 	@Property()
 	streak: Opt<number> = 0;
