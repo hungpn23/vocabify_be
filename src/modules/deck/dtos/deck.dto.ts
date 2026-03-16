@@ -17,7 +17,7 @@ export class CreateDeckDto {
 	name!: string;
 
 	@StringValidatorOptional()
-	description?: string | null;
+	description?: string;
 
 	@EnumValidator(Visibility)
 	visibility!: Visibility;

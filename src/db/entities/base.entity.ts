@@ -10,10 +10,10 @@ export abstract class BaseEntity {
 	createdAt: Opt<Date> = new Date();
 
 	@NullableProperty({ type: t.datetime, onUpdate: () => new Date() })
-	updatedAt?: Date | null;
+	updatedAt?: Date;
 }
 
 export abstract class SoftDeleteBaseEntity extends BaseEntity {
 	@NullableProperty()
-	deletedAt?: Date | null;
+	deletedAt?: Date;
 }

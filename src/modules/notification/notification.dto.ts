@@ -15,10 +15,10 @@ export class NotificationResponseDto {
 	content!: string;
 
 	@Expose()
-	readAt?: Date | null;
+	readAt?: Date;
 
 	@Expose()
-	actor?: ActorResponseDto | null;
+	actor?: ActorResponseDto;
 
 	@Expose()
 	createdAt!: Date;

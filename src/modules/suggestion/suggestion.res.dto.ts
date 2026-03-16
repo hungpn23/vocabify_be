@@ -13,7 +13,7 @@ export class TermSuggestionResponseDto {
 	partOfSpeech?: string;
 
 	@Expose()
-	usageOrGrammar?: string | null;
+	usageOrGrammar?: string;
 
 	@Expose()
 	examples!: string[];

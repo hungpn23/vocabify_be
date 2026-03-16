@@ -13,10 +13,10 @@ export class Notification extends BaseEntity {
 	content!: string;
 
 	@NullableProperty({ type: t.datetime })
-	readAt?: Date | null;
+	readAt?: Date;
 
 	@ManyToOne(() => User, { ref: true, nullable: true, deleteRule: "set null" })
-	actor?: Ref<User> | null;
+	actor?: Ref<User>;
 
 	@ManyToOne(() => User, { ref: true })
 	recipient!: Ref<User>;

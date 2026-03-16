@@ -11,13 +11,13 @@ export class UserResponseDto {
 	username!: string;
 
 	@Expose()
-	email?: string | null;
+	email?: string;
 
 	@Expose()
 	emailVerified!: boolean;
 
 	@Expose()
-	avatarUrl?: string | null;
+	avatarUrl?: string;
 
 	@Expose()
 	role!: UserRole;
@@ -26,7 +26,7 @@ export class UserResponseDto {
 	createdAt!: Date;
 
 	@Expose()
-	updatedAt?: Date | null;
+	updatedAt?: Date;
 }
 
 @Exclude()
@@ -38,7 +38,7 @@ export class OwnerResponseDto {
 	username!: string;
 
 	@Expose()
-	avatarUrl?: string | null;
+	avatarUrl?: string;
 }
 
 @Exclude()

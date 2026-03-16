@@ -30,10 +30,10 @@ export class Deck extends SoftDeleteBaseEntity {
 	name!: string;
 
 	@Property()
-	slug?: string | null;
+	slug?: string;
 
 	@NullableProperty()
-	description?: string | null;
+	description?: string;
 
 	@Enum(() => Visibility)
 	visibility!: Visibility;
@@ -48,10 +48,10 @@ export class Deck extends SoftDeleteBaseEntity {
 	learnerCount: Opt<number> = 0;
 
 	@NullableProperty({ type: t.datetime })
-	openedAt?: Date | null;
+	openedAt?: Date;
 
 	@ManyToOne(() => Deck, { ref: true, nullable: true })
-	clonedFrom?: Ref<Deck> | null;
+	clonedFrom?: Ref<Deck>;
 
 	@ManyToOne(() => User, { ref: true })
 	owner!: Ref<User>;
@@ -63,7 +63,7 @@ export class Deck extends SoftDeleteBaseEntity {
 	createdBy!: UUID;
 
 	@NullableProperty()
-	updatedBy?: UUID | null;
+	updatedBy?: UUID;
 
 	@BeforeCreate()
 	@BeforeUpdate()

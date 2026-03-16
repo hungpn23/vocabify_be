@@ -31,13 +31,13 @@ export class CardResponseDto {
 	usageOrGrammar?: string;
 
 	@Expose()
-	examples?: string[] | null;
+	examples?: string[];
 
 	@Expose()
 	streak!: number;
 
 	@Expose()
-	reviewDate?: Date | null;
+	reviewDate?: Date;
 
 	@Expose()
 	status!: CardStatus;

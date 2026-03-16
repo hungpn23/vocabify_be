@@ -27,5 +27,5 @@ export class ErrorResponseDto {
 	message!: string;
 
 	@Expose()
-	details?: ErrorDetailResponseDto[] | null;
+	details?: ErrorDetailResponseDto[];
 }

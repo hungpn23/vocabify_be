@@ -49,7 +49,7 @@ export class Card {
 	streak: Opt<number> = 0;
 
 	@NullableProperty()
-	reviewDate?: Date | null;
+	reviewDate?: Date;
 
 	@Enum(() => CardStatus)
 	status: Opt<CardStatus> = CardStatus.NEW;

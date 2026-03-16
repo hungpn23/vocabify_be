@@ -17,7 +17,7 @@ export class QueryDto {
 	order: QueryOrder = QueryOrder.DESC_NULLS_LAST;
 
 	@StringValidatorOptional()
-	search?: string | null;
+	search?: string;
 
 	get offset() {
 		return this.page ? (this.page - 1) * this.limit : 0;
@@ -39,10 +39,10 @@ export class MetadataResponseDto {
 	currentPage!: number;
 
 	@Expose()
-	nextPage?: number | null;
+	nextPage?: number;
 
 	@Expose()
-	previousPage?: number | null;
+	previousPage?: number;
 }
 
 @Exclude()

@@ -17,7 +17,7 @@ export class DeckResponseDto {
 	slug!: string;
 
 	@Expose()
-	description?: string | null;
+	description?: string;
 
 	@Expose()
 	visibility!: Visibility;
@@ -29,10 +29,10 @@ export class DeckResponseDto {
 	learnerCount!: number;
 
 	@Expose()
-	clonedFrom?: Pick<DeckResponseDto, "id" | "name"> | null;
+	clonedFrom?: Pick<DeckResponseDto, "id" | "name">;
 
 	@Expose()
-	openedAt?: Date | null;
+	openedAt?: Date;
 
 	@Expose()
 	createdAt!: Date;

@@ -17,7 +17,7 @@ export class UserStatistic {
 	id: Opt<UUID> = createUUID();
 
 	@NullableProperty()
-	lastStudyDate?: Date | null;
+	lastStudyDate?: Date;
 
 	@Property()
 	currentStreak: Opt<number> = 0;
