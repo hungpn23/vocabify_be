@@ -1,4 +1,4 @@
-import { ApiEndpoint, User } from "@common/decorators";
+import { ApiEndpoint, PrivateCache, User } from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import {
@@ -26,6 +26,7 @@ export class StudyController {
 		return await this.studyService.saveAnswers(userId, deckId, dto);
 	}
 
+	@PrivateCache()
 	@ApiEndpoint()
 	@Get("stats")
 	async getUserStats(@User("userId") userId: UUID) {
