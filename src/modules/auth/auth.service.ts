@@ -40,7 +40,6 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import argon2 from "argon2";
-import { plainToInstance } from "class-transformer";
 import { Response } from "express";
 import { pick } from "lodash";
 import { generateFromEmail } from "unique-username-generator";
@@ -123,7 +122,9 @@ export class AuthService {
 		return res.redirect(`${this.appConf.frontendUrl}/redirect?${searchParams}`);
 	}
 
-	async requestMagicLink({ email }: RequestMagicLinkDto) {
+	async requestMagicLink({
+		email,
+	}: RequestMagicLinkDto): Promise<SuccessResponseDto> {
 		const token = createUUID();
 
 		const searchParams = new URLSearchParams({
@@ -142,9 +143,7 @@ export class AuthService {
 			magicLink: `${this.appConf.frontendUrl}/redirect?${searchParams}`,
 		});
 
-		return plainToInstance(SuccessResponseDto, {
-			success: true,
-		});
+		return { success: true };
 	}
 
 	async verifyToken(token: string) {
@@ -175,12 +174,12 @@ export class AuthService {
 		return tokenPair;
 	}
 
-	async getMyInfo(userId: UUID) {
+	async getMyInfo(userId: UUID): Promise<UserResponseDto> {
 		const user = await this.userRepository.findOne(userId);
 
 		if (!user) throw new UnauthorizedException("User not found.");
 
-		return plainToInstance(UserResponseDto, wrap(user).toObject());
+		return wrap(user).toObject();
 	}
 
 	async signUp({ username, password, verifiedToken }: SignUpDto) {
@@ -228,13 +227,14 @@ export class AuthService {
 		});
 	}
 
-	async logout({ userId, sessionId }: UserJwtPayload) {
+	async logout({
+		userId,
+		sessionId,
+	}: UserJwtPayload): Promise<SuccessResponseDto> {
 		const userTokenKey = getUserSessionKey(userId, sessionId);
 		await this.redisService.deleteKey(userTokenKey);
 
-		return plainToInstance(SuccessResponseDto, {
-			success: true,
-		});
+		return { success: true };
 	}
 
 	async refresh(refreshToken: string) {
@@ -252,7 +252,7 @@ export class AuthService {
 	async changePassword(
 		userId: UUID,
 		{ oldPassword, newPassword }: ChangePasswordDto,
-	) {
+	): Promise<SuccessResponseDto> {
 		const user = await this.userRepository.findOne(userId);
 		if (!user?.password) throw new BadRequestException();
 
@@ -270,15 +270,15 @@ export class AuthService {
 
 		await this.em.flush();
 
-		return plainToInstance(SuccessResponseDto, {
-			success: true,
-		});
+		return { success: true };
 	}
 
-	async requestEmailVerification({ email }: RequestEmailVerificationDto) {
+	async requestEmailVerification({
+		email,
+	}: RequestEmailVerificationDto): Promise<SuccessResponseDto> {
 		const user = await this.userRepository.findOne({ email });
 		if (user?.emailVerified) {
-			return plainToInstance(SuccessResponseDto, { success: true });
+			return { success: true };
 		}
 
 		const attempts = await this.redisService.increaseAttempts(
@@ -305,10 +305,13 @@ export class AuthService {
 
 		await this.mailProducer.sendOtpEmail({ to: email, otp });
 
-		return plainToInstance(SuccessResponseDto, { success: true });
+		return { success: true };
 	}
 
-	async confirmEmailVerification({ email, otp }: ConfirmEmailVerificationDto) {
+	async confirmEmailVerification({
+		email,
+		otp,
+	}: ConfirmEmailVerificationDto): Promise<ConfirmEmailVerificationResponseDto> {
 		const attempts = await this.redisService.increaseAttempts(
 			getEmailVerificationKey(email, "confirm_attempts"),
 			RATE_LIMIT.CONFIRM_EMAIL_VERIFICATION.WINDOW_SECONDS,
@@ -347,15 +350,15 @@ export class AuthService {
 			parseStringValueToSeconds("5m"),
 		);
 
-		return plainToInstance(ConfirmEmailVerificationResponseDto, {
-			verifiedToken,
-		});
+		return { verifiedToken };
 	}
 
-	async requestPasswordReset({ email }: RequestPasswordResetDto) {
+	async requestPasswordReset({
+		email,
+	}: RequestPasswordResetDto): Promise<SuccessResponseDto> {
 		const user = await this.userRepository.findOne({ email });
 		if (!user) {
-			return plainToInstance(SuccessResponseDto, { success: true });
+			return { success: true };
 		}
 
 		const attempts = await this.redisService.increaseAttempts(
@@ -382,10 +385,13 @@ export class AuthService {
 
 		await this.mailProducer.sendOtpEmail({ to: email, otp });
 
-		return plainToInstance(SuccessResponseDto, { success: true });
+		return { success: true };
 	}
 
-	async confirmPasswordReset({ email, otp }: ConfirmPasswordResetDto) {
+	async confirmPasswordReset({
+		email,
+		otp,
+	}: ConfirmPasswordResetDto): Promise<ConfirmPasswordResetResponseDto> {
 		const attempts = await this.redisService.increaseAttempts(
 			getPasswordResetKey(email, "confirm_attempts"),
 			RATE_LIMIT.CONFIRM_PASSWORD_RESET.WINDOW_SECONDS,
@@ -419,10 +425,13 @@ export class AuthService {
 			parseStringValueToSeconds("5m"),
 		);
 
-		return plainToInstance(ConfirmPasswordResetResponseDto, { resetToken });
+		return { resetToken };
 	}
 
-	async resetPassword({ resetToken, newPassword }: ResetPasswordDto) {
+	async resetPassword({
+		resetToken,
+		newPassword,
+	}: ResetPasswordDto): Promise<SuccessResponseDto> {
 		const email = await this.redisService.getValue<string>(
 			getResetPasswordSessionKey(resetToken),
 		);
@@ -446,7 +455,7 @@ export class AuthService {
 		await this.redisService.deleteKey(getResetPasswordSessionKey(resetToken));
 		await this.em.flush();
 
-		return plainToInstance(SuccessResponseDto, { success: true });
+		return { success: true };
 	}
 
 	async verifyJwt(jwt: string) {
@@ -470,7 +479,7 @@ export class AuthService {
 		userId,
 		sessionId,
 		role,
-	}: CreateTokenPairOptions) {
+	}: CreateTokenPairOptions): Promise<TokenPairResponseDto> {
 		const jti = createUUID();
 
 		const jwtPayload: UserJwtPayload = {
@@ -502,10 +511,7 @@ export class AuthService {
 			),
 		]);
 
-		return plainToInstance(TokenPairResponseDto, {
-			accessToken,
-			refreshToken,
-		});
+		return { accessToken, refreshToken };
 	}
 
 	private _createOtp() {

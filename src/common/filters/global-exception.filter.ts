@@ -9,7 +9,6 @@ import {
 	HttpStatus,
 	UnprocessableEntityException,
 } from "@nestjs/common";
-import { plainToInstance } from "class-transformer";
 import { ValidationError } from "class-validator";
 import { Response } from "express";
 
@@ -37,55 +36,55 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
 	private _handleUnprocessableEntityException(
 		exception: UnprocessableEntityException,
-	) {
-		const response = exception.getResponse() as { message: ValidationError[] };
+	): ErrorResponseDto {
+		const response = exception.getResponse() as {
+			message: ValidationError[];
+		};
 		const statusCode = exception.getStatus();
 
-		const errorResponse = {
+		return {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			message: "Validation failed",
 			details: this._handleValidationErrors(response.message),
 		};
-
-		return plainToInstance(ErrorResponseDto, errorResponse);
 	}
 
-	private _handleHttpException(exception: HttpException) {
+	private _handleHttpException(exception: HttpException): ErrorResponseDto {
 		const statusCode = exception.getStatus();
 
-		return plainToInstance(ErrorResponseDto, {
+		return {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage: STATUS_CODES[statusCode],
 			message: exception.message,
-		});
+		};
 	}
 
 	private _handleUniqueConstraintException(
 		exception: UniqueConstraintViolationException,
-	) {
+	): ErrorResponseDto {
 		const statusCode = HttpStatus.CONFLICT;
 
-		return plainToInstance(ErrorResponseDto, {
+		return {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage: STATUS_CODES[statusCode],
 			message: JSON.stringify(exception.name),
-		});
+		};
 	}
 
-	private _handleUnknownError(error: unknown) {
+	private _handleUnknownError(error: unknown): ErrorResponseDto {
 		const err = error instanceof Error ? error : new Error(String(error));
 		const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 		const statusMessage = STATUS_CODES[statusCode] || "Internal Server Error";
 
-		return plainToInstance(ErrorResponseDto, {
+		return {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage,
 			message: err.message || statusMessage,
-		});
+		};
 	}
 
 	// ref: https://www.yasint.dev/flatten-error-constraints
