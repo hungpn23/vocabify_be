@@ -30,7 +30,7 @@ export class Deck extends SoftDeleteBaseEntity {
 	name!: string;
 
 	@Property()
-	slug?: string;
+	slug: Opt<string> = "";
 
 	@NullableProperty()
 	description?: string;

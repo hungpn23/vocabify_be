@@ -8,7 +8,6 @@ import { CardStatus } from "@modules/deck/deck.enum";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Queue } from "bullmq";
-import { plainToInstance } from "class-transformer";
 import { SaveAnswersDto } from "./study.dto";
 import { UserStatsResponseDto } from "./study.res.dto";
 
@@ -27,7 +26,7 @@ export class StudyService {
 		private readonly studyQueue: Queue<UpdateUserStatsData, void, JobName>,
 	) {}
 
-	async getUserStats(userId: UUID) {
+	async getUserStats(userId: UUID): Promise<UserStatsResponseDto> {
 		let stats = await this.userStatsRepository.findOne({ user: userId });
 
 		if (!stats) {
@@ -35,7 +34,7 @@ export class StudyService {
 			await this.em.flush();
 		}
 
-		return plainToInstance(UserStatsResponseDto, wrap(stats).toObject());
+		return wrap(stats).toObject();
 	}
 
 	async saveAnswers(userId: UUID, deckId: UUID, dto: SaveAnswersDto) {

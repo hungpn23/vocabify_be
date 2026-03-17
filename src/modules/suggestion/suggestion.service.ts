@@ -26,7 +26,6 @@ import {
 	NotFoundException,
 	OnModuleInit,
 } from "@nestjs/common";
-import { plainToInstance } from "class-transformer";
 import {
 	GetNextCardSuggestionDto,
 	GetTermSuggestionDto,
@@ -78,7 +77,10 @@ export class SuggestionService implements OnModuleInit {
 		return this._store;
 	}
 
-	async suggestDefinition({ partOfSpeech, ...rest }: GetTermSuggestionDto) {
+	async suggestDefinition({
+		partOfSpeech,
+		...rest
+	}: GetTermSuggestionDto): Promise<TermSuggestionResponseDto> {
 		const where: GetTermSuggestionDto = rest;
 		if (partOfSpeech) where.partOfSpeech = partOfSpeech;
 
@@ -89,16 +91,13 @@ export class SuggestionService implements OnModuleInit {
 
 		if (cachedSuggestion) {
 			this.logger.debug("Found cached suggestion");
-			return plainToInstance(TermSuggestionResponseDto, cachedSuggestion);
+			return cachedSuggestion;
 		}
 
 		const suggestion = await this.cardSuggestionRepository.findOne(where);
 		if (!suggestion) throw new NotFoundException();
 
-		const suggestionDto = plainToInstance(
-			TermSuggestionResponseDto,
-			wrap(suggestion).toObject(),
-		);
+		const suggestionDto = wrap(suggestion).toObject();
 
 		await this.redisService.setValue(
 			getSuggestionKey(where),
@@ -109,7 +108,10 @@ export class SuggestionService implements OnModuleInit {
 		return suggestionDto;
 	}
 
-	async suggestNextCard(dto: GetNextCardSuggestionDto, k: number = 2) {
+	async suggestNextCard(
+		dto: GetNextCardSuggestionDto,
+		k: number = 2,
+	): Promise<NextCardSuggestionResponseDto[]> {
 		const query = `${dto.term} ${dto.definition}`;
 
 		const records = await this._similaritySearch(query, k);
@@ -119,12 +121,10 @@ export class SuggestionService implements OnModuleInit {
 			termLanguage: { $in: records.map((r) => r.termLanguageCode) },
 		});
 
-		return cards.map((c) =>
-			plainToInstance(NextCardSuggestionResponseDto, wrap(c).toObject()),
-		);
+		return cards.map((c) => wrap(c).toObject());
 	}
 
-	async embedData() {
+	async embedData(): Promise<SuccessResponseDto> {
 		const documents = getSampleData().map((d) => this._buildDocument(d));
 
 		const batchSize = 1000;
@@ -137,9 +137,9 @@ export class SuggestionService implements OnModuleInit {
 		}
 
 		this.logger.debug(`Total ${documents.length} documents embedded.`);
-		return plainToInstance(SuccessResponseDto, {
+		return {
 			success: true,
-		});
+		};
 	}
 
 	private async _similaritySearch(query: string, k: number) {

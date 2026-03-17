@@ -12,14 +12,13 @@ import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { NotificationResponseDto } from "@modules/notification/notification.dto";
 import { NotificationGateway } from "@modules/notification/notification.gateway";
-import { OwnerResponseDto } from "@modules/user/user.res.dto";
 import {
 	BadRequestException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { assign, omit, pick } from "lodash";
+import { omit, pick } from "lodash";
 import { Visibility } from "./deck.enum";
 import { CardResponseDto } from "./dtos/card.res.dto";
 import {
@@ -50,7 +49,7 @@ export class DeckService {
 		private readonly notificationRepository: EntityRepository<Notification>,
 	) {}
 
-	async getOne(userId: UUID, deckId: UUID) {
+	async getOne(userId: UUID, deckId: UUID): Promise<GetOneResponseDto> {
 		const deck = await this.deckRepository.findOne(
 			{
 				id: deckId,
@@ -70,13 +69,13 @@ export class DeckService {
 
 		await this.em.flush();
 
-		const plainDeck = wrap(deck).toObject();
-		const cards = plainDeck.cards.map((c) => omit(c, ["deck"]));
-
-		return plainToInstance(GetOneResponseDto, assign(plainDeck, { cards }));
+		return plainToInstance(GetOneResponseDto, wrap(deck).toObject());
 	}
 
-	async getMany(userId: UUID, query: GetManyQueryDto) {
+	async getMany(
+		userId: UUID,
+		query: GetManyQueryDto,
+	): Promise<PaginatedDto<GetManyResponseDto>> {
 		const { limit, offset, search, orderBy, order } = query;
 
 		const where: FilterQuery<Deck> = { owner: userId };
@@ -104,13 +103,16 @@ export class DeckService {
 			});
 		});
 
-		return plainToInstance(PaginatedDto<GetManyResponseDto>, {
+		return {
 			data: deckWithCards,
 			metadata: getMetadataResponseDto(totalRecords, query),
-		});
+		};
 	}
 
-	async getSharedOne(userId: UUID | undefined, deckId: UUID) {
+	async getSharedOne(
+		userId: UUID | undefined,
+		deckId: UUID,
+	): Promise<GetSharedOneResponseDto> {
 		const where: FilterQuery<Deck> = {
 			id: deckId,
 			visibility: [Visibility.PUBLIC, Visibility.PROTECTED],
@@ -133,13 +135,16 @@ export class DeckService {
 
 		const plainDeck = wrap(deck).toObject();
 
-		return plainToInstance(GetSharedOneResponseDto, {
+		return {
 			...plainDeck,
 			totalCards: plainDeck.cards.length,
-		});
+		};
 	}
 
-	async getSharedMany(userId: UUID | undefined, query: GetManyQueryDto) {
+	async getSharedMany(
+		userId: UUID | undefined,
+		query: GetManyQueryDto,
+	): Promise<PaginatedDto<GetSharedManyResponseDto>> {
 		const { limit, offset, search, orderBy, order } = query;
 
 		const where: FilterQuery<Deck> = {
@@ -164,18 +169,21 @@ export class DeckService {
 
 			return plainToInstance(GetSharedManyResponseDto, {
 				...plainDeck,
-				owner: plainToInstance(OwnerResponseDto, plainDeck.owner),
+				owner: plainDeck.owner,
 				totalCards: plainDeck.cards.length,
 			});
 		});
 
-		return plainToInstance(PaginatedDto<GetSharedManyResponseDto>, {
+		return {
 			data,
 			metadata: getMetadataResponseDto(totalRecords, query),
-		});
+		};
 	}
 
-	async create(userId: UUID, dto: CreateDeckDto) {
+	async create(
+		userId: UUID,
+		dto: CreateDeckDto,
+	): Promise<CreateDeckResponseDto> {
 		const { cards: cardDtos, ...deckDto } = dto;
 
 		const deck = await this.deckRepository.findOne({
@@ -203,10 +211,7 @@ export class DeckService {
 
 		await this.em.flush();
 
-		return plainToInstance(
-			CreateDeckResponseDto,
-			pick(newDeck, ["id", "slug"]),
-		);
+		return pick(newDeck, ["id", "slug"]);
 	}
 
 	async update(userId: UUID, deckId: UUID, dto: UpdateDeckDto) {
@@ -285,7 +290,7 @@ export class DeckService {
 		await this.em.flush();
 	}
 
-	async delete(userId: UUID, deckId: UUID) {
+	async delete(userId: UUID, deckId: UUID): Promise<SuccessResponseDto> {
 		const deck = await this.deckRepository.findOne(
 			{ id: deckId, owner: userId },
 			{ populate: ["cards"] },
@@ -296,10 +301,14 @@ export class DeckService {
 
 		await this.em.remove(deck).flush();
 
-		return plainToInstance(SuccessResponseDto, { success: true });
+		return { success: true };
 	}
 
-	async clone(userId: UUID, deckId: UUID, dto: CloneDeckDto) {
+	async clone(
+		userId: UUID,
+		deckId: UUID,
+		dto: CloneDeckDto,
+	): Promise<SuccessResponseDto> {
 		const originalDeck = await this.deckRepository.findOne(
 			{
 				id: deckId,
@@ -351,10 +360,10 @@ export class DeckService {
 			plainToInstance(NotificationResponseDto, wrap(notification).toObject()),
 		);
 
-		return plainToInstance(SuccessResponseDto, { success: true });
+		return { success: true };
 	}
 
-	async restart(userId: UUID, deckId: UUID) {
+	async restart(userId: UUID, deckId: UUID): Promise<SuccessResponseDto> {
 		const deck = await this.deckRepository.findOne({
 			id: deckId,
 			owner: userId,
@@ -374,7 +383,7 @@ export class DeckService {
 
 		await this.em.flush();
 
-		return plainToInstance(SuccessResponseDto, { success: true });
+		return { success: true };
 	}
 
 	private _getDeckStats(cards: Pick<CardResponseDto, "status">[]) {
