@@ -70,7 +70,7 @@ export class DeckService {
 
 		await this.em.flush();
 
-		const plainDeck = wrap(deck).toPOJO();
+		const plainDeck = wrap(deck).toObject();
 		const cards = plainDeck.cards.map((c) => omit(c, ["deck"]));
 
 		return plainToInstance(GetOneResponseDto, assign(plainDeck, { cards }));
@@ -94,7 +94,7 @@ export class DeckService {
 		);
 
 		const deckWithCards = decks.map((d) => {
-			const plainDeck = wrap(d).toPOJO();
+			const plainDeck = wrap(d).toObject();
 
 			return plainToInstance(GetManyResponseDto, {
 				...plainDeck,
@@ -131,7 +131,7 @@ export class DeckService {
 
 		await this.em.flush();
 
-		const plainDeck = wrap(deck).toPOJO();
+		const plainDeck = wrap(deck).toObject();
 
 		return plainToInstance(GetSharedOneResponseDto, {
 			...plainDeck,
@@ -160,7 +160,7 @@ export class DeckService {
 		);
 
 		const data = decks.map((d) => {
-			const plainDeck = wrap(d).toPOJO();
+			const plainDeck = wrap(d).toObject();
 
 			return plainToInstance(GetSharedManyResponseDto, {
 				...plainDeck,
@@ -348,7 +348,7 @@ export class DeckService {
 		await this.em.flush();
 
 		this.notificationGateway.sendNotification(
-			plainToInstance(NotificationResponseDto, wrap(notification).toPOJO()),
+			plainToInstance(NotificationResponseDto, wrap(notification).toObject()),
 		);
 
 		return plainToInstance(SuccessResponseDto, { success: true });

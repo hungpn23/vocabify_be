@@ -37,5 +37,9 @@ export function getSuggestionKey({
 	termLanguage,
 	definitionLanguage,
 }: GetTermSuggestionDto) {
-	return `suggestion:${term}:${partOfSpeech}:termLang:${termLanguage}:defLang:${definitionLanguage}`;
+	return `suggestion:${term}:${partOfSpeech}:term_lang:${termLanguage}:def_lang:${definitionLanguage}`;
+}
+
+export function getPrivateCacheKey(userId: UUID, key: string) {
+	return `private_cache:${userId}:${key}`;
 }

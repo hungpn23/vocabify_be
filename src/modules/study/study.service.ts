@@ -35,7 +35,7 @@ export class StudyService {
 			await this.em.flush();
 		}
 
-		return plainToInstance(UserStatsResponseDto, wrap(stats).toPOJO());
+		return plainToInstance(UserStatsResponseDto, wrap(stats).toObject());
 	}
 
 	async saveAnswers(userId: UUID, deckId: UUID, dto: SaveAnswersDto) {

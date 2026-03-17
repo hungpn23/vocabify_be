@@ -1,4 +1,9 @@
-import { ApiEndpoint, ApiEndpointPublic, User } from "@common/decorators";
+import {
+	ApiEndpoint,
+	ApiEndpointPublic,
+	PrivateCache,
+	User,
+} from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
 import type { UserJwtPayload, UUID } from "@common/types";
 import { UserResponseDto } from "@modules/user/user.res.dto";
@@ -45,6 +50,7 @@ export class AuthController {
 		return await this.authService.verifyToken(token);
 	}
 
+	@PrivateCache()
 	@ApiEndpoint({ type: UserResponseDto })
 	@Get("session")
 	async getSession(@User("userId") userId: UUID) {

@@ -97,7 +97,7 @@ export class SuggestionService implements OnModuleInit {
 
 		const suggestionDto = plainToInstance(
 			TermSuggestionResponseDto,
-			wrap(suggestion).toPOJO(),
+			wrap(suggestion).toObject(),
 		);
 
 		await this.redisService.setValue(
@@ -120,7 +120,7 @@ export class SuggestionService implements OnModuleInit {
 		});
 
 		return cards.map((c) =>
-			plainToInstance(NextCardSuggestionResponseDto, wrap(c).toPOJO()),
+			plainToInstance(NextCardSuggestionResponseDto, wrap(c).toObject()),
 		);
 	}
 

@@ -1,5 +1,6 @@
 import { AppController } from "@app.controller";
 import { NodeEnv } from "@common/enums";
+import { HttpCacheInterceptor } from "@common/interceptors";
 import {
 	appConfig,
 	authConfig,
@@ -23,6 +24,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { APP_INTERCEPTOR } from "@nestjs/core";
 
 const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 
@@ -71,6 +73,7 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 			useFactory: (redisConf: RedisConfig) => {
 				return {
 					stores: [new KeyvRedis(redisConf.connectionString)],
+					ttl: 6 * 60 * 60 * 1000, // 6 hours
 				} satisfies CacheManagerOptions;
 			},
 		}),
@@ -85,5 +88,11 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 		Modules,
 	],
 	controllers: [AppController],
+	providers: [
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: HttpCacheInterceptor,
+		},
+	],
 })
 export class AppModule {}

@@ -180,7 +180,7 @@ export class AuthService {
 
 		if (!user) throw new UnauthorizedException("User not found.");
 
-		return plainToInstance(UserResponseDto, wrap(user).toPOJO());
+		return plainToInstance(UserResponseDto, wrap(user).toObject());
 	}
 
 	async signUp({ username, password, verifiedToken }: SignUpDto) {
