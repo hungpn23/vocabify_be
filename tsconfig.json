@@ -1,28 +1,48 @@
 {
 	"compilerOptions": {
-		"module": "nodenext",
-		"moduleResolution": "nodenext",
-		"resolvePackageJsonExports": true,
-		"esModuleInterop": true,
-		"isolatedModules": true,
-		"declaration": true,
-		"removeComments": true,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "ES2023",
-		"sourceMap": true,
-		"outDir": "./dist",
-		"baseUrl": "./",
-		"incremental": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"noFallthroughCasesInSwitch": true,
-		"composite": false,
-		"strict": true,
-		"jsx": "react-jsx",
+		// ─── Target & Output ───────────────────────────────────────────
+		"target": "ES2023", // compile xuống ES2023 cho Node.js hiện đại
+		"outDir": "./dist", // thư mục chứa file JS sau khi build
+		"sourceMap": true, // sinh .map file để debug
+		"declaration": true, // sinh .d.ts cho type checking
+		"removeComments": true, // xóa comment khỏi output JS
+		"incremental": true, // cache build, lần sau nhanh hơn
+		"composite": false, // không dùng project references
+
+		// ─── Module System ─────────────────────────────────────────────
+		"module": "nodenext", // dùng ESM/CJS theo Node.js native
+		"moduleResolution": "nodenext", // resolve import theo thuật toán của Node.js
+		"resolvePackageJsonExports": true, // tôn trọng field "exports" trong package.json
+		"baseUrl": "./", // base cho paths alias bên dưới
 		"paths": {
-			"@*": ["src/*"]
-		}
+			"@*": ["src/*"] // @something → src/something
+		},
+
+		// ─── Interop ───────────────────────────────────────────────────
+		"esModuleInterop": true, // import CJS module không cần * as
+		"allowSyntheticDefaultImports": true, // cho phép default import từ module không có default
+		"isolatedModules": true, // mỗi file compile độc lập (tương thích esbuild/swc)
+
+		// ─── Decorators (NestJS) ───────────────────────────────────────
+		"experimentalDecorators": true, // bật @Decorator syntax
+		"emitDecoratorMetadata": true, // emit metadata cho dependency injection
+
+		// ─── JSX ───────────────────────────────────────────────────────
+		"jsx": "react-jsx", // transform JSX không cần import React thủ công
+
+		// ─── Type Checking — core ──────────────────────────────────────
+		"strict": true, // bật toàn bộ strict flags (noImplicitAny, strictNullChecks…)
+		"skipLibCheck": true, // bỏ qua kiểm tra .d.ts của node_modules
+		"forceConsistentCasingInFileNames": true, // tránh lỗi import sai hoa/thường trên Linux
+		"noFallthroughCasesInSwitch": true, // switch case phải có break/return
+
+		// ─── Type Checking — stricter ──────────────────────────────────
+		"noUncheckedIndexedAccess": true, // arr[i] trả về T | undefined, buộc phải null-check
+		"noImplicitOverride": true, // method override phải ghi rõ từ khóa override
+
+		// ─── Disabled — để linter (ESLint) xử lý thay ─────────────────
+		"noUnusedLocals": false, // không báo lỗi biến local không dùng
+		"noUnusedParameters": false, // không báo lỗi tham số hàm không dùng
+		"noPropertyAccessFromIndexSignature": false // cho phép dot notation trên index signature
 	}
 }
