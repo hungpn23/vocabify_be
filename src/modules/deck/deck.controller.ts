@@ -1,7 +1,7 @@
 import {
 	ApiEndpoint,
 	ApiEndpointPublic,
-	PrivateCache,
+	UseCache,
 	User,
 } from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
@@ -54,14 +54,14 @@ export class DeckController {
 		return await this.deckService.getSharedOne(userId, deckId);
 	}
 
-	@PrivateCache()
+	@UseCache()
 	@ApiEndpoint({ type: GetManyResponseDto, isPaginated: true })
 	@Get()
 	async getMany(@User("userId") userId: UUID, @Query() query: GetManyQueryDto) {
 		return await this.deckService.getMany(userId, query);
 	}
 
-	@PrivateCache()
+	@UseCache()
 	@ApiEndpoint({ type: GetOneResponseDto })
 	@Get(":deckId")
 	async getOne(
