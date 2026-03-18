@@ -6,9 +6,9 @@ import { ExecutionContext, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class HttpCacheInterceptor extends CacheInterceptor {
-	protected allowedMethods: string[] = ["GET"];
+	override allowedMethods: string[] = ["GET"];
 
-	trackBy(context: ExecutionContext): string | undefined {
+	override trackBy(context: ExecutionContext): string | undefined {
 		const req = context.switchToHttp().getRequest<RequestWithUser>();
 
 		if (!this.allowedMethods.includes(req.method)) return undefined;
