@@ -108,7 +108,7 @@ export class AuthService {
 
 		const token = createUUID();
 
-		await this.redisService.setValue(
+		await this.redisService.set(
 			getVerificationTokenKey(token),
 			email,
 			parseStringValueToSeconds("1m"),
@@ -132,7 +132,7 @@ export class AuthService {
 			token,
 		}).toString();
 
-		await this.redisService.setValue<string>(
+		await this.redisService.set<string>(
 			getVerificationTokenKey(token),
 			email,
 			parseStringValueToSeconds("5m"),
@@ -147,7 +147,7 @@ export class AuthService {
 	}
 
 	async verifyToken(token: string) {
-		const email = await this.redisService.getValue<string>(
+		const email = await this.redisService.get<string>(
 			getVerificationTokenKey(token),
 		);
 
@@ -168,7 +168,7 @@ export class AuthService {
 			role: user.role,
 		});
 
-		await this.redisService.deleteKey(token);
+		await this.redisService.del(token);
 		await this.em.flush();
 
 		return tokenPair;
@@ -183,14 +183,14 @@ export class AuthService {
 	}
 
 	async signUp({ username, password, verifiedToken }: SignUpDto) {
-		const email = await this.redisService.getValue<string>(
+		const email = await this.redisService.get<string>(
 			getSignUpSessionKey(verifiedToken),
 		);
 		if (!email) throw new BadRequestException();
 
 		let user = await this.userRepository.findOne({ email });
 		if (user?.emailVerified) {
-			await this.redisService.deleteKey(getSignUpSessionKey(verifiedToken));
+			await this.redisService.del(getSignUpSessionKey(verifiedToken));
 			throw new BadRequestException();
 		}
 
@@ -207,7 +207,7 @@ export class AuthService {
 			role: user.role,
 		});
 
-		await this.redisService.deleteKey(getSignUpSessionKey(verifiedToken));
+		await this.redisService.del(getSignUpSessionKey(verifiedToken));
 		await this.em.flush();
 
 		return tokenPair;
@@ -232,7 +232,7 @@ export class AuthService {
 		sessionId,
 	}: UserJwtPayload): Promise<SuccessResponseDto> {
 		const userTokenKey = getUserSessionKey(userId, sessionId);
-		await this.redisService.deleteKey(userTokenKey);
+		await this.redisService.del(userTokenKey);
 
 		return { success: true };
 	}
@@ -297,7 +297,7 @@ export class AuthService {
 			hashedOtp: await argon2.hash(otp),
 		};
 
-		await this.redisService.setValue(
+		await this.redisService.set(
 			getEmailVerificationKey(email, "otp"),
 			data,
 			parseStringValueToSeconds("5m"),
@@ -323,7 +323,7 @@ export class AuthService {
 			);
 		}
 
-		const data = await this.redisService.getValue<OtpData>(
+		const data = await this.redisService.get<OtpData>(
 			getEmailVerificationKey(email, "otp"),
 		);
 		if (!data) throw new BadRequestException();
@@ -332,10 +332,8 @@ export class AuthService {
 		if (!isOtpValid) throw new BadRequestException();
 
 		await Promise.all([
-			this.redisService.deleteKey(getEmailVerificationKey(email, "otp")),
-			this.redisService.deleteKey(
-				getEmailVerificationKey(email, "confirm_attempts"),
-			),
+			this.redisService.del(getEmailVerificationKey(email, "otp")),
+			this.redisService.del(getEmailVerificationKey(email, "confirm_attempts")),
 		]);
 
 		const user = await this.userRepository.findOne({ email });
@@ -344,7 +342,7 @@ export class AuthService {
 		}
 
 		const verifiedToken = createUUID();
-		await this.redisService.setValue(
+		await this.redisService.set(
 			getSignUpSessionKey(verifiedToken),
 			email,
 			parseStringValueToSeconds("5m"),
@@ -377,7 +375,7 @@ export class AuthService {
 			hashedOtp: await argon2.hash(otp),
 		};
 
-		await this.redisService.setValue(
+		await this.redisService.set(
 			getPasswordResetKey(email, "otp"),
 			data,
 			parseStringValueToSeconds("5m"),
@@ -403,7 +401,7 @@ export class AuthService {
 			);
 		}
 
-		const data = await this.redisService.getValue<OtpData>(
+		const data = await this.redisService.get<OtpData>(
 			getPasswordResetKey(email, "otp"),
 		);
 		if (!data) throw new BadRequestException();
@@ -412,14 +410,12 @@ export class AuthService {
 		if (!isOtpValid) throw new BadRequestException();
 
 		await Promise.all([
-			this.redisService.deleteKey(getPasswordResetKey(email, "otp")),
-			this.redisService.deleteKey(
-				getPasswordResetKey(email, "confirm_attempts"),
-			),
+			this.redisService.del(getPasswordResetKey(email, "otp")),
+			this.redisService.del(getPasswordResetKey(email, "confirm_attempts")),
 		]);
 
 		const resetToken = createUUID();
-		await this.redisService.setValue(
+		await this.redisService.set(
 			getResetPasswordSessionKey(resetToken),
 			email,
 			parseStringValueToSeconds("5m"),
@@ -432,7 +428,7 @@ export class AuthService {
 		resetToken,
 		newPassword,
 	}: ResetPasswordDto): Promise<SuccessResponseDto> {
-		const email = await this.redisService.getValue<string>(
+		const email = await this.redisService.get<string>(
 			getResetPasswordSessionKey(resetToken),
 		);
 		if (!email) throw new BadRequestException();
@@ -452,7 +448,7 @@ export class AuthService {
 			password: await argon2.hash(newPassword),
 		});
 
-		await this.redisService.deleteKey(getResetPasswordSessionKey(resetToken));
+		await this.redisService.del(getResetPasswordSessionKey(resetToken));
 		await this.em.flush();
 
 		return { success: true };
@@ -463,7 +459,7 @@ export class AuthService {
 			const payload = await this.jwtService.verifyAsync<UserJwtPayload>(jwt);
 			const { userId, sessionId, jti } = payload;
 
-			const currentJti = await this.redisService.getValue<string>(
+			const currentJti = await this.redisService.get<string>(
 				getUserSessionKey(userId, sessionId),
 			);
 
@@ -504,7 +500,7 @@ export class AuthService {
 				expiresIn: this.authConf.refreshTokenExpiresIn,
 			}),
 
-			this.redisService.setValue(
+			this.redisService.set(
 				getUserSessionKey(userId, sessionId),
 				jti,
 				parseStringValueToSeconds(this.authConf.refreshTokenExpiresIn),

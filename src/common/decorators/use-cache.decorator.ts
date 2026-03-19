@@ -4,4 +4,4 @@ import { SetMetadata } from "@nestjs/common";
 export type CacheType = "private" | "no_cache";
 
 export const UseCache = (type: CacheType = "private") =>
-	SetMetadata(MetadataKey.CACHE_CONTROL, type);
+	SetMetadata(MetadataKey.USE_CACHE, type);

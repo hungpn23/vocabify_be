@@ -15,7 +15,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
 		if (!this.allowedMethods.includes(req.method)) return undefined;
 
 		const cacheType = this.reflector.getAllAndOverride<CacheType>(
-			MetadataKey.CACHE_CONTROL,
+			MetadataKey.USE_CACHE,
 			[context.getClass(), context.getHandler()],
 		);
 

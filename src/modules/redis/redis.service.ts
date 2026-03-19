@@ -7,7 +7,7 @@ import { REDIS_CLIENT } from "./redis.constant";
 export class RedisService {
 	constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
-	async getValue<T = unknown>(key: string) {
+	async get<T = unknown>(key: string) {
 		const data = await this.redis.get(key);
 		if (!data) return null;
 
@@ -23,7 +23,7 @@ export class RedisService {
 		}
 	}
 
-	async setValue<TValue = unknown>(
+	async set<TValue = unknown>(
 		key: string,
 		value: TValue,
 		ttlInSeconds?: Seconds,
@@ -38,7 +38,7 @@ export class RedisService {
 		}
 	}
 
-	async deleteKey(key: string) {
+	async del(key: string) {
 		await this.redis.del(key);
 	}
 

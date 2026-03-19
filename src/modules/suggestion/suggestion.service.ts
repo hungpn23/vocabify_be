@@ -85,7 +85,7 @@ export class SuggestionService implements OnModuleInit {
 		if (partOfSpeech) where.partOfSpeech = partOfSpeech;
 
 		const cachedSuggestion =
-			await this.redisService.getValue<TermSuggestionResponseDto>(
+			await this.redisService.get<TermSuggestionResponseDto>(
 				getSuggestionKey(where),
 			);
 
@@ -99,7 +99,7 @@ export class SuggestionService implements OnModuleInit {
 
 		const suggestionDto = wrap(suggestion).toObject();
 
-		await this.redisService.setValue(
+		await this.redisService.set(
 			getSuggestionKey(where),
 			suggestionDto,
 			parseStringValueToSeconds("5m"),
