@@ -72,14 +72,10 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 			isGlobal: true,
 			inject: [redisConfig.KEY],
 			useFactory: (redisConf: RedisConfig) => {
-				const { connectionString, ...rest } = redisConf;
-				const config: CacheManagerOptions = {
-					ttl: ms(rest.cacheTtl),
-				};
-
-				return Object.assign(config, {
-					store: new KeyvRedis(connectionString ? connectionString : rest),
-				});
+				return {
+					stores: [new KeyvRedis(redisConf.connectionString)],
+					ttl: ms("1d"),
+				} satisfies CacheManagerOptions;
 			},
 		}),
 
