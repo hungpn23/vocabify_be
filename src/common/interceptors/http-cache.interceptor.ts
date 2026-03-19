@@ -1,4 +1,3 @@
-import { CacheType } from "@common/decorators";
 import { MetadataKey } from "@common/enums";
 import { RequestWithUser } from "@common/types";
 import { getPrivateCacheKey } from "@common/utils";
@@ -14,14 +13,13 @@ export class HttpCacheInterceptor extends CacheInterceptor {
 
 		if (!this.allowedMethods.includes(req.method)) return undefined;
 
-		const cacheType = this.reflector.getAllAndOverride<CacheType>(
-			MetadataKey.CACHE_CONTROL,
+		const isPrivate = this.reflector.getAllAndOverride<boolean>(
+			MetadataKey.PRIVATE_CACHE,
 			[context.getClass(), context.getHandler()],
 		);
 
-		if (cacheType === "no_cache") return undefined;
-		if (cacheType === "private" && !req.user) return undefined;
-		if (cacheType === "private" && req.user)
+		if (isPrivate && !req.user) return undefined;
+		if (isPrivate && req.user)
 			return getPrivateCacheKey(req.user.userId, req.url);
 
 		return req.url;

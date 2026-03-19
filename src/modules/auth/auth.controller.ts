@@ -1,7 +1,7 @@
 import {
 	ApiEndpoint,
 	ApiEndpointPublic,
-	UseCache,
+	PrivateCache,
 	User,
 } from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
@@ -32,7 +32,6 @@ import { AuthService } from "./auth.service";
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
-	@UseCache("no_cache")
 	@ApiEndpointPublic()
 	@Get("google/callback")
 	async googleCallback(@Query("code") code: string, @Res() res: Response) {
@@ -51,7 +50,7 @@ export class AuthController {
 		return await this.authService.verifyToken(token);
 	}
 
-	@UseCache()
+	@PrivateCache()
 	@ApiEndpoint({ type: UserResponseDto })
 	@Get("session")
 	async getSession(@User("userId") userId: UUID) {

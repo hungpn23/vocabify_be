@@ -23,9 +23,6 @@ export class DeckResponseDto {
 	visibility!: Visibility;
 
 	@Expose()
-	passcode!: string;
-
-	@Expose()
 	viewCount!: number;
 
 	@Expose()
@@ -62,8 +59,6 @@ export class GetOneResponseDto extends PickType(DeckResponseDto, [
 	"name",
 	"slug",
 	"description",
-	"visibility",
-	"passcode",
 ]) {
 	@Expose()
 	cards!: CardResponseDto[];
