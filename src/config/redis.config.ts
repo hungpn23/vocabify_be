@@ -5,6 +5,7 @@ import {
 } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { ValidateIf } from "class-validator";
+import ms from "ms";
 import { validateConfig } from "./validate-config";
 
 class RedisEnvVariables {
@@ -26,6 +27,9 @@ class RedisEnvVariables {
 	@ValidateIf((obj: RedisEnvVariables) => !obj.REDIS_CONNECTION_STRING)
 	@StringValidator()
 	REDIS_PASSWORD!: string;
+
+	@StringValidator()
+	REDIS_CACHE_TTL!: ms.StringValue;
 }
 
 /**
@@ -36,9 +40,11 @@ export const redisConfig = registerAs("redis", () => {
 
 	return config.REDIS_CONNECTION_STRING
 		? {
+				cacheTtl: config.REDIS_CACHE_TTL,
 				connectionString: config.REDIS_CONNECTION_STRING,
 			}
 		: {
+				cacheTtl: config.REDIS_CACHE_TTL,
 				host: config.REDIS_HOST,
 				port: config.REDIS_PORT,
 				username: config.REDIS_USERNAME,

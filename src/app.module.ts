@@ -25,6 +25,7 @@ import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_INTERCEPTOR } from "@nestjs/core";
+import ms from "ms";
 
 const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 
@@ -69,10 +70,14 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 			isGlobal: true,
 			inject: [redisConfig.KEY],
 			useFactory: (redisConf: RedisConfig) => {
-				return {
-					stores: [new KeyvRedis(redisConf.connectionString)],
-					ttl: 6 * 60 * 60 * 1000, // 6 hours
-				} satisfies CacheManagerOptions;
+				const { connectionString, ...rest } = redisConf;
+				const config: CacheManagerOptions = {
+					ttl: ms(rest.cacheTtl),
+				};
+
+				return Object.assign(config, {
+					store: new KeyvRedis(connectionString ? connectionString : rest),
+				});
 			},
 		}),
 
