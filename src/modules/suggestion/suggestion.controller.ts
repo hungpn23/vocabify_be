@@ -24,14 +24,14 @@ export class SuggestionController {
 	}
 
 	@ApiEndpoint({ type: TermSuggestionResponseDto })
-	@Post("term")
-	async getTermSuggestion(@Body() dto: GetTermSuggestionDto) {
-		return await this.suggestionService.suggestDefinition(dto);
+	@Post("content")
+	async suggestContent(@Body() dto: GetTermSuggestionDto) {
+		return await this.suggestionService.suggestContent(dto);
 	}
 
 	@ApiEndpoint({ type: NextCardSuggestionResponseDto })
 	@Post("next-card")
-	async getNextCardSuggestion(@Body() dto: GetNextCardSuggestionDto) {
+	async suggestNextCard(@Body() dto: GetNextCardSuggestionDto) {
 		return await this.suggestionService.suggestNextCard(dto);
 	}
 }

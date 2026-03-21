@@ -1,3 +1,4 @@
+import { UserRole } from "@common/enums";
 import { Card, Deck, User } from "@db/entities";
 import { faker } from "@faker-js/faker";
 import { EntityManager } from "@mikro-orm/core";
@@ -222,9 +223,9 @@ export class DatabaseSeeder extends Seeder {
 			email: "hungpn23@gmail.com",
 			password: "Password@123",
 			emailVerified: true,
+			role: UserRole.ADMIN,
 		});
 
-		// admin01 deck
 		const deck = em.create(Deck, {
 			owner: admin,
 			name: "30 Basic English Words",

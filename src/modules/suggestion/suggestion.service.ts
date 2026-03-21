@@ -61,12 +61,12 @@ export class SuggestionService implements OnModuleInit {
 	 * @see https://docs.nestjs.com/fundamentals/lifecycle-events
 	 */
 	async onModuleInit() {
-		// const { host, port, collectionName } = this.vectorDbConf;
-		// this._store = await QdrantVectorStore.fromExistingCollection(this.model, {
-		// 	url: `http://${host}:${port}`,
-		// 	collectionName,
-		// });
-		// this.logger.debug("VectorStore initialized.");
+		const { host, port, collectionName } = this.vectorDbConf;
+		this._store = await QdrantVectorStore.fromExistingCollection(this.model, {
+			url: `http://${host}:${port}`,
+			collectionName,
+		});
+		this.logger.debug("VectorStore initialized.");
 	}
 
 	get store() {
@@ -77,7 +77,7 @@ export class SuggestionService implements OnModuleInit {
 		return this._store;
 	}
 
-	async suggestDefinition({
+	async suggestContent({
 		partOfSpeech,
 		...rest
 	}: GetTermSuggestionDto): Promise<TermSuggestionResponseDto> {
@@ -121,7 +121,8 @@ export class SuggestionService implements OnModuleInit {
 			termLanguage: { $in: records.map((r) => r.termLanguageCode) },
 		});
 
-		return cards.map((c) => wrap(c).toObject());
+		const plainCards = cards.map((c) => wrap(c).toObject());
+		return plainCards.filter((c) => c.term !== dto.term);
 	}
 
 	async embedData(): Promise<SuccessResponseDto> {
