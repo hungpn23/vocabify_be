@@ -14,6 +14,6 @@ export abstract class BaseEntity {
 }
 
 export abstract class SoftDeleteBaseEntity extends BaseEntity {
-	@NullableProperty()
+	@NullableProperty({ type: t.datetime })
 	deletedAt?: Date;
 }

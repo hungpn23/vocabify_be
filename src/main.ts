@@ -43,9 +43,8 @@ async function bootstrap() {
 	app.useGlobalFilters(new GlobalExceptionFilter());
 
 	const isProduction = nodeEnv === NodeEnv.PRODUCTION;
-	const orm = app.get(MikroORM);
-
 	if (!isProduction) {
+		const orm = app.get(MikroORM);
 		await orm.schema.updateSchema();
 	}
 

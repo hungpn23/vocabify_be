@@ -12,6 +12,7 @@ import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { NotificationResponseDto } from "@modules/notification/notification.dto";
 import { NotificationGateway } from "@modules/notification/notification.gateway";
+import { ActorResponseDto } from "@modules/user/user.res.dto";
 import {
 	BadRequestException,
 	Injectable,
@@ -352,12 +353,20 @@ export class DeckService {
 			content: `Your deck "${name}" has been cloned by an user.`,
 			actor: userId,
 			recipient: owner.id,
+			readAt: null,
 		});
 
 		await this.em.flush();
 
 		this.notificationGateway.sendNotification(
-			plainToInstance(NotificationResponseDto, wrap(notification).toObject()),
+			plainToInstance(NotificationResponseDto, {
+				...notification,
+				recipientId: notification.recipient.id,
+				actor: plainToInstance(
+					ActorResponseDto,
+					await notification.actor?.load(),
+				),
+			}),
 		);
 
 		return { success: true };

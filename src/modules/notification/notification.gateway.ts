@@ -42,6 +42,6 @@ export class NotificationGateway implements OnGatewayConnection {
 	}
 
 	sendNotification(payload: NotificationResponseDto) {
-		this.server.emit("notificationAdded", payload);
+		this.server.to(payload.recipientId).emit("notificationAdded", payload);
 	}
 }

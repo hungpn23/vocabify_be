@@ -23,7 +23,7 @@ import { RedisService } from "./redis.service";
 				redis
 					.ping()
 					.then(() => {
-						logger.log(`Redis client connected`);
+						logger.debug(`Redis client connected`);
 					})
 					.catch(() => {
 						logger.error(`Redis client connection failed`);

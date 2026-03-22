@@ -21,5 +21,8 @@ export class NotificationResponseDto {
 	actor?: ActorResponseDto;
 
 	@Expose()
+	recipientId!: UUID;
+
+	@Expose()
 	createdAt!: Date;
 }
