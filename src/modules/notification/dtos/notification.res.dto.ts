@@ -1,6 +1,5 @@
 import type { UUID } from "@common/types";
 import { ActorResponseDto } from "@modules/user/user.res.dto";
-
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
@@ -25,4 +24,13 @@ export class NotificationResponseDto {
 
 	@Expose()
 	createdAt!: Date;
+}
+
+@Exclude()
+export class NotificationsResponseDto {
+	@Expose()
+	data!: NotificationResponseDto[];
+
+	@Expose()
+	totalRecords!: number;
 }

@@ -54,7 +54,7 @@ export class DeckStatsResponseDto {
 }
 
 @Exclude()
-export class GetOneResponseDto extends PickType(DeckResponseDto, [
+export class GetDeckResponseDto extends PickType(DeckResponseDto, [
 	"id",
 	"name",
 	"slug",
@@ -65,7 +65,7 @@ export class GetOneResponseDto extends PickType(DeckResponseDto, [
 }
 
 @Exclude()
-export class GetManyResponseDto extends PickType(DeckResponseDto, [
+export class GetDecksResponseDto extends PickType(DeckResponseDto, [
 	"id",
 	"name",
 	"slug",
@@ -77,7 +77,7 @@ export class GetManyResponseDto extends PickType(DeckResponseDto, [
 }
 
 @Exclude()
-export class GetSharedOneResponseDto extends PickType(DeckResponseDto, [
+export class GetSharedDeckResponseDto extends PickType(DeckResponseDto, [
 	"id",
 	"name",
 	"description",
@@ -94,7 +94,7 @@ export class GetSharedOneResponseDto extends PickType(DeckResponseDto, [
 }
 
 @Exclude()
-export class GetSharedManyResponseDto extends PickType(DeckResponseDto, [
+export class GetSharedDecksResponseDto extends PickType(DeckResponseDto, [
 	"id",
 	"name",
 	"slug",

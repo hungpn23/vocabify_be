@@ -8,7 +8,8 @@ export function validateConfig<T extends object>(
 	const transformed = plainToInstance(envVariablesClass, config);
 
 	const errors = validateSync(transformed, {
-		skipMissingProperties: false,
+		whitelist: true,
+		enableDebugMessages: true,
 	});
 
 	if (errors.length > 0) throw new Error(errors.toString());

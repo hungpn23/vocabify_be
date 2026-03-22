@@ -8,7 +8,7 @@ import {
 	WebSocketServer,
 } from "@nestjs/websockets";
 import { DefaultEventsMap, Server } from "socket.io";
-import { NotificationResponseDto } from "./notification.dto";
+import { NotificationResponseDto } from "./dtos/notification.res.dto";
 import { ServerToClientEvents } from "./notification.interface";
 
 @WebSocketGateway({

@@ -4,7 +4,7 @@ import {
 	UseCache,
 	User,
 } from "@common/decorators";
-import { SuccessResponseDto } from "@common/dtos";
+import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import {
 	Body,
@@ -21,54 +21,60 @@ import { DeckService } from "./deck.service";
 import {
 	CloneDeckDto,
 	CreateDeckDto,
-	GetManyQueryDto,
+	GetDecksQueryDto,
 	UpdateDeckDto,
 } from "./dtos/deck.dto";
 import {
 	DeckResponseDto,
-	GetManyResponseDto,
-	GetOneResponseDto,
-	GetSharedManyResponseDto,
-	GetSharedOneResponseDto,
+	GetDeckResponseDto,
+	GetDecksResponseDto,
+	GetSharedDeckResponseDto,
+	GetSharedDecksResponseDto,
 } from "./dtos/deck.res.dto";
 
 @Controller("decks")
 export class DeckController {
 	constructor(private readonly deckService: DeckService) {}
 
-	@ApiEndpointPublic({ type: GetSharedManyResponseDto, isPaginated: true })
+	@ApiEndpointPublic({
+		type: PaginatedDto<GetSharedDecksResponseDto>,
+		isPaginated: true,
+	})
 	@Get("shared")
 	async getSharedMany(
 		@User("userId") userId: UUID | undefined,
-		@Query() query: GetManyQueryDto,
+		@Query() query: GetDecksQueryDto,
 	) {
-		return await this.deckService.getSharedMany(userId, query);
+		return await this.deckService.getSharedDecks(userId, query);
 	}
 
-	@ApiEndpointPublic({ type: GetSharedOneResponseDto })
+	@ApiEndpointPublic({ type: GetSharedDeckResponseDto })
 	@Get("shared/:deckId")
 	async getSharedOne(
 		@User("userId") userId: UUID | undefined,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 	) {
-		return await this.deckService.getSharedOne(userId, deckId);
+		return await this.deckService.getSharedDeck(userId, deckId);
 	}
 
 	@UseCache()
-	@ApiEndpoint({ type: GetManyResponseDto, isPaginated: true })
+	@ApiEndpoint({ type: PaginatedDto<GetDecksResponseDto>, isPaginated: true })
 	@Get()
-	async getMany(@User("userId") userId: UUID, @Query() query: GetManyQueryDto) {
-		return await this.deckService.getMany(userId, query);
+	async getMany(
+		@User("userId") userId: UUID,
+		@Query() query: GetDecksQueryDto,
+	) {
+		return await this.deckService.getDecks(userId, query);
 	}
 
 	@UseCache()
-	@ApiEndpoint({ type: GetOneResponseDto })
+	@ApiEndpoint({ type: GetDeckResponseDto })
 	@Get(":deckId")
 	async getOne(
 		@User("userId") userId: UUID,
 		@Param("deckId", ParseUUIDPipe) deckId: UUID,
 	) {
-		return await this.deckService.getOne(userId, deckId);
+		return await this.deckService.getDeck(userId, deckId);
 	}
 
 	@ApiEndpoint({ type: DeckResponseDto })
@@ -77,7 +83,7 @@ export class DeckController {
 		return await this.deckService.create(userId, dto);
 	}
 
-	@ApiEndpoint({ type: DeckResponseDto })
+	@ApiEndpoint({ type: SuccessResponseDto })
 	@Patch(":deckId")
 	async update(
 		@User("userId") userId: UUID,

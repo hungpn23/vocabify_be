@@ -7,3 +7,4 @@ export * from "./redis.util";
 export * from "./sample-data.util";
 export * from "./time.util";
 export * from "./uuid.util";
+export * from "./validation.util";

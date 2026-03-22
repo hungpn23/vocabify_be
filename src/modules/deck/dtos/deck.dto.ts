@@ -54,7 +54,7 @@ export class CloneDeckDto {
 	passcode?: string;
 }
 
-export class GetManyQueryDto extends QueryDto {
+export class GetDecksQueryDto extends QueryDto {
 	@EnumValidatorOptional(DeckOrderBy)
 	orderBy: DeckOrderBy = DeckOrderBy.OPENED_AT;
 }
