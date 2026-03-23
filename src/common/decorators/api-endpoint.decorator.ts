@@ -17,7 +17,7 @@ import {
 import { ApiPublic } from "./api-public.decorator";
 
 type EndpointOptions = Partial<{
-	type: Type<unknown>;
+	responseType: Type<unknown>;
 	isPublic: boolean;
 	description: string;
 	statusCode: HttpStatus;
@@ -27,7 +27,7 @@ type EndpointOptions = Partial<{
 
 export function ApiEndpoint(options: EndpointOptions = {}) {
 	const {
-		type,
+		responseType,
 		isPublic,
 		description,
 		statusCode = HttpStatus.OK,
@@ -37,17 +37,17 @@ export function ApiEndpoint(options: EndpointOptions = {}) {
 
 	const decorators: MethodDecorator[] = [];
 
-	decorators.push(SerializeOptions({ type }));
+	decorators.push(SerializeOptions({ type: responseType }));
 	decorators.push(HttpCode(statusCode));
 	decorators.push(isPublic ? ApiPublic() : ApiBearerAuth());
 
-	if (type) {
+	if (responseType) {
 		if (isPaginated) {
-			decorators.push(ApiPaginatedResponse(type));
+			decorators.push(ApiPaginatedResponse(responseType));
 		} else {
 			decorators.push(
 				ApiOkResponse({
-					type,
+					type: responseType,
 					description,
 				}),
 			);

@@ -16,7 +16,7 @@ import { StudyService } from "./study.service";
 export class StudyController {
 	constructor(private readonly studyService: StudyService) {}
 
-	@ApiEndpoint({ type: SuccessResponseDto })
+	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post("save-answers/:deckId")
 	async saveAnswers(
 		@User("userId") userId: UUID,

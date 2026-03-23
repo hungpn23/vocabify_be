@@ -39,50 +39,50 @@ export class AuthController {
 		return await this.authService.googleCallback(code, res);
 	}
 
-	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@ApiEndpointPublic({ responseType: SuccessResponseDto })
 	@Post("magic-link")
 	async requestMagicLink(@Body() dto: RequestMagicLinkDto) {
 		return await this.authService.requestMagicLink(dto);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairResponseDto })
+	@ApiEndpointPublic({ responseType: TokenPairResponseDto })
 	@Post("verify-token")
 	async verifyToken(@Query("token") token: string) {
 		return await this.authService.verifyToken(token);
 	}
 
 	@UseCache()
-	@ApiEndpoint({ type: UserResponseDto })
+	@ApiEndpoint({ responseType: UserResponseDto })
 	@Get("session")
 	async getSession(@User("userId") userId: UUID) {
 		return await this.authService.getMyInfo(userId);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairResponseDto })
+	@ApiEndpointPublic({ responseType: TokenPairResponseDto })
 	@Post("sign-up")
 	async signUp(@Body() dto: SignUpDto) {
 		return await this.authService.signUp(dto);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairResponseDto })
+	@ApiEndpointPublic({ responseType: TokenPairResponseDto })
 	@Post("login")
 	async login(@Body() dto: LoginDto) {
 		return await this.authService.login(dto);
 	}
 
-	@ApiEndpoint({ type: SuccessResponseDto })
+	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post("logout")
 	async logout(@User() payload: UserJwtPayload) {
 		return await this.authService.logout(payload);
 	}
 
-	@ApiEndpointPublic({ type: TokenPairResponseDto })
+	@ApiEndpointPublic({ responseType: TokenPairResponseDto })
 	@Post("refresh")
 	async refresh(@Body() dto: RefreshTokenDto) {
 		return await this.authService.refresh(dto.refreshToken);
 	}
 
-	@ApiEndpoint({ type: SuccessResponseDto })
+	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post("password/change")
 	async changePassword(
 		@User("userId") userId: UUID,
@@ -91,31 +91,31 @@ export class AuthController {
 		return await this.authService.changePassword(userId, dto);
 	}
 
-	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@ApiEndpointPublic({ responseType: SuccessResponseDto })
 	@Post("email-verification/request")
 	async requestEmailVerification(@Body() dto: RequestEmailVerificationDto) {
 		return await this.authService.requestEmailVerification(dto);
 	}
 
-	@ApiEndpointPublic({ type: ConfirmEmailVerificationResponseDto })
+	@ApiEndpointPublic({ responseType: ConfirmEmailVerificationResponseDto })
 	@Post("email-verification/confirm")
 	async confirmEmailVerification(@Body() dto: ConfirmEmailVerificationDto) {
 		return await this.authService.confirmEmailVerification(dto);
 	}
 
-	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@ApiEndpointPublic({ responseType: SuccessResponseDto })
 	@Post("password/reset/request")
 	async requestPasswordReset(@Body() dto: RequestPasswordResetDto) {
 		return await this.authService.requestPasswordReset(dto);
 	}
 
-	@ApiEndpointPublic({ type: ConfirmPasswordResetResponseDto })
+	@ApiEndpointPublic({ responseType: ConfirmPasswordResetResponseDto })
 	@Post("password/reset/confirm")
 	async confirmPasswordReset(@Body() dto: ConfirmPasswordResetDto) {
 		return await this.authService.confirmPasswordReset(dto);
 	}
 
-	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@ApiEndpointPublic({ responseType: SuccessResponseDto })
 	@Post("password/reset")
 	async resetPassword(@Body() dto: ResetPasswordDto) {
 		return await this.authService.resetPassword(dto);

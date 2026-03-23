@@ -14,7 +14,7 @@ export class NotificationController {
 	constructor(private readonly notificationService: NotificationService) {}
 
 	@UseCache()
-	@ApiEndpoint({ type: GetNotificationsResponseDto })
+	@ApiEndpoint({ responseType: GetNotificationsResponseDto })
 	@Get()
 	async getNotifications(
 		@User("userId") userId: UUID,
@@ -23,7 +23,7 @@ export class NotificationController {
 		return await this.notificationService.getNotifications(userId, query);
 	}
 
-	@ApiEndpoint({ type: SuccessResponseDto })
+	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post()
 	async readNotification(
 		@User("userId") userId: UUID,

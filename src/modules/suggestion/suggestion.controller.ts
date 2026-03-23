@@ -17,19 +17,19 @@ export class SuggestionController {
 	constructor(private readonly suggestionService: SuggestionService) {}
 
 	@RoleBaseAccessControl([UserRole.ADMIN])
-	@ApiEndpoint({ type: SuccessResponseDto })
+	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post("embed-data")
 	async embedData() {
 		return await this.suggestionService.embedData();
 	}
 
-	@ApiEndpoint({ type: TermSuggestionResponseDto })
+	@ApiEndpoint({ responseType: TermSuggestionResponseDto })
 	@Post("content")
 	async suggestContent(@Body() dto: GetTermSuggestionDto) {
 		return await this.suggestionService.suggestContent(dto);
 	}
 
-	@ApiEndpoint({ type: NextCardSuggestionResponseDto })
+	@ApiEndpoint({ responseType: NextCardSuggestionResponseDto })
 	@Post("next-card")
 	async suggestNextCard(@Body() dto: GetNextCardSuggestionDto) {
 		return await this.suggestionService.suggestNextCard(dto);

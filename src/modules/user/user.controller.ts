@@ -11,7 +11,7 @@ export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@ApiFile("avatar", { storage: multerStorage() })
-	@ApiEndpoint({ type: UploadAvatarResponseDto })
+	@ApiEndpoint({ responseType: UploadAvatarResponseDto })
 	@Post("upload-avatar")
 	async uploadAvatar(
 		@UploadedFile(validateImagePipe())

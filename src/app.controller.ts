@@ -4,7 +4,7 @@ import { Controller, Get } from "@nestjs/common";
 
 @Controller()
 export class AppController {
-	@ApiEndpointPublic({ type: SuccessResponseDto })
+	@ApiEndpointPublic({ responseType: SuccessResponseDto })
 	@Get("health-check")
 	checkHealth(): SuccessResponseDto {
 		return { success: true };
