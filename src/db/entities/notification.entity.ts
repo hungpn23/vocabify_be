@@ -1,6 +1,7 @@
 import { type UUID } from "@common/types";
 import { NullableProperty } from "@common/utils";
 import { Entity, ManyToOne, Property, type Ref, t } from "@mikro-orm/core";
+import { type NotificationType } from "@modules/notification/notification.type";
 import { BaseEntity } from "./base.entity";
 import { User } from "./user.entity";
 
@@ -10,12 +11,19 @@ export class Notification extends BaseEntity {
 	entityId!: UUID;
 
 	@Property()
+	type!: NotificationType;
+
+	@Property()
 	content!: string;
 
 	@NullableProperty({ type: t.datetime })
 	readAt?: Date;
 
-	@ManyToOne(() => User, { ref: true, nullable: true, deleteRule: "set null" })
+	@ManyToOne(() => User, {
+		ref: true,
+		nullable: true,
+		deleteRule: "set null",
+	})
 	actor?: Ref<User>;
 
 	@ManyToOne(() => User, { ref: true })

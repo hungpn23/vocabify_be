@@ -356,7 +356,8 @@ export class DeckService {
 
 		const notification = this.notificationRepository.create({
 			entityId: id,
-			content: `Your deck "${name}" has been cloned by an user.`,
+			type: "clone",
+			content: `An user cloned your deck "${name}".`,
 			actor: userId,
 			recipient: owner.id,
 			readAt: null,
