@@ -1,14 +1,17 @@
+import { SuccessResponseDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import { Notification } from "@db/entities";
-import { EntityRepository, QueryOrder, wrap } from "@mikro-orm/core";
+import {
+	EntityManager,
+	EntityRepository,
+	QueryOrder,
+	wrap,
+} from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { ActorResponseDto } from "@modules/user/user.res.dto";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import {
-	GetNotificationsQueryDto,
-	ReadNotificationDto,
-} from "./dtos/notification.dto";
+import { GetNotificationsQueryDto } from "./dtos/notification.dto";
 import {
 	GetNotificationsResponseDto,
 	NotificationResponseDto,
@@ -17,8 +20,9 @@ import {
 @Injectable()
 export class NotificationService {
 	constructor(
+		private readonly em: EntityManager,
 		@InjectRepository(Notification)
-		private readonly notificationRepo: EntityRepository<Notification>,
+		private readonly notificationRepository: EntityRepository<Notification>,
 	) {}
 
 	async getNotifications(
@@ -28,7 +32,7 @@ export class NotificationService {
 		const { limit } = query;
 
 		const [notifications, totalRecords] =
-			await this.notificationRepo.findAndCount(
+			await this.notificationRepository.findAndCount(
 				{ recipient: userId },
 				{
 					limit,
@@ -49,5 +53,37 @@ export class NotificationService {
 		return { data, totalRecords };
 	}
 
-	async readNotification(userId: UUID, body: ReadNotificationDto) {}
+	async readNotification(
+		userId: UUID,
+		notificationId: UUID,
+	): Promise<SuccessResponseDto> {
+		const notification = await this.notificationRepository.findOne({
+			id: notificationId,
+			recipient: userId,
+		});
+
+		if (!notification) {
+			throw new NotFoundException("Notification not found");
+		}
+
+		notification.readAt = new Date();
+		await this.em.flush();
+
+		return { success: true };
+	}
+
+	async readAllNotifications(userId: UUID): Promise<SuccessResponseDto> {
+		const notifications = await this.notificationRepository.find({
+			recipient: userId,
+			readAt: null,
+		});
+
+		notifications.forEach((n) => {
+			n.readAt = new Date();
+		});
+
+		await this.em.flush();
+
+		return { success: true };
+	}
 }
