@@ -27,7 +27,7 @@ export class NotificationResponseDto {
 }
 
 @Exclude()
-export class NotificationsResponseDto {
+export class GetNotificationsResponseDto {
 	@Expose()
 	data!: NotificationResponseDto[];
 

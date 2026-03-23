@@ -5,10 +5,13 @@ import { InjectRepository } from "@mikro-orm/nestjs";
 import { ActorResponseDto } from "@modules/user/user.res.dto";
 import { Injectable } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { GetNotificationsQueryDto } from "./dtos/notification.dto";
 import {
+	GetNotificationsQueryDto,
+	ReadNotificationDto,
+} from "./dtos/notification.dto";
+import {
+	GetNotificationsResponseDto,
 	NotificationResponseDto,
-	NotificationsResponseDto,
 } from "./dtos/notification.res.dto";
 
 @Injectable()
@@ -21,7 +24,7 @@ export class NotificationService {
 	async getNotifications(
 		userId: UUID,
 		query: GetNotificationsQueryDto,
-	): Promise<NotificationsResponseDto> {
+	): Promise<GetNotificationsResponseDto> {
 		const { limit } = query;
 
 		const [notifications, totalRecords] =
@@ -45,4 +48,6 @@ export class NotificationService {
 
 		return { data, totalRecords };
 	}
+
+	async readNotification(userId: UUID, body: ReadNotificationDto) {}
 }

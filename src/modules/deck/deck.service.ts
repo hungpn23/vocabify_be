@@ -1,7 +1,7 @@
 import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
 import { UUID } from "@common/types";
 import { getMetadataResponseDto } from "@common/utils";
-import { Card, Deck, Notification } from "@db/entities";
+import { Card, Deck, Notification, User } from "@db/entities";
 import {
 	EntityRepository,
 	FilterQuery,
@@ -48,6 +48,8 @@ export class DeckService {
 		private readonly cardRepository: EntityRepository<Card>,
 		@InjectRepository(Notification)
 		private readonly notificationRepository: EntityRepository<Notification>,
+		@InjectRepository(User)
+		private readonly userRepository: EntityRepository<User>,
 	) {}
 
 	async getDeck(userId: UUID, deckId: UUID): Promise<GetDeckResponseDto> {
@@ -354,27 +356,27 @@ export class DeckService {
 
 		originalDeck.learnerCount++;
 
+		const actor = await this.userRepository.findOne(userId);
+		if (!actor) throw new NotFoundException("Actor not found.");
+
 		const notification = this.notificationRepository.create({
 			entityId: id,
 			type: "clone",
-			content: `An user cloned your deck "${name}".`,
-			actor: userId,
+			content: `${actor.username} cloned your deck "${name}".`,
+			actor,
 			recipient: owner.id,
 			readAt: null,
 		});
-
-		await this.em.flush();
 
 		this.notificationGateway.sendNotification(
 			plainToInstance(NotificationResponseDto, {
 				...notification,
 				recipientId: notification.recipient.id,
-				actor: plainToInstance(
-					ActorResponseDto,
-					await notification.actor?.load(),
-				),
+				actor: plainToInstance(ActorResponseDto, wrap(actor).toObject()),
 			}),
 		);
+
+		await this.em.flush();
 
 		return { success: true };
 	}
