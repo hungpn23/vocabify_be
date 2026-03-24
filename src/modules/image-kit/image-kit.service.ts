@@ -4,7 +4,12 @@ import { User } from "@db/entities";
 import ImageKit from "@imagekit/nodejs";
 import { EntityManager, EntityRepository } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import {
+	BadRequestException,
+	Inject,
+	Injectable,
+	Logger,
+} from "@nestjs/common";
 import { IMAGEKIT_CLIENT } from "./image-kit.const";
 
 @Injectable()
@@ -19,21 +24,29 @@ export class ImageKitService {
 	) {}
 
 	async uploadFile(userId: UUID, file: Express.Multer.File) {
-		const uploadResult = await this.imageKitClient.files.upload({
+		const folder = this._buildFolderPath(userId, file.destination);
+
+		const { url, fileId } = await this.imageKitClient.files.upload({
 			file: createReadStream(file.path),
 			fileName: file.filename,
-			folder: this._buildFolderPath(userId, file.destination),
+			folder,
 		});
 
 		const user = await this.userRepository.findOne(userId);
 		if (!user) throw new Error(`User with ID ${userId} not found`);
 
-		user.avatarUrl = uploadResult.url;
+		if (!url || !fileId) throw new BadRequestException("Upload failed");
+
+		user.avatar = { url, fileId, folder };
+		console.log(
+			"🚀 ~ ImageKitService ~ uploadFile ~ user.avatar:",
+			user.avatar,
+		);
 
 		unlinkSync(file.path);
 		await this.em.flush();
 
-		this.logger.debug(`Uploaded to ImageKit, URL: ${uploadResult.url}`);
+		this.logger.debug(`Uploaded to ImageKit, URL: ${url}`);
 	}
 
 	async deleteFile(userId: UUID) {

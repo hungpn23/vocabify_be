@@ -37,7 +37,13 @@ export function ApiEndpoint(options: EndpointOptions = {}) {
 
 	const decorators: MethodDecorator[] = [];
 
-	decorators.push(SerializeOptions({ type: responseType }));
+	decorators.push(
+		SerializeOptions({
+			type: responseType,
+			excludeExtraneousValues: true,
+			strategy: "excludeAll",
+		}),
+	);
 	decorators.push(HttpCode(statusCode));
 	decorators.push(isPublic ? ApiPublic() : ApiBearerAuth());
 

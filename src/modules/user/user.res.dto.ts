@@ -1,5 +1,7 @@
+import { MediaInfoResponseDto } from "@common/dtos/media-info.res.dto";
 import { UserRole } from "@common/enums";
 import { type UUID } from "@common/types";
+import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
@@ -17,7 +19,7 @@ export class UserResponseDto {
 	emailVerified!: boolean;
 
 	@Expose()
-	avatarUrl?: string;
+	avatar?: MediaInfoResponseDto;
 
 	@Expose()
 	role!: UserRole;
@@ -30,16 +32,11 @@ export class UserResponseDto {
 }
 
 @Exclude()
-export class OwnerResponseDto {
-	@Expose()
-	id!: UUID;
-
-	@Expose()
-	username!: string;
-
-	@Expose()
-	avatarUrl?: string;
-}
+export class OwnerResponseDto extends PickType(UserResponseDto, [
+	"id",
+	"username",
+	"avatar",
+] as const) {}
 
 @Exclude()
 export class ActorResponseDto extends OwnerResponseDto {}

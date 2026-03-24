@@ -1,9 +1,10 @@
 import { UserRole } from "@common/enums";
-import { HiddenProperty, NullableProperty } from "@common/utils";
+import { HiddenProperty } from "@common/utils";
 import {
 	BeforeCreate,
 	BeforeUpdate,
 	Collection,
+	Embedded,
 	Entity,
 	Enum,
 	OneToMany,
@@ -11,6 +12,7 @@ import {
 	Property,
 } from "@mikro-orm/core";
 import argon2 from "argon2";
+import { MediaInfo } from "../embeddables";
 import { BaseEntity } from "./base.entity";
 import { Deck } from "./deck.entity";
 import { Notification } from "./notification.entity";
@@ -29,8 +31,8 @@ export class User extends BaseEntity {
 	@HiddenProperty({ nullable: true })
 	password?: string;
 
-	@NullableProperty()
-	avatarUrl?: string;
+	@Embedded(() => MediaInfo, { nullable: true, prefix: "avatar_" })
+	avatar?: MediaInfo;
 
 	@Enum(() => UserRole)
 	role: Opt<UserRole> = UserRole.USER;

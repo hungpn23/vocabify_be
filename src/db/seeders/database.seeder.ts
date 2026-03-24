@@ -252,7 +252,11 @@ export class DatabaseSeeder extends Seeder {
 				email: faker.internet.email({ provider: "example.com" }),
 				password: "Password@123",
 				emailVerified: true,
-				avatarUrl: faker.image.avatar(),
+				avatar: {
+					url: faker.image.avatar(),
+					fileId: "from seeder",
+					folder: "from seeder",
+				},
 			});
 
 			const cardCount = faker.number.int({ min: 5, max: 20 });
