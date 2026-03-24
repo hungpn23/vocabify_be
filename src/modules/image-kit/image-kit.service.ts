@@ -1,15 +1,10 @@
 import { createReadStream, unlinkSync } from "node:fs";
-import { UUID } from "@common/types";
+import { DeleteImageData, UploadImageData, UUID } from "@common/types";
 import { User } from "@db/entities";
 import ImageKit from "@imagekit/nodejs";
 import { EntityManager, EntityRepository } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
-import {
-	BadRequestException,
-	Inject,
-	Injectable,
-	Logger,
-} from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { IMAGEKIT_CLIENT } from "./image-kit.const";
 
 @Injectable()
@@ -23,7 +18,7 @@ export class ImageKitService {
 		private readonly userRepository: EntityRepository<User>,
 	) {}
 
-	async uploadFile(userId: UUID, file: Express.Multer.File) {
+	async uploadFile({ userId, file }: UploadImageData) {
 		const folder = this._buildFolderPath(userId, file.destination);
 
 		const { url, fileId } = await this.imageKitClient.files.upload({
@@ -33,15 +28,11 @@ export class ImageKitService {
 		});
 
 		const user = await this.userRepository.findOne(userId);
-		if (!user) throw new Error(`User with ID ${userId} not found`);
+		if (!user) throw new Error(`User not found`);
 
-		if (!url || !fileId) throw new BadRequestException("Upload failed");
+		if (!url || !fileId) throw new Error("Upload failed");
 
 		user.avatar = { url, fileId, folder };
-		console.log(
-			"🚀 ~ ImageKitService ~ uploadFile ~ user.avatar:",
-			user.avatar,
-		);
 
 		unlinkSync(file.path);
 		await this.em.flush();
@@ -49,8 +40,22 @@ export class ImageKitService {
 		this.logger.debug(`Uploaded to ImageKit, URL: ${url}`);
 	}
 
-	async deleteFile(userId: UUID) {
-		await this.imageKitClient.files.delete("fileId");
+	async deleteFile({ userId, fileId }: DeleteImageData) {
+		const user = await this.userRepository.findOne({
+			id: userId,
+			avatar: { fileId },
+		});
+		if (!user) throw new Error("User not found");
+
+		await this.imageKitClient.files
+			.delete(fileId)
+			.then(async () => {
+				user.avatar = undefined;
+				await this.em.flush();
+			})
+			.catch(() => {
+				this.logger.error(`Failed to delete file ${fileId}`);
+			});
 	}
 
 	private _buildFolderPath(

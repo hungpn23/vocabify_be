@@ -9,6 +9,7 @@ export type UploadImageData = {
 
 export type DeleteImageData = {
 	userId: UUID;
+	fileId: string;
 };
 
 export type UpdateUserStatsData = {

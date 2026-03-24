@@ -7,6 +7,7 @@ import {
 	Body,
 	Controller,
 	Delete,
+	Param,
 	Patch,
 	Post,
 	UploadedFile,
@@ -39,8 +40,11 @@ export class UserController {
 	}
 
 	@ApiEndpoint({ responseType: SuccessResponseDto })
-	@Delete("avatar")
-	async deleteAvatar(@User("userId") userId: UUID) {
-		return await this.userService.deleteAvatar(userId);
+	@Delete("avatar/:fileId")
+	async deleteAvatar(
+		@User("userId") userId: UUID,
+		@Param("fileId") fileId: string,
+	) {
+		return await this.userService.deleteAvatar(userId, fileId);
 	}
 }

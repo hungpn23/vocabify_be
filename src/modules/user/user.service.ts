@@ -40,8 +40,8 @@ export class UserService {
 		return { success: true };
 	}
 
-	async deleteAvatar(userId: UUID) {
-		await this.imageQueue.add(JobName.DELETE_USER_AVATAR, { userId });
+	async deleteAvatar(userId: UUID, fileId: string) {
+		await this.imageQueue.add(JobName.DELETE_USER_AVATAR, { userId, fileId });
 		return { success: true };
 	}
 }

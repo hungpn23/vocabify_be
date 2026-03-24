@@ -1,5 +1,9 @@
 import { JobName, QueueName } from "@common/enums";
-import { UploadImageData } from "@common/types";
+import {
+	DeleteImageData,
+	ImageQueueDataTypes,
+	UploadImageData,
+} from "@common/types";
 import { EntityManager, RequestContext } from "@mikro-orm/core";
 import { ImageKitService } from "@modules/image-kit/image-kit.service";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
@@ -17,16 +21,16 @@ export class UserConsumer extends WorkerHost {
 		super();
 	}
 
-	async process(job: Job<UploadImageData, void, JobName>) {
-		const { data, name } = job;
+	async process(job: Job<ImageQueueDataTypes, void, JobName>) {
+		const { name, data } = job;
 
 		await RequestContext.create(this.em, async () => {
 			switch (name) {
 				case JobName.UPLOAD_USER_AVATAR:
-					await this.imageKitService.uploadFile(data.userId, data.file);
+					await this.imageKitService.uploadFile(data as UploadImageData);
 					break;
 				case JobName.DELETE_USER_AVATAR:
-					await this.imageKitService.deleteFile(data.userId);
+					await this.imageKitService.deleteFile(data as DeleteImageData);
 					break;
 			}
 		});

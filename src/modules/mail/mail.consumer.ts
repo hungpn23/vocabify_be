@@ -16,15 +16,17 @@ export class MailConsumer extends WorkerHost {
 	async process(job: Job<unknown, void, JobName>) {
 		this.logger.debug(`Processing job ${job.id} of type ${job.name}...`);
 
-		switch (job.name) {
+		const { name, data } = job;
+
+		switch (name) {
 			case JobName.SEND_WELCOME_EMAIL:
-				await this.mailService.sendWelcomeEmail(job.data as SendWelcomeDto);
+				await this.mailService.sendWelcomeEmail(data as SendWelcomeDto);
 				break;
 			case JobName.SEND_MAGIC_LINK_EMAIL:
-				await this.mailService.sendMagicLinkEmail(job.data as SendMagicLinkDto);
+				await this.mailService.sendMagicLinkEmail(data as SendMagicLinkDto);
 				break;
 			case JobName.SEND_OTP_EMAIL:
-				await this.mailService.sendOtpEmail(job.data as SendOtpDto);
+				await this.mailService.sendOtpEmail(data as SendOtpDto);
 				break;
 		}
 	}
