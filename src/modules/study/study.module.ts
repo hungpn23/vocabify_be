@@ -3,8 +3,8 @@ import { Card, Deck, UserStatistic } from "@db/entities";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
+import { StudyConsumer } from "./study.consumer";
 import { StudyController } from "./study.controller";
-import { StudyProcessor } from "./study.processor";
 import { StudyService } from "./study.service";
 
 @Module({
@@ -18,6 +18,6 @@ import { StudyService } from "./study.service";
 		}),
 	],
 	controllers: [StudyController],
-	providers: [StudyService, StudyProcessor],
+	providers: [StudyService, StudyConsumer],
 })
 export class StudyModule {}

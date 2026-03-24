@@ -9,8 +9,8 @@ import { Job } from "bullmq";
 import { differenceInCalendarDays } from "date-fns";
 
 @Processor(QueueName.STUDY)
-export class StudyProcessor extends WorkerHost {
-	private readonly logger = new Logger(StudyProcessor.name);
+export class StudyConsumer extends WorkerHost {
+	private readonly logger = new Logger(StudyConsumer.name);
 
 	constructor(private readonly em: EntityManager) {
 		super();

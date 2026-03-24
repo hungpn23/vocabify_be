@@ -43,9 +43,3 @@ export class OwnerResponseDto {
 
 @Exclude()
 export class ActorResponseDto extends OwnerResponseDto {}
-
-@Exclude()
-export class UploadAvatarResponseDto {
-	@Expose()
-	status!: string;
-}

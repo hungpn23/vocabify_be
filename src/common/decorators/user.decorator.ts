@@ -2,7 +2,7 @@ import { RequestWithUser, UserJwtPayload } from "@common/types";
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
 export const User = createParamDecorator(
-	(data: keyof UserJwtPayload | undefined, context: ExecutionContext) => {
+	(data: keyof UserJwtPayload, context: ExecutionContext) => {
 		const request = context.switchToHttp().getRequest<RequestWithUser>();
 		const user = request.user; // user is set in the AuthGuard
 

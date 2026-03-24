@@ -1,32 +1,35 @@
 import { JobName, QueueName } from "@common/enums";
+import { UploadImageData } from "@common/types";
+import { EntityManager, RequestContext } from "@mikro-orm/core";
+import { ImageKitService } from "@modules/image-kit/image-kit.service";
 import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
-import { SendMagicLinkDto, SendOtpDto, SendWelcomeDto } from "./mail.dto";
-import { MailService } from "./mail.service";
 
-@Processor(QueueName.EMAIL)
-export class MailConsumer extends WorkerHost {
-	private readonly logger = new Logger(MailConsumer.name);
+@Processor(QueueName.IMAGE)
+export class UserConsumer extends WorkerHost {
+	private readonly logger = new Logger(UserConsumer.name);
 
-	constructor(private readonly mailService: MailService) {
+	constructor(
+		private readonly em: EntityManager,
+		private readonly imageKitService: ImageKitService,
+	) {
 		super();
 	}
 
-	async process(job: Job<unknown, void, JobName>) {
-		this.logger.debug(`Processing job ${job.id} of type ${job.name}...`);
+	async process(job: Job<UploadImageData, void, JobName>) {
+		const { data, name } = job;
 
-		switch (job.name) {
-			case JobName.SEND_WELCOME_EMAIL:
-				await this.mailService.sendWelcomeEmail(job.data as SendWelcomeDto);
-				break;
-			case JobName.SEND_MAGIC_LINK_EMAIL:
-				await this.mailService.sendMagicLinkEmail(job.data as SendMagicLinkDto);
-				break;
-			case JobName.SEND_OTP_EMAIL:
-				await this.mailService.sendOtpEmail(job.data as SendOtpDto);
-				break;
-		}
+		await RequestContext.create(this.em, async () => {
+			switch (name) {
+				case JobName.UPLOAD_USER_AVATAR:
+					await this.imageKitService.uploadFile(data.userId, data.file);
+					break;
+				case JobName.DELETE_USER_AVATAR:
+					await this.imageKitService.deleteFile(data.userId);
+					break;
+			}
+		});
 	}
 
 	@OnWorkerEvent("active")

@@ -1,9 +1,14 @@
 import { UUID } from "./branded.type";
 
-export type ImageUploadData = {
+export type ImageQueueDataTypes = UploadImageData | DeleteImageData;
+
+export type UploadImageData = {
 	userId: UUID;
-	filePath: string;
-	fileName: string;
+	file: Express.Multer.File;
+};
+
+export type DeleteImageData = {
+	userId: UUID;
 };
 
 export type UpdateUserStatsData = {

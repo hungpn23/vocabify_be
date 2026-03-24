@@ -1,29 +1,47 @@
+import { SuccessResponseDto } from "@common/dtos";
 import { JobName, QueueName } from "@common/enums";
-import { ImageUploadData, UUID } from "@common/types";
+import { ImageQueueDataTypes, UUID } from "@common/types";
+import { User } from "@db/entities";
+import { EntityManager, EntityRepository } from "@mikro-orm/core";
+import { InjectRepository } from "@mikro-orm/nestjs";
 import { InjectQueue } from "@nestjs/bullmq";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { Queue } from "bullmq";
-import { UploadAvatarResponseDto } from "./user.res.dto";
+import { UpdateProfileDto } from "./user.dto";
 
 @Injectable()
 export class UserService {
 	constructor(
+		private readonly em: EntityManager,
 		@InjectQueue(QueueName.IMAGE)
-		private readonly imageQueue: Queue<ImageUploadData, void, JobName>,
+		private readonly imageQueue: Queue<ImageQueueDataTypes, void, JobName>,
+		@InjectRepository(User)
+		private readonly userRepository: EntityRepository<User>,
 	) {}
 
 	async uploadAvatar(
 		userId: UUID,
 		file: Express.Multer.File,
-	): Promise<UploadAvatarResponseDto> {
-		await this.imageQueue.add(JobName.UPLOAD_USER_AVATAR, {
-			userId,
-			filePath: file.path,
-			fileName: file.filename,
-		});
+	): Promise<SuccessResponseDto> {
+		await this.imageQueue.add(JobName.UPLOAD_USER_AVATAR, { userId, file });
+		return { success: true };
+	}
 
-		return {
-			status: "Avatar is being processed.",
-		};
+	async updateProfile(
+		userId: UUID,
+		dto: UpdateProfileDto,
+	): Promise<SuccessResponseDto> {
+		const user = await this.userRepository.findOne(userId);
+		if (!user) throw new NotFoundException();
+
+		this.userRepository.assign(user, dto);
+		await this.em.flush();
+
+		return { success: true };
+	}
+
+	async deleteAvatar(userId: UUID) {
+		await this.imageQueue.add(JobName.DELETE_USER_AVATAR, { userId });
+		return { success: true };
 	}
 }

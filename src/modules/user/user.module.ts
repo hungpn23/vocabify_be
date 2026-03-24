@@ -4,8 +4,8 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { ImageKitModule } from "@modules/image-kit/image-kit.module";
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
+import { UserConsumer } from "./user.consumer";
 import { UserController } from "./user.controller";
-import { UserProcessor } from "./user.processor";
 import { UserService } from "./user.service";
 
 @Module({
@@ -15,6 +15,6 @@ import { UserService } from "./user.service";
 		BullModule.registerQueue({ name: QueueName.IMAGE }),
 	],
 	controllers: [UserController],
-	providers: [UserService, UserProcessor],
+	providers: [UserService, UserConsumer],
 })
 export class UserModule {}
