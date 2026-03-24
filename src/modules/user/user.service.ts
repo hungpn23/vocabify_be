@@ -5,7 +5,11 @@ import { User } from "@db/entities";
 import { EntityManager, EntityRepository } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { InjectQueue } from "@nestjs/bullmq";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from "@nestjs/common";
 import { Queue } from "bullmq";
 import { UpdateProfileDto } from "./user.dto";
 
@@ -33,6 +37,11 @@ export class UserService {
 	): Promise<SuccessResponseDto> {
 		const user = await this.userRepository.findOne(userId);
 		if (!user) throw new NotFoundException();
+
+		const existing = await this.userRepository.findOne({
+			username: dto.username,
+		});
+		if (existing) throw new BadRequestException("Username already exists");
 
 		this.userRepository.assign(user, dto);
 		await this.em.flush();
