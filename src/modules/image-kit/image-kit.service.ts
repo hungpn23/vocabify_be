@@ -32,10 +32,16 @@ export class ImageKitService {
 
 		if (!url || !fileId) throw new Error("Upload failed");
 
-		user.avatar = { url, fileId, folder };
+		if (user.avatar) {
+			await this.imageKitClient.files.delete(user.avatar.fileId).catch(() => {
+				this.logger.debug(`failed to cleanup old avatar`);
+			});
+		}
 
-		unlinkSync(file.path);
+		user.avatar = { url, fileId, folder };
 		await this.em.flush();
+
+		unlinkSync(file.path); // local cleanup
 
 		this.logger.debug(`Uploaded to ImageKit, URL: ${url}`);
 	}
