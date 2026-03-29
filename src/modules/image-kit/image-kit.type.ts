@@ -1,6 +1,7 @@
 import { UUID } from "@common/types";
 
-export type FolderSegments = {
-	subFolder: "avatars" | "decks" | "cards";
-	resourceId?: UUID;
+export type UploadFileOptions = {
+	userId: UUID;
+	file: Express.Multer.File;
+	folders: string[];
 };

@@ -255,7 +255,6 @@ export class DatabaseSeeder extends Seeder {
 				avatar: {
 					url: faker.image.avatar(),
 					fileId: "from seeder",
-					folder: "from seeder",
 				},
 			});
 

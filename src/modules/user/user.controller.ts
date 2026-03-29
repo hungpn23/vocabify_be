@@ -2,7 +2,6 @@ import { ApiEndpoint, ApiFile, User } from "@common/decorators";
 import { SuccessResponseDto } from "@common/dtos";
 import { validateImagePipe } from "@common/pipes";
 import { type UUID } from "@common/types";
-import { multerStorage } from "@common/utils";
 import {
 	Body,
 	Controller,
@@ -12,6 +11,7 @@ import {
 	Post,
 	UploadedFile,
 } from "@nestjs/common";
+import { memoryStorage } from "multer";
 import { UpdateProfileDto } from "./user.dto";
 import { UserService } from "./user.service";
 
@@ -28,7 +28,7 @@ export class UserController {
 		return await this.userService.updateProfile(userId, dto);
 	}
 
-	@ApiFile("avatar", { storage: multerStorage("avatars") })
+	@ApiFile("avatar", { storage: memoryStorage() })
 	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post("avatar")
 	async uploadAvatar(

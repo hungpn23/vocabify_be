@@ -4,5 +4,4 @@ import { Embeddable, Property } from "@mikro-orm/core";
 export class MediaInfo {
 	@Property() url!: string;
 	@Property() fileId!: string;
-	@Property() folder!: string;
 }

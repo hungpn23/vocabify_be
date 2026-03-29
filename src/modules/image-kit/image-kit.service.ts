@@ -1,77 +1,43 @@
-import { createReadStream, unlinkSync } from "node:fs";
-import { DeleteImageData, UploadImageData, UUID } from "@common/types";
-import { User } from "@db/entities";
-import ImageKit from "@imagekit/nodejs";
-import { EntityManager, EntityRepository } from "@mikro-orm/core";
-import { InjectRepository } from "@mikro-orm/nestjs";
+import { SuccessResponseDto } from "@common/dtos";
+import { UUID } from "@common/types";
+import ImageKit, { toFile } from "@imagekit/nodejs";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { IMAGEKIT_CLIENT } from "./image-kit.const";
+import { UploadFileOptions } from "./image-kit.type";
 
 @Injectable()
 export class ImageKitService {
 	private readonly logger = new Logger(ImageKitService.name);
 
 	constructor(
-		private readonly em: EntityManager,
 		@Inject(IMAGEKIT_CLIENT) private readonly imageKitClient: ImageKit,
-		@InjectRepository(User)
-		private readonly userRepository: EntityRepository<User>,
 	) {}
 
-	async uploadFile({ userId, file }: UploadImageData) {
-		const folder = this._buildFolderPath(userId, file.destination);
+	async uploadFile(
+		options: UploadFileOptions,
+	): Promise<ImageKit.Files.FileUploadResponse> {
+		const { userId, file, folders } = options;
 
-		const { url, fileId } = await this.imageKitClient.files.upload({
-			file: createReadStream(file.path),
-			fileName: file.filename,
-			folder,
+		const timestamp = Date.now().toString();
+		const uniqueName = `${timestamp}-${file.originalname}`;
+
+		return await this.imageKitClient.files.upload({
+			file: await toFile(file.buffer),
+			fileName: uniqueName,
+			folder: this._buildFolderPath(userId, folders),
 		});
-
-		const user = await this.userRepository.findOne(userId);
-		if (!user) throw new Error(`User not found`);
-
-		if (!url || !fileId) throw new Error("Upload failed");
-
-		if (user.avatar) {
-			await this.imageKitClient.files.delete(user.avatar.fileId).catch(() => {
-				this.logger.debug(`failed to cleanup old avatar`);
-			});
-		}
-
-		user.avatar = { url, fileId, folder };
-		await this.em.flush();
-
-		unlinkSync(file.path); // local cleanup
-
-		this.logger.debug(`Uploaded to ImageKit, URL: ${url}`);
 	}
 
-	async deleteFile({ userId, fileId }: DeleteImageData) {
-		const user = await this.userRepository.findOne({
-			id: userId,
-			avatar: { fileId },
+	async deleteFile(fileId: string): Promise<SuccessResponseDto> {
+		await this.imageKitClient.files.delete(fileId).catch(() => {
+			this.logger.error(`Failed to delete file ${fileId}`);
+			return { success: false };
 		});
-		if (!user) throw new Error("User not found");
 
-		await this.imageKitClient.files
-			.delete(fileId)
-			.then(async () => {
-				user.avatar = undefined;
-				await this.em.flush();
-			})
-			.catch(() => {
-				this.logger.error(`Failed to delete file ${fileId}`);
-			});
+		return { success: true };
 	}
 
-	private _buildFolderPath(
-		userId: UUID,
-		destination: string,
-		resourceId?: UUID,
-	) {
-		const subFolder = destination.replace(/^.*uploads\//, "");
-		const parts = [userId, subFolder];
-		if (resourceId) parts.push(resourceId);
-		return parts.join("/");
+	private _buildFolderPath(userId: UUID, folders: string[]) {
+		return [userId, ...folders].join("/");
 	}
 }

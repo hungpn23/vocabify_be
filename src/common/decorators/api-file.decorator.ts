@@ -35,14 +35,20 @@ export function ApiFile(
 	);
 }
 
-export function ApiArrayFiles<TClass>(
-	fieldName: string,
-	maxCount?: number,
-	extraModels?: ClassConstructor<TClass>,
-	options?: MulterOptions,
+export type ApiFilesOptions<TClass> = {
+	fieldName: string;
+	maxCount?: number;
+	extraModels?: ClassConstructor<TClass>;
+	options?: MulterOptions;
+};
+
+export function ApiFiles<TClass>(
+	options: ApiFilesOptions<TClass>,
 ): MethodDecorator {
+	const { fieldName, maxCount, extraModels, options: multerOptions } = options;
+
 	const decorators = [
-		UseInterceptors(FilesInterceptor(fieldName, maxCount, options)),
+		UseInterceptors(FilesInterceptor(fieldName, maxCount, multerOptions)),
 		ApiConsumes("multipart/form-data"),
 	];
 
