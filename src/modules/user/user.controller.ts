@@ -11,7 +11,6 @@ import {
 	Post,
 	UploadedFile,
 } from "@nestjs/common";
-import { memoryStorage } from "multer";
 import { UpdateProfileDto } from "./user.dto";
 import { UserService } from "./user.service";
 
@@ -28,7 +27,7 @@ export class UserController {
 		return await this.userService.updateProfile(userId, dto);
 	}
 
-	@ApiFile("avatar", { storage: memoryStorage() })
+	@ApiFile("avatar")
 	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Post("avatar")
 	async uploadAvatar(

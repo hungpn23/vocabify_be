@@ -23,7 +23,9 @@ import { BullModule } from "@nestjs/bullmq";
 import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { MulterModule } from "@nestjs/platform-express";
 import ms from "ms";
+import { memoryStorage } from "multer";
 
 const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 
@@ -82,6 +84,11 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 			useFactory: (redisConf: RedisConfig) => ({
 				connection: { url: redisConf.connectionString },
 			}),
+		}),
+
+		MulterModule.register({
+			storage: memoryStorage(),
+			limits: { fileSize: 5 * 1024 * 1024 },
 		}),
 
 		Modules,
