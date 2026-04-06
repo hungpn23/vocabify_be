@@ -24,6 +24,6 @@ export class PendingMedia {
 	@ManyToOne(() => User, { ref: true })
 	owner!: Ref<User>;
 
-	@Property()
-	createdAt: Date = new Date();
+	@Property({ type: t.datetime })
+	createdAt: Opt<Date> = new Date();
 }

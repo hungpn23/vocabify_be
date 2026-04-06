@@ -53,3 +53,9 @@ export class PreviewCardResponseDto extends PickType(CardResponseDto, [
 	"usageOrGrammar",
 	"examples",
 ]) {}
+
+@Exclude()
+export class UploadCardImageResponseDto {
+	url!: string;
+	fileId!: string;
+}

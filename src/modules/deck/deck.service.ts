@@ -1,7 +1,7 @@
 import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
 import { UUID } from "@common/types";
 import { getMetadataResponseDto } from "@common/utils";
-import { Card, Deck, Notification, User } from "@db/entities";
+import { Card, Deck, Notification, PendingMedia, User } from "@db/entities";
 import {
 	EntityRepository,
 	FilterQuery,
@@ -10,6 +10,7 @@ import {
 } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
+import { ImageKitService } from "@modules/image-kit/image-kit.service";
 import { NotificationResponseDto } from "@modules/notification/dtos/notification.res.dto";
 import { NotificationGateway } from "@modules/notification/notification.gateway";
 import { ActorResponseDto } from "@modules/user/user.res.dto";
@@ -21,7 +22,10 @@ import {
 import { plainToInstance } from "class-transformer";
 import { omit, pick } from "lodash";
 import { Visibility } from "./deck.enum";
-import { CardResponseDto } from "./dtos/card.res.dto";
+import {
+	CardResponseDto,
+	UploadCardImageResponseDto,
+} from "./dtos/card.res.dto";
 import {
 	CloneDeckDto,
 	CreateDeckDto,
@@ -42,6 +46,7 @@ export class DeckService {
 	constructor(
 		private readonly em: EntityManager,
 		private readonly notificationGateway: NotificationGateway,
+		private readonly imageKitService: ImageKitService,
 		@InjectRepository(Deck)
 		private readonly deckRepository: EntityRepository<Deck>,
 		@InjectRepository(Card)
@@ -50,6 +55,8 @@ export class DeckService {
 		private readonly notificationRepository: EntityRepository<Notification>,
 		@InjectRepository(User)
 		private readonly userRepository: EntityRepository<User>,
+		@InjectRepository(PendingMedia)
+		private readonly pendingMediaRepo: EntityRepository<PendingMedia>,
 	) {}
 
 	async getDeck(userId: UUID, deckId: UUID): Promise<GetDeckResponseDto> {
@@ -181,6 +188,30 @@ export class DeckService {
 			data,
 			metadata: getMetadataResponseDto(totalRecords, query),
 		};
+	}
+
+	async uploadCardImage(
+		userId: UUID,
+		file: Express.Multer.File,
+	): Promise<UploadCardImageResponseDto> {
+		const user = await this.userRepository.findOne(userId);
+		if (!user) throw new BadRequestException();
+
+		const { url, fileId } = await this.imageKitService.uploadFile({
+			userId,
+			file,
+			folders: ["avatars"],
+		});
+		if (!url || !fileId) throw new BadRequestException();
+
+		this.pendingMediaRepo.create({
+			owner: user,
+			media: { url, fileId },
+		});
+
+		await this.em.flush();
+
+		return { url, fileId };
 	}
 
 	async create(

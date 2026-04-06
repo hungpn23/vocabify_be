@@ -6,9 +6,9 @@ import {
 	User,
 } from "@common/decorators";
 import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
+import { validateImagePipe } from "@common/pipes/validate-image.pipe";
 import { type UUID } from "@common/types";
 import {
-	BadRequestException,
 	Body,
 	Controller,
 	Delete,
@@ -18,8 +18,10 @@ import {
 	Patch,
 	Post,
 	Query,
+	UploadedFile,
 } from "@nestjs/common";
 import { DeckService } from "./deck.service";
+import { UploadCardImageResponseDto } from "./dtos/card.res.dto";
 import {
 	CloneDeckDto,
 	CreateDeckDto,
@@ -90,11 +92,15 @@ export class DeckController {
 		return await this.deckService.create(userId, dto);
 	}
 
-	@ApiFile("image")
-	@ApiEndpoint({ responseType: SuccessResponseDto })
+	@ApiFile("card-image")
+	@ApiEndpoint({ responseType: UploadCardImageResponseDto })
 	@Post("card-image")
-	async uploadCardImage(@User("userId") _userId: UUID, @Body() _dto: unknown) {
-		throw new BadRequestException("Not implemented");
+	async uploadCardImage(
+		@User("userId") userId: UUID,
+		@UploadedFile(validateImagePipe())
+		file: Express.Multer.File,
+	) {
+		return await this.deckService.uploadCardImage(userId, file);
 	}
 
 	@ApiEndpoint({ responseType: SuccessResponseDto })
