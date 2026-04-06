@@ -7,10 +7,7 @@ import {
 	ApiExtraModels,
 	getSchemaPath,
 } from "@nestjs/swagger";
-import {
-	ReferenceObject,
-	SchemaObject,
-} from "@nestjs/swagger/dist/interfaces/open-api-spec.interface";
+import { SchemaObject } from "@nestjs/swagger/dist/interfaces/open-api-spec.interface";
 import { ClassConstructor } from "class-transformer";
 
 export function ApiFile(
@@ -35,46 +32,55 @@ export function ApiFile(
 	);
 }
 
-export type ApiFilesOptions<TClass> = {
+export type ApiFilesOptions = {
 	fieldName: string;
 	maxCount?: number;
-	extraModels?: ClassConstructor<TClass>;
-	options?: MulterOptions;
+	extraModel?: ClassConstructor<object>;
+	multerOptions?: MulterOptions;
 };
 
-export function ApiFiles<TClass>(
-	options: ApiFilesOptions<TClass>,
-): MethodDecorator {
-	const { fieldName, maxCount, extraModels, options: multerOptions } = options;
+export function ApiFiles(options: ApiFilesOptions): MethodDecorator {
+	const { fieldName, maxCount, extraModel, multerOptions } = options;
 
-	const decorators = [
+	const decorators: Parameters<typeof applyDecorators> = [
 		UseInterceptors(FilesInterceptor(fieldName, maxCount, multerOptions)),
 		ApiConsumes("multipart/form-data"),
 	];
 
-	const schema: SchemaObject | ReferenceObject = {
-		allOf: [
-			{
-				properties: {
-					[fieldName]: {
-						type: "array",
-						items: {
-							type: "string",
-							format: "binary",
-						},
-					},
+	const fileSchema: SchemaObject = {
+		type: "object",
+		properties: {
+			[fieldName]: {
+				type: "array",
+				items: {
+					type: "string",
+					format: "binary",
 				},
-				required: [fieldName],
 			},
-		],
+		},
+		required: [fieldName],
 	};
 
-	if (extraModels) {
-		decorators.push(ApiExtraModels(extraModels));
-
-		schema.allOf?.push({
-			$ref: getSchemaPath(extraModels),
-		});
+	if (extraModel) {
+		decorators.push(ApiExtraModels(extraModel));
+		decorators.push(
+			ApiBody({
+				schema: {
+					allOf: [
+						fileSchema,
+						{
+							$ref: getSchemaPath(extraModel),
+						},
+					],
+				},
+			}),
+		);
+	} else {
+		decorators.push(
+			ApiBody({
+				schema: fileSchema,
+			}),
+		);
 	}
 
 	return applyDecorators(...decorators);

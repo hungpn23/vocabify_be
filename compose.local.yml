@@ -30,8 +30,10 @@ services:
       service: qdrant
     ports:
       - '${VECTOR_DB_PORT}:6333'
+    # use docker volumes to avoid "Incompatible file system" error
+    # https://qdrant.tech/documentation/operations/common-errors/#how-to-avoid-incompatible-file-system
     volumes:
-      - ${PWD}/.docker/volumes/qdrant_data:/qdrant/storage
+      - qdrant_data:/qdrant/storage 
     networks:
       - vocabify_network
 

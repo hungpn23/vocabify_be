@@ -1,6 +1,7 @@
 import {
 	ApiEndpoint,
 	ApiEndpointPublic,
+	ApiFiles,
 	UseCache,
 	User,
 } from "@common/decorators";
@@ -11,11 +12,13 @@ import {
 	Controller,
 	Delete,
 	Get,
+	Logger,
 	Param,
 	ParseUUIDPipe,
 	Patch,
 	Post,
 	Query,
+	UploadedFiles,
 } from "@nestjs/common";
 import { DeckService } from "./deck.service";
 import {
@@ -23,6 +26,7 @@ import {
 	CreateDeckDto,
 	GetDecksQueryDto,
 	UpdateDeckDto,
+	UploadDeckCardImagesDto,
 } from "./dtos/deck.dto";
 import {
 	DeckResponseDto,
@@ -34,6 +38,8 @@ import {
 
 @Controller("decks")
 export class DeckController {
+	private readonly logger = new Logger(DeckController.name);
+
 	constructor(private readonly deckService: DeckService) {}
 
 	@ApiEndpointPublic({
@@ -84,6 +90,41 @@ export class DeckController {
 	@Post()
 	async create(@User("userId") userId: UUID, @Body() dto: CreateDeckDto) {
 		return await this.deckService.create(userId, dto);
+	}
+
+	@ApiFiles({
+		fieldName: "images",
+		extraModel: UploadDeckCardImagesDto,
+	})
+	@ApiEndpoint({ responseType: SuccessResponseDto })
+	@Post(":deckId/cards/images")
+	async uploadCardImages(
+		@User("userId") userId: UUID,
+		@Param("deckId", ParseUUIDPipe) deckId: UUID,
+		@UploadedFiles() files: Express.Multer.File[],
+		@Body() dto: UploadDeckCardImagesDto,
+	) {
+		let mappings: unknown = dto.mappings;
+
+		try {
+			mappings = JSON.parse(dto.mappings);
+		} catch {
+			this.logger.warn("Failed to parse mappings JSON");
+		}
+
+		this.logger.log({
+			userId,
+			deckId,
+			mappings,
+			files: files.map((file) => ({
+				fieldname: file.fieldname,
+				originalname: file.originalname,
+				mimetype: file.mimetype,
+				size: file.size,
+			})),
+		});
+
+		return { success: true };
 	}
 
 	@ApiEndpoint({ responseType: SuccessResponseDto })

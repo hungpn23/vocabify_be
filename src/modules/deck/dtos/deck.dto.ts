@@ -7,7 +7,7 @@ import {
 	StringValidatorOptional,
 } from "@common/decorators";
 import { QueryDto } from "@common/dtos";
-import { PickType } from "@nestjs/swagger";
+import { ApiProperty, PickType } from "@nestjs/swagger";
 import { ArrayMinSize, ValidateIf } from "class-validator";
 import { DeckOrderBy, Visibility } from "../deck.enum";
 import { CreateCardDto, UpdateCardDto } from "./card.dto";
@@ -52,6 +52,16 @@ export class UpdateDeckDto extends PickType(CreateDeckDto, [
 export class CloneDeckDto {
 	@StringValidatorOptional()
 	passcode?: string;
+}
+
+export class UploadDeckCardImagesDto {
+	@ApiProperty({
+		description: "JSON string mapping file index to card id",
+		example:
+			'[{"cardId":"0f8fad5b-d9cb-469f-a165-70867728950e","fileIndex":0},{"cardId":"7c9e6679-7425-40de-944b-e07fc1f90ae7","fileIndex":1}]',
+	})
+	@StringValidator()
+	mappings!: string;
 }
 
 export class GetDecksQueryDto extends QueryDto {
