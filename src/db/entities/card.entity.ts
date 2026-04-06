@@ -1,8 +1,10 @@
 import { type UUID } from "@common/types";
 import { createUUID, NullableProperty } from "@common/utils";
+import { MediaInfo } from "@db/embeddables/media-info.embeddable";
 import {
 	BeforeCreate,
 	BeforeUpdate,
+	Embedded,
 	Entity,
 	Enum,
 	ManyToOne,
@@ -32,6 +34,9 @@ export class Card {
 
 	@Property()
 	definitionLanguage!: LanguageCode;
+
+	@Embedded(() => MediaInfo, { nullable: true, prefix: "image_" })
+	image?: MediaInfo;
 
 	@NullableProperty()
 	pronunciation?: string;

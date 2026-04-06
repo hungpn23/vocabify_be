@@ -1,0 +1,29 @@
+import { UUID } from "@common/types";
+import { createUUID } from "@common/utils";
+import { MediaInfo } from "@db/embeddables/media-info.embeddable";
+import {
+	Embedded,
+	Entity,
+	ManyToOne,
+	Opt,
+	PrimaryKey,
+	Property,
+	type Ref,
+	t,
+} from "@mikro-orm/core";
+import { User } from "./user.entity";
+
+@Entity()
+export class PendingMedia {
+	@PrimaryKey({ type: t.uuid })
+	id: Opt<UUID> = createUUID();
+
+	@Embedded(() => MediaInfo, { prefix: "pending_" })
+	media!: MediaInfo;
+
+	@ManyToOne(() => User, { ref: true })
+	owner!: Ref<User>;
+
+	@Property()
+	createdAt: Date = new Date();
+}

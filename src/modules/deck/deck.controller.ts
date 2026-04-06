@@ -1,24 +1,23 @@
 import {
 	ApiEndpoint,
 	ApiEndpointPublic,
-	ApiFiles,
+	ApiFile,
 	UseCache,
 	User,
 } from "@common/decorators";
 import { PaginatedDto, SuccessResponseDto } from "@common/dtos";
 import { type UUID } from "@common/types";
 import {
+	BadRequestException,
 	Body,
 	Controller,
 	Delete,
 	Get,
-	Logger,
 	Param,
 	ParseUUIDPipe,
 	Patch,
 	Post,
 	Query,
-	UploadedFiles,
 } from "@nestjs/common";
 import { DeckService } from "./deck.service";
 import {
@@ -26,7 +25,6 @@ import {
 	CreateDeckDto,
 	GetDecksQueryDto,
 	UpdateDeckDto,
-	UploadDeckCardImagesDto,
 } from "./dtos/deck.dto";
 import {
 	DeckResponseDto,
@@ -38,7 +36,7 @@ import {
 
 @Controller("decks")
 export class DeckController {
-	private readonly logger = new Logger(DeckController.name);
+	// private readonly logger = new Logger(DeckController.name);
 
 	constructor(private readonly deckService: DeckService) {}
 
@@ -92,39 +90,11 @@ export class DeckController {
 		return await this.deckService.create(userId, dto);
 	}
 
-	@ApiFiles({
-		fieldName: "images",
-		extraModel: UploadDeckCardImagesDto,
-	})
+	@ApiFile("image")
 	@ApiEndpoint({ responseType: SuccessResponseDto })
-	@Post(":deckId/cards/images")
-	async uploadCardImages(
-		@User("userId") userId: UUID,
-		@Param("deckId", ParseUUIDPipe) deckId: UUID,
-		@UploadedFiles() files: Express.Multer.File[],
-		@Body() dto: UploadDeckCardImagesDto,
-	) {
-		let mappings: unknown = dto.mappings;
-
-		try {
-			mappings = JSON.parse(dto.mappings);
-		} catch {
-			this.logger.warn("Failed to parse mappings JSON");
-		}
-
-		this.logger.log({
-			userId,
-			deckId,
-			mappings,
-			files: files.map((file) => ({
-				fieldname: file.fieldname,
-				originalname: file.originalname,
-				mimetype: file.mimetype,
-				size: file.size,
-			})),
-		});
-
-		return { success: true };
+	@Post("card-image")
+	async uploadCardImage(@User("userId") _userId: UUID, @Body() _dto: unknown) {
+		throw new BadRequestException("Not implemented");
 	}
 
 	@ApiEndpoint({ responseType: SuccessResponseDto })
