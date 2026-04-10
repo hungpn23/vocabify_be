@@ -24,6 +24,7 @@ import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { MulterModule } from "@nestjs/platform-express";
+import { ScheduleModule } from "@nestjs/schedule";
 import ms from "ms";
 import { memoryStorage } from "multer";
 
@@ -90,6 +91,8 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 			storage: memoryStorage(),
 			limits: { fileSize: 5 * 1024 * 1024 },
 		}),
+
+		ScheduleModule.forRoot(),
 
 		Modules,
 	],

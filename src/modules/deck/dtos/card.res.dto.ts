@@ -1,3 +1,4 @@
+import { MediaInfoResponseDto } from "@common/dtos/media-info.res.dto";
 import { type UUID } from "@common/types";
 import { PickType } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
@@ -20,6 +21,9 @@ export class CardResponseDto {
 
 	@Expose()
 	definitionLanguage!: LanguageCode;
+
+	@Expose()
+	image?: MediaInfoResponseDto;
 
 	@Expose()
 	pronunciation?: string;
@@ -48,6 +52,7 @@ export class PreviewCardResponseDto extends PickType(CardResponseDto, [
 	"id",
 	"term",
 	"definition",
+	"image",
 	"pronunciation",
 	"partOfSpeech",
 	"usageOrGrammar",
@@ -55,7 +60,6 @@ export class PreviewCardResponseDto extends PickType(CardResponseDto, [
 ]) {}
 
 @Exclude()
-export class UploadCardImageResponseDto {
-	url!: string;
-	fileId!: string;
-}
+export class UploadCardImageResponseDto extends PickType(MediaInfoResponseDto, [
+	"fileId",
+] as const) {}

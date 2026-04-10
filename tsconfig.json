@@ -1,7 +1,5 @@
 {
 	"compilerOptions": {
-		"ignoreDeprecations": "6.0", // bỏ qua cảnh báo deprecated APIs của TypeScript 6.0+
-
 		// ─── Target & Output ───────────────────────────────────────────
 		"target": "ES2023", // compile xuống ES2023 cho Node.js hiện đại
 		"outDir": "./dist", // thư mục chứa file JS sau khi build

@@ -3,7 +3,7 @@ import { UUID } from "@common/types";
 import ImageKit, { toFile } from "@imagekit/nodejs";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { IMAGEKIT_CLIENT } from "./image-kit.const";
-import { UploadFileOptions } from "./image-kit.type";
+import { DeleteFilesResponse, UploadFileOptions } from "./image-kit.type";
 
 @Injectable()
 export class ImageKitService {
@@ -21,20 +21,45 @@ export class ImageKitService {
 		const timestamp = Date.now().toString();
 		const uniqueName = `${timestamp}-${file.originalname}`;
 
-		return await this.imageKitClient.files.upload({
+		const res = await this.imageKitClient.files.upload({
 			file: await toFile(file.buffer),
 			fileName: uniqueName,
 			folder: this._buildFolderPath(userId, folders),
 		});
+		return res;
 	}
 
 	async deleteFile(fileId: string): Promise<SuccessResponseDto> {
-		await this.imageKitClient.files.delete(fileId).catch(() => {
+		try {
+			await this.imageKitClient.files.delete(fileId);
+
+			return { success: true };
+		} catch {
 			this.logger.error(`Failed to delete file ${fileId}`);
 			return { success: false };
-		});
+		}
+	}
 
-		return { success: true };
+	async deleteFiles(fileIds: string[]): Promise<DeleteFilesResponse> {
+		const { successfullyDeletedFileIds } =
+			await this.imageKitClient.files.bulk.delete({
+				fileIds,
+			});
+
+		return {
+			success: true,
+			successfullyDeletedFileIds,
+		};
+	}
+
+	async copyFile(
+		sourcePath: string,
+		destinationPath: string,
+	): Promise<ImageKit.Files.FileCopyResponse> {
+		return await this.imageKitClient.files.copy({
+			destinationPath,
+			sourceFilePath: sourcePath,
+		});
 	}
 
 	private _buildFolderPath(userId: UUID, folders: string[]) {

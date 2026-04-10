@@ -197,21 +197,21 @@ export class DeckService {
 		const user = await this.userRepository.findOne(userId);
 		if (!user) throw new BadRequestException();
 
-		const { url, fileId } = await this.imageKitService.uploadFile({
+		const { url, fileId, filePath } = await this.imageKitService.uploadFile({
 			userId,
 			file,
 			folders: ["avatars"],
 		});
-		if (!url || !fileId) throw new BadRequestException();
+		if (!url || !fileId || !filePath) throw new BadRequestException();
 
 		this.pendingMediaRepo.create({
 			owner: user,
-			media: { url, fileId },
+			media: { url, fileId, filePath },
 		});
 
 		await this.em.flush();
 
-		return { url, fileId };
+		return { fileId };
 	}
 
 	async create(
@@ -220,10 +220,23 @@ export class DeckService {
 	): Promise<CreateDeckResponseDto> {
 		const { cards: cardDtos, ...deckDto } = dto;
 
-		const deck = await this.deckRepository.findOne({
-			name: deckDto.name,
-			owner: userId,
-		});
+		const [deck, pendingImages] = await Promise.all([
+			this.deckRepository.findOne({
+				name: deckDto.name,
+				owner: userId,
+			}),
+			this.pendingMediaRepo.find({
+				owner: userId,
+				media: {
+					fileId: {
+						$in: cardDtos
+							.map((c) => c.fileId)
+							.filter((id): id is string => !!id),
+					},
+				},
+			}),
+		]);
+
 		if (deck) {
 			throw new BadRequestException(
 				`Deck with name "${deckDto.name}" already exists.`,
@@ -236,11 +249,18 @@ export class DeckService {
 			createdBy: userId,
 		});
 
-		for (const c of cardDtos) {
+		const map = new Map(pendingImages.map((pi) => [pi.media.fileId, pi]));
+
+		for (const cardDto of cardDtos) {
+			const pendingImg = map.get(cardDto.fileId ?? "");
+
 			this.cardRepository.create({
-				...c,
+				...cardDto,
 				deck: newDeck.id,
+				image: pendingImg?.media,
 			});
+
+			if (pendingImg) this.em.remove(pendingImg);
 		}
 
 		await this.em.flush();
@@ -338,6 +358,18 @@ export class DeckService {
 
 		if (!deck)
 			throw new NotFoundException(`Deck with id "${deckId}" not found.`);
+
+		deck.cards
+			.getItems()
+			.filter((card) => !!card.image?.fileId)
+			.forEach(({ image }) => {
+				if (image) {
+					this.pendingMediaRepo.create({
+						owner: userId,
+						media: image,
+					});
+				}
+			});
 
 		await this.em.remove(deck).flush();
 

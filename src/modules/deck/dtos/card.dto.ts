@@ -33,8 +33,8 @@ export class CreateCardDto {
 	@StringValidatorOptional({ isArray: true })
 	examples?: string[];
 
-	@StringValidator()
-	fileId!: string;
+	@StringValidatorOptional()
+	fileId?: string;
 }
 
 export class UpdateCardDto extends OmitType(CreateCardDto, [

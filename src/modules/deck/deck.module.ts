@@ -5,6 +5,7 @@ import { NotificationModule } from "@modules/notification/notification.module";
 import { Module } from "@nestjs/common";
 import { DeckController } from "./deck.controller";
 import { DeckService } from "./deck.service";
+import { PendingMediaService } from "./pending-media.service";
 
 @Module({
 	imports: [
@@ -13,6 +14,6 @@ import { DeckService } from "./deck.service";
 		NotificationModule,
 	],
 	controllers: [DeckController],
-	providers: [DeckService],
+	providers: [DeckService, PendingMediaService],
 })
 export class DeckModule {}

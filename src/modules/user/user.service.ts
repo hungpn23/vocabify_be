@@ -30,15 +30,15 @@ export class UserService {
 		const user = await this.userRepository.findOne(userId);
 		if (!user) throw new BadRequestException();
 
-		const { url, fileId } = await this.imageKitService.uploadFile({
+		const { url, fileId, filePath } = await this.imageKitService.uploadFile({
 			userId,
 			file,
 			folders: ["avatars"],
 		});
-		if (!url || !fileId) throw new BadRequestException();
+		if (!url || !fileId || !filePath) throw new BadRequestException();
 
 		const oldAvatar = user.avatar;
-		user.avatar = { url, fileId };
+		user.avatar = { url, fileId, filePath };
 		await this.em.flush();
 
 		if (oldAvatar) {
