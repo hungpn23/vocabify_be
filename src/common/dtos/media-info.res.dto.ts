@@ -7,4 +7,7 @@ export class MediaInfoResponseDto {
 
 	@Expose()
 	fileId!: string;
+
+	@Expose()
+	filePath!: string;
 }

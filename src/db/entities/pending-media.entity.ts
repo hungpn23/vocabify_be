@@ -4,6 +4,7 @@ import { MediaInfo } from "@db/embeddables/media-info.embeddable";
 import {
 	Embedded,
 	Entity,
+	Index,
 	ManyToOne,
 	Opt,
 	PrimaryKey,
@@ -13,6 +14,7 @@ import {
 } from "@mikro-orm/core";
 import { User } from "./user.entity";
 
+@Index({ properties: ["createdAt"] })
 @Entity()
 export class PendingMedia {
 	@PrimaryKey({ type: t.uuid })
