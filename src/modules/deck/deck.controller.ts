@@ -104,6 +104,15 @@ export class DeckController {
 	}
 
 	@ApiEndpoint({ responseType: SuccessResponseDto })
+	@Delete("card-image/:fileId")
+	async deleteCardImage(
+		@User("userId") userId: UUID,
+		@Param("fileId") fileId: string,
+	) {
+		return await this.deckService.deleteCardImage(userId, fileId);
+	}
+
+	@ApiEndpoint({ responseType: SuccessResponseDto })
 	@Patch(":deckId")
 	async update(
 		@User("userId") userId: UUID,

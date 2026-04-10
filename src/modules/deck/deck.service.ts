@@ -214,6 +214,25 @@ export class DeckService {
 		return { fileId };
 	}
 
+	async deleteCardImage(
+		userId: UUID,
+		fileId: string,
+	): Promise<SuccessResponseDto> {
+		const image = await this.pendingMediaRepo.findOne({
+			owner: userId,
+			media: { fileId },
+		});
+
+		if (!image) throw new NotFoundException();
+		this.em.remove(image);
+
+		const { success } = await this.imageKitService.deleteFile(fileId);
+
+		if (!success) throw new BadRequestException();
+
+		return { success };
+	}
+
 	async create(
 		userId: UUID,
 		dto: CreateDeckDto,
@@ -412,7 +431,7 @@ export class DeckService {
 
 		for (const card of cards.toArray()) {
 			this.cardRepository.create({
-				...omit(card, ["id", "streak", "reviewDate", "status"]),
+				...omit(card, ["id", "streak", "reviewDate", "status", "image"]),
 				deck: clonedDeck.id,
 			});
 		}

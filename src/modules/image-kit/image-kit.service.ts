@@ -53,13 +53,16 @@ export class ImageKitService {
 	}
 
 	async copyFile(
+		userId: UUID,
 		sourcePath: string,
-		destinationPath: string,
-	): Promise<ImageKit.Files.FileCopyResponse> {
-		return await this.imageKitClient.files.copy({
-			destinationPath,
+		folders: string[],
+	): Promise<void> {
+		await this.imageKitClient.files.copy({
 			sourceFilePath: sourcePath,
+			destinationPath: this._buildFolderPath(userId, folders),
 		});
+
+		// TODO: get fileId here and return it
 	}
 
 	private _buildFolderPath(userId: UUID, folders: string[]) {
