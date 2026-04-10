@@ -297,20 +297,7 @@ export class DeckService {
 			{ populate: ["cards"] },
 		);
 
-		if (!deck)
-			throw new NotFoundException(`Deck with id "${deckId}" not found.`);
-
-		if (dto.name && dto.name !== deck.name) {
-			const existingDeck = await this.deckRepository.findOne({
-				name: dto.name,
-				owner: userId,
-			});
-
-			if (existingDeck)
-				throw new BadRequestException(
-					`Deck with name "${dto.name}" already exists.`,
-				);
-		}
+		if (!deck) throw new NotFoundException();
 
 		if (dto.visibility) {
 			switch (dto.visibility) {
@@ -319,35 +306,100 @@ export class DeckService {
 					dto.passcode = "";
 					break;
 				case Visibility.PROTECTED:
-					if (!dto.passcode)
-						throw new BadRequestException(
-							"Passcode is required for protected visibility.",
-						);
+					if (!dto.passcode) {
+						throw new BadRequestException("Passcode is required.");
+					}
 					break;
 			}
 		}
 
 		if (dto.cards) {
-			const cardMap = new Map(deck.cards.getItems().map((c) => [c.id, c]));
+			const pendingImages = await this.pendingMediaRepo.find({
+				owner: userId,
+				media: {
+					fileId: {
+						$in: dto.cards
+							.map((card) => card.fileId)
+							.filter((id): id is string => !!id),
+					},
+				},
+			});
+
+			const pendingImageMap = new Map(
+				pendingImages.map((pi) => [pi.media.fileId, pi]),
+			);
+			const cardMap = new Map(
+				deck.cards.getItems().map((card) => [card.id, card]),
+			);
 			const newOrUpdatedCards: Card[] = [];
 
 			for (const cardDto of dto.cards) {
+				const { id: _cardId, fileId, ...cardData } = cardDto;
+				const pendingImage = fileId ? pendingImageMap.get(fileId) : undefined;
+
 				const existingCard = cardMap.get(cardDto.id);
 
+				// UPDATE
 				if (existingCard) {
-					// update existing card
-					this.cardRepository.assign(existingCard, cardDto);
+					// delete image
+					if (fileId === "") {
+						if (existingCard.image) {
+							this.pendingMediaRepo.create({
+								owner: userId,
+								media: existingCard.image,
+							});
+						}
+
+						existingCard.image = undefined;
+					}
+
+					// update/create image
+					else if (fileId && fileId !== existingCard.image?.fileId) {
+						if (!pendingImage) continue;
+
+						if (existingCard.image) {
+							this.pendingMediaRepo.create({
+								owner: userId,
+								media: existingCard.image,
+							});
+
+							existingCard.image = pendingImage.media;
+						}
+
+						this.em.remove(pendingImage);
+					}
+
+					this.cardRepository.assign(existingCard, cardData);
 					newOrUpdatedCards.push(existingCard);
 					cardMap.delete(cardDto.id);
-				} else {
-					// add new card
-					const { id: _tempId, ...cardData } = cardDto;
-					const newCard = this.cardRepository.create({ ...cardData, deck });
+				}
+
+				// CREATE
+				else {
+					if (fileId && !pendingImage) continue;
+
+					const newCard = this.cardRepository.create({
+						...cardData,
+						deck,
+						image: pendingImage?.media,
+					});
+
+					if (pendingImage) this.em.remove(pendingImage);
+
 					newOrUpdatedCards.push(newCard);
 				}
 			}
 
-			// remove cards remaining
+			// remove remaining card images & cards
+			cardMap.forEach((card) => {
+				if (card.image) {
+					this.pendingMediaRepo.create({
+						owner: userId,
+						media: card.image,
+					});
+				}
+			});
+
 			this.em.remove(cardMap.values());
 
 			dto.cards = newOrUpdatedCards;

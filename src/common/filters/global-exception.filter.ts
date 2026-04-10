@@ -70,7 +70,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 			timestamp: new Date().toISOString(),
 			statusCode,
 			statusMessage: STATUS_CODES[statusCode],
-			message: JSON.stringify(exception.name),
+			message: JSON.stringify(exception),
 		};
 	}
 

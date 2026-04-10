@@ -5,7 +5,6 @@ import {
 	StringValidatorOptional,
 } from "@common/decorators";
 import { type UUID } from "@common/types";
-import { OmitType } from "@nestjs/swagger";
 import type { LanguageCode } from "../deck.type";
 
 export class CreateCardDto {
@@ -37,9 +36,7 @@ export class CreateCardDto {
 	fileId?: string;
 }
 
-export class UpdateCardDto extends OmitType(CreateCardDto, [
-	"fileId",
-] as const) {
+export class UpdateCardDto extends CreateCardDto {
 	@StringValidator({ isUUID: true })
 	id!: UUID;
 }
