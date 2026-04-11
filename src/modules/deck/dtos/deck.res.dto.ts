@@ -59,6 +59,7 @@ export class GetDeckResponseDto extends PickType(DeckResponseDto, [
 	"name",
 	"slug",
 	"description",
+	"visibility",
 ]) {
 	@Expose()
 	cards!: CardResponseDto[];
