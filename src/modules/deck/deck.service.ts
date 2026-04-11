@@ -11,6 +11,7 @@ import {
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { ImageKitService } from "@modules/image-kit/image-kit.service";
+import { processImage } from "@modules/image-kit/image-kit.util";
 import { NotificationResponseDto } from "@modules/notification/dtos/notification.res.dto";
 import { NotificationGateway } from "@modules/notification/notification.gateway";
 import { ActorResponseDto } from "@modules/user/user.res.dto";
@@ -197,10 +198,16 @@ export class DeckService {
 		const user = await this.userRepository.findOne(userId);
 		if (!user) throw new BadRequestException();
 
+		const { buffer, newOriginalName } = await processImage(file);
+
 		const { url, fileId, filePath } = await this.imageKitService.uploadFile({
 			userId,
-			file,
-			folders: ["avatars"],
+			file: {
+				...file,
+				buffer,
+				originalname: newOriginalName,
+			},
+			folders: ["cards"],
 		});
 		if (!url || !fileId || !filePath) throw new BadRequestException();
 
