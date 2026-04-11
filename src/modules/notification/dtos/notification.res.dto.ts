@@ -1,4 +1,5 @@
 import type { UUID } from "@common/types";
+import type { NotificationType } from "@modules/notification/notification.type";
 import { ActorResponseDto } from "@modules/user/user.res.dto";
 import { Exclude, Expose } from "class-transformer";
 
@@ -8,7 +9,7 @@ export class NotificationResponseDto {
 	id!: UUID;
 
 	@Expose()
-	entityId!: UUID;
+	type!: NotificationType;
 
 	@Expose()
 	content!: string;

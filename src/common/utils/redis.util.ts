@@ -1,5 +1,4 @@
 import { UUID } from "@common/types";
-import { GetTermSuggestionDto } from "@modules/suggestion/suggestion.dto";
 
 export function getUserSessionKey(userId: UUID, sessionId: UUID) {
 	return `user:${userId}:session:${sessionId}`;
@@ -29,15 +28,6 @@ export function getSignUpSessionKey(token: string) {
 
 export function getResetPasswordSessionKey(token: string) {
 	return `reset_password_session:${token}`;
-}
-
-export function getSuggestionKey({
-	term,
-	partOfSpeech,
-	termLanguage,
-	definitionLanguage,
-}: GetTermSuggestionDto) {
-	return `suggestion:${term}:${partOfSpeech}:term_lang:${termLanguage}:def_lang:${definitionLanguage}`;
 }
 
 export function getPrivateCacheKey(userId: UUID, key: string) {

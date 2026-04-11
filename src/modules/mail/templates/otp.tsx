@@ -18,7 +18,7 @@ export const OtpEmail = ({ otp }: OtpEmailProps) => (
 		<Head />
 		<Tailwind>
 			<Body className="bg-white font-notion">
-				<Preview>Verify your email in Vocabify</Preview>
+				<Preview>Verify your email address</Preview>
 				<Container className="px-3 mx-auto">
 					<Heading className="text-[#333] text-[24px] my-10 mx-0 p-0">
 						Enter this code to verify your email: {otp}

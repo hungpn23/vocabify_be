@@ -1,1 +1,1 @@
-export type NotificationType = "clone";
+export type NotificationType = "account" | "custom" | "system";

@@ -3,7 +3,7 @@ import { NodeEnv } from "@common/enums";
 import { GlobalExceptionFilter } from "@common/filters";
 import { AuthGuard, RoleBasedAccessControlGuard } from "@common/guards";
 import { FieldsValidationPipe } from "@common/pipes";
-import { getAppConfig, VectorDbConfig, vectorDbConfig } from "@config";
+import { getAppConfig } from "@config";
 import { MikroORM } from "@mikro-orm/core";
 import { AuthService } from "@modules/auth/auth.service";
 import { Logger } from "@nestjs/common";
@@ -20,9 +20,6 @@ async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 	const authService = app.get(AuthService);
 	const reflector = app.get(Reflector);
-	const { host: vectorDbHost, port: vectorDbPort } = app.get<VectorDbConfig>(
-		vectorDbConfig.KEY,
-	);
 
 	app.enableCors({
 		origin: frontendUrl,
@@ -49,8 +46,10 @@ async function bootstrap() {
 	}
 
 	const config = new DocumentBuilder()
-		.setTitle("App title")
-		.setDescription("App API description")
+		.setTitle("NestJS Boilerplate API")
+		.setDescription(
+			"Reusable NestJS boilerplate with auth, user, mail, and notification modules.",
+		)
 		.setVersion("1.0")
 		.addBearerAuth()
 		.build();
@@ -66,9 +65,6 @@ async function bootstrap() {
 			logger.debug(`API endpoint: ${appUrl}`);
 			logger.debug(`Health check: ${appUrl}/health-check`);
 			logger.debug(`Swagger docs: ${appUrl}/docs`);
-			logger.debug(
-				`Qdrant dashboard: http://${vectorDbHost}:${vectorDbPort}/dashboard`,
-			);
 		}
 	});
 }

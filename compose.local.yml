@@ -1,4 +1,4 @@
-name: vocabify
+name: nestjs-boilerplate
 
 services:
   db:
@@ -10,7 +10,7 @@ services:
     volumes:
       - ${PWD}/.docker/volumes/pg_data:/var/lib/postgresql/data
     networks:
-      - vocabify_network
+      - boilerplate_network
     
   redis:
     extends:
@@ -22,26 +22,12 @@ services:
       - ${PWD}/.docker/volumes/redis_data:/data
     command: ["redis-server", "--appendonly", "yes", "--dir", "/data"]
     networks:
-      - vocabify_network
-
-  qdrant:
-    extends:
-      file: .docker/compose.base.yml
-      service: qdrant
-    ports:
-      - '${VECTOR_DB_PORT}:6333'
-    # use docker volumes to avoid "Incompatible file system" error
-    # https://qdrant.tech/documentation/operations/common-errors/#how-to-avoid-incompatible-file-system
-    volumes:
-      - qdrant_data:/qdrant/storage 
-    networks:
-      - vocabify_network
+      - boilerplate_network
 
 
 volumes:
   pg_data:
   redis_data:
-  qdrant_data:
 
 networks:
-  vocabify_network:
+  boilerplate_network:

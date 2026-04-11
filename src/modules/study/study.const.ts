@@ -1,2 +1,0 @@
-export const MAX_REVIEW_CARDS_PER_SESSION = 50;
-export const TOTAL_SESSION_LIMIT = 100;

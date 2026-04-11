@@ -1,4 +1,4 @@
-name: vocabify
+name: nestjs-boilerplate
 
 services:
   caddy:
@@ -44,8 +44,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      qdrant:
-        condition: service_started
       migration:
         condition: service_completed_successfully
     networks:
@@ -74,21 +72,9 @@ services:
     networks:
       - default_network
 
-  qdrant:
-    extends:
-      file: .docker/compose.base.yml
-      service: qdrant
-    expose:
-      - '${VECTOR_DB_PORT}'
-    volumes:
-      - qdrant_data:/qdrant/storage
-    networks:
-      - default_network
-
 volumes:
   pg_data:
   redis_data:
-  qdrant_data:
   caddy_data:
   caddy_config:
 

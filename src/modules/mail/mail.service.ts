@@ -35,7 +35,7 @@ export class MailService {
 		const { data, error } = await this.resend.emails.send({
 			from: this.mailConf.from,
 			to,
-			subject: "Welcome to Vocabify!",
+			subject: "Welcome to the application",
 			html: await renderEmail<WelcomeEmailProps>(WelcomeEmail, { username }),
 		});
 
@@ -48,7 +48,7 @@ export class MailService {
 		const { data, error } = await this.resend.emails.send({
 			from: this.mailConf.from,
 			to,
-			subject: "Login to Vocabify with magic link",
+			subject: "Use this magic link to sign in",
 			html: await renderEmail<MagicLinkEmailProps>(MagicLinkEmail, {
 				link: magicLink,
 			}),
@@ -63,7 +63,7 @@ export class MailService {
 		const { data, error } = await this.resend.emails.send({
 			from: this.mailConf.from,
 			to,
-			subject: "Verify your email in Vocabify",
+			subject: "Verify your email address",
 			html: await renderEmail<OtpEmailProps>(OtpEmail, {
 				otp,
 			}),

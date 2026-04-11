@@ -1,4 +1,3 @@
-import { type UUID } from "@common/types";
 import { NullableProperty } from "@common/utils";
 import { Entity, ManyToOne, Property, type Ref, t } from "@mikro-orm/core";
 import { type NotificationType } from "@modules/notification/notification.type";
@@ -7,9 +6,6 @@ import { User } from "./user.entity";
 
 @Entity()
 export class Notification extends BaseEntity {
-	@Property({ type: t.uuid })
-	entityId!: UUID;
-
 	@Property()
 	type!: NotificationType;
 

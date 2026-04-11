@@ -18,7 +18,7 @@ export const MagicLinkEmail = ({ link }: MagicLinkEmailProps) => (
 		<Head />
 		<Tailwind>
 			<Body className="bg-white font-notion">
-				<Preview>Log in to Vocabify</Preview>
+				<Preview>Sign in with your magic link</Preview>
 				<Container className="px-3 mx-auto">
 					<Link
 						href={link}

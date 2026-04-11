@@ -14,7 +14,6 @@ import {
 import argon2 from "argon2";
 import { MediaInfo } from "../embeddables";
 import { BaseEntity } from "./base.entity";
-import { Deck } from "./deck.entity";
 import { Notification } from "./notification.entity";
 
 @Entity()
@@ -36,9 +35,6 @@ export class User extends BaseEntity {
 
 	@Enum(() => UserRole)
 	role: Opt<UserRole> = UserRole.USER;
-
-	@OneToMany(() => Deck, "owner", { orphanRemoval: true })
-	decks = new Collection<Deck, User>(this);
 
 	@OneToMany(() => Notification, "recipient", { orphanRemoval: true })
 	notifications = new Collection<Notification, User>(this);

@@ -20,11 +20,11 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => (
 		<Head />
 		<Tailwind>
 			<Body className="bg-white font-sans">
-				<Preview>Welcome to Vocabify!</Preview>
+				<Preview>Welcome to the application</Preview>
 				<Container className="mx-auto py-5 pb-12">
 					<Text className="text-[16px] leading-[26px]">Hi {username},</Text>
 					<Text className="text-[16px] leading-[26px]">
-						Welcome to Vocabify!
+						Welcome to the application.
 					</Text>
 					<Section className="text-center">
 						<Button
@@ -37,10 +37,12 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => (
 					<Text className="text-[16px] leading-[26px]">
 						Best,
 						<br />
-						The Vocabify team
+						The engineering team
 					</Text>
 					<Hr className="border-[#cccccc] my-5" />
-					<Text className="text-[#8898aa] text-[12px]">Ha Noi, Viet Nam</Text>
+					<Text className="text-[#8898aa] text-[12px]">
+						Powered by NestJS Boilerplate
+					</Text>
 				</Container>
 			</Body>
 		</Tailwind>
