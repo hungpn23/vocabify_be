@@ -188,6 +188,26 @@
 					"length": 255,
 					"mappedType": "string"
 				},
+				"avatar_file_id": {
+					"name": "avatar_file_id",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": true,
+					"length": 255,
+					"mappedType": "string"
+				},
+				"avatar_file_path": {
+					"name": "avatar_file_path",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": true,
+					"length": 255,
+					"mappedType": "string"
+				},
 				"role": {
 					"name": "role",
 					"type": "text",
@@ -243,6 +263,100 @@
 					"nullable": false,
 					"mappedType": "uuid"
 				},
+				"pending_url": {
+					"name": "pending_url",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"length": 255,
+					"mappedType": "string"
+				},
+				"pending_file_id": {
+					"name": "pending_file_id",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"length": 255,
+					"mappedType": "string"
+				},
+				"pending_file_path": {
+					"name": "pending_file_path",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"length": 255,
+					"mappedType": "string"
+				},
+				"owner_id": {
+					"name": "owner_id",
+					"type": "uuid",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"mappedType": "uuid"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamptz",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"length": 6,
+					"mappedType": "datetime"
+				}
+			},
+			"name": "pending_media",
+			"schema": "public",
+			"indexes": [
+				{
+					"keyName": "pending_media_created_at_index",
+					"columnNames": ["created_at"],
+					"composite": false,
+					"constraint": false,
+					"primary": false,
+					"unique": false
+				},
+				{
+					"keyName": "pending_media_pkey",
+					"columnNames": ["id"],
+					"composite": false,
+					"constraint": true,
+					"primary": true,
+					"unique": true
+				}
+			],
+			"checks": [],
+			"foreignKeys": {
+				"pending_media_owner_id_foreign": {
+					"constraintName": "pending_media_owner_id_foreign",
+					"columnNames": ["owner_id"],
+					"localTableName": "public.pending_media",
+					"referencedColumnNames": ["id"],
+					"referencedTableName": "public.user",
+					"updateRule": "cascade"
+				}
+			},
+			"nativeEnums": {}
+		},
+		{
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"mappedType": "uuid"
+				},
 				"created_at": {
 					"name": "created_at",
 					"type": "timestamptz",
@@ -271,6 +385,16 @@
 					"primary": false,
 					"nullable": false,
 					"mappedType": "uuid"
+				},
+				"type": {
+					"name": "type",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": false,
+					"length": 255,
+					"mappedType": "string"
 				},
 				"content": {
 					"name": "content",
@@ -378,13 +502,13 @@
 				},
 				"deleted_at": {
 					"name": "deleted_at",
-					"type": "varchar(255)",
+					"type": "timestamptz",
 					"unsigned": false,
 					"autoincrement": false,
 					"primary": false,
 					"nullable": true,
-					"length": 255,
-					"mappedType": "string"
+					"length": 6,
+					"mappedType": "datetime"
 				},
 				"name": {
 					"name": "name",
@@ -404,6 +528,7 @@
 					"primary": false,
 					"nullable": false,
 					"length": 255,
+					"default": "''",
 					"mappedType": "string"
 				},
 				"description": {
@@ -605,6 +730,36 @@
 					"length": 255,
 					"mappedType": "string"
 				},
+				"image_url": {
+					"name": "image_url",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": true,
+					"length": 255,
+					"mappedType": "string"
+				},
+				"image_file_id": {
+					"name": "image_file_id",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": true,
+					"length": 255,
+					"mappedType": "string"
+				},
+				"image_file_path": {
+					"name": "image_file_path",
+					"type": "varchar(255)",
+					"unsigned": false,
+					"autoincrement": false,
+					"primary": false,
+					"nullable": true,
+					"length": 255,
+					"mappedType": "string"
+				},
 				"pronunciation": {
 					"name": "pronunciation",
 					"type": "varchar(255)",
@@ -641,7 +796,7 @@
 					"unsigned": false,
 					"autoincrement": false,
 					"primary": false,
-					"nullable": true,
+					"nullable": false,
 					"mappedType": "array"
 				},
 				"streak": {
@@ -656,13 +811,13 @@
 				},
 				"review_date": {
 					"name": "review_date",
-					"type": "varchar(255)",
+					"type": "timestamptz",
 					"unsigned": false,
 					"autoincrement": false,
 					"primary": false,
 					"nullable": true,
-					"length": 255,
-					"mappedType": "string"
+					"length": 6,
+					"mappedType": "datetime"
 				},
 				"status": {
 					"name": "status",
@@ -723,13 +878,13 @@
 				},
 				"last_study_date": {
 					"name": "last_study_date",
-					"type": "varchar(255)",
+					"type": "timestamptz",
 					"unsigned": false,
 					"autoincrement": false,
 					"primary": false,
 					"nullable": true,
-					"length": 255,
-					"mappedType": "string"
+					"length": 6,
+					"mappedType": "datetime"
 				},
 				"current_streak": {
 					"name": "current_streak",
