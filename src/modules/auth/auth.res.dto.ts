@@ -1,19 +1,29 @@
-import { Expose } from "class-transformer";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-export class TokenPairResponseDto {
-	@Expose()
-	accessToken!: string;
+const tokenPairSchema = type({
+	accessToken: "string",
+	refreshToken: "string",
+});
 
-	@Expose()
-	refreshToken!: string;
-}
+export class TokenPairResponseDto extends createArkDto(tokenPairSchema, {
+	name: "TokenPairResponseDto",
+}) {}
 
-export class ConfirmEmailVerificationResponseDto {
-	@Expose()
-	verifiedToken!: string;
-}
+const confirmEmailVerificationResponseSchema = type({
+	verifiedToken: "string",
+});
 
-export class ConfirmPasswordResetResponseDto {
-	@Expose()
-	resetToken!: string;
-}
+export class ConfirmEmailVerificationResponseDto extends createArkDto(
+	confirmEmailVerificationResponseSchema,
+	{ name: "ConfirmEmailVerificationResponseDto" },
+) {}
+
+const confirmPasswordResetResponseSchema = type({
+	resetToken: "string",
+});
+
+export class ConfirmPasswordResetResponseDto extends createArkDto(
+	confirmPasswordResetResponseSchema,
+	{ name: "ConfirmPasswordResetResponseDto" },
+) {}

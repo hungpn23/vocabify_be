@@ -9,7 +9,6 @@ import {
 	HttpStatus,
 	UnprocessableEntityException,
 } from "@nestjs/common";
-import { ValidationError } from "class-validator";
 import { Response } from "express";
 
 @Catch()
@@ -38,15 +37,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 		exception: UnprocessableEntityException,
 	): ErrorResponseDto {
 		const response = exception.getResponse() as {
-			message: ValidationError[];
+			message?: string;
+			details?: ErrorDetailResponseDto[];
 		};
 		const statusCode = exception.getStatus();
 
 		return {
 			timestamp: new Date().toISOString(),
 			statusCode,
-			message: "Validation failed",
-			details: this._handleValidationErrors(response.message),
+			message: response.message ?? "Validation failed",
+			details: response.details ?? [],
 		};
 	}
 
@@ -85,42 +85,5 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 			statusMessage,
 			message: err.message || statusMessage,
 		};
-	}
-
-	// ref: https://www.yasint.dev/flatten-error-constraints
-	private _handleValidationErrors(errors: ValidationError[]) {
-		const results: ErrorDetailResponseDto[] = [];
-		for (const error of errors) {
-			this._flattenError(error, results);
-		}
-		return results;
-	}
-
-	private _flattenError(
-		error: ValidationError,
-		results: ErrorDetailResponseDto[],
-		parentPath?: string,
-	) {
-		const propertyPath = parentPath
-			? `${parentPath}.${error.property}`
-			: error.property;
-
-		if (error.constraints) {
-			for (const [constraintName, message] of Object.entries(
-				error.constraints,
-			)) {
-				results.push({
-					property: propertyPath,
-					constraintName,
-					message,
-				});
-			}
-		}
-
-		if (error.children && error.children.length > 0) {
-			for (const child of error.children) {
-				this._flattenError(child, results, propertyPath);
-			}
-		}
 	}
 }

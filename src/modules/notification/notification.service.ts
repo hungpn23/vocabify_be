@@ -8,14 +8,9 @@ import {
 	wrap,
 } from "@mikro-orm/core";
 import { InjectRepository } from "@mikro-orm/nestjs";
-import { ActorResponseDto } from "@modules/user/user.res.dto";
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { plainToInstance } from "class-transformer";
 import { GetNotificationsQueryDto } from "./dtos/notification.dto";
-import {
-	GetNotificationsResponseDto,
-	NotificationResponseDto,
-} from "./dtos/notification.res.dto";
+import { GetNotificationsResponseDto } from "./dtos/notification.res.dto";
 
 @Injectable()
 export class NotificationService {
@@ -43,14 +38,16 @@ export class NotificationService {
 
 		const data = notifications.map((n) => {
 			const plainNoti = wrap(n).toObject();
-
-			return plainToInstance(NotificationResponseDto, {
-				...plainNoti,
-				actor: plainToInstance(ActorResponseDto, plainNoti.actor),
-			});
+			const { recipient, ...rest } = plainNoti as typeof plainNoti & {
+				recipient: UUID;
+			};
+			return {
+				...rest,
+				recipientId: recipient,
+			};
 		});
 
-		return { data, totalRecords };
+		return { data, totalRecords } as unknown as GetNotificationsResponseDto;
 	}
 
 	async readNotification(

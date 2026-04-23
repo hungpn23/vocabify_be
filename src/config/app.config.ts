@@ -1,32 +1,24 @@
-import {
-	EnumValidator,
-	PortValidator,
-	StringValidator,
-	UrlValidator,
-} from "@common/decorators";
 import { NodeEnv } from "@common/enums";
 import { ConfigType, registerAs } from "@nestjs/config";
+import { type } from "arktype";
 import { validateConfig } from "./validate-config";
 
-class AppEnvVariables {
-	@EnumValidator(NodeEnv)
-	NODE_ENV!: NodeEnv;
+const portSchema = type("string.numeric.parse").narrow(
+	(n, ctx) =>
+		(Number.isInteger(n) && n >= 0 && n <= 65535) ||
+		ctx.mustBe("a valid port number (0-65535)"),
+);
 
-	@UrlValidator({ require_tld: false }) // to allow localhost
-	APP_HOST!: string;
-
-	@PortValidator()
-	APP_PORT!: number;
-
-	@StringValidator()
-	API_PREFIX!: string;
-
-	@UrlValidator({ require_tld: false })
-	FRONTEND_URL!: string;
-}
+const appEnvSchema = type({
+	NODE_ENV: type.enumerated(...Object.values(NodeEnv)),
+	APP_HOST: "string >= 1",
+	APP_PORT: portSchema,
+	API_PREFIX: "string >= 1",
+	FRONTEND_URL: "string >= 1",
+});
 
 export const getAppConfig = () => {
-	const config = validateConfig(AppEnvVariables);
+	const config = validateConfig(appEnvSchema);
 
 	return {
 		nodeEnv: config.NODE_ENV,

@@ -1,31 +1,24 @@
-import { Exclude, Expose } from "class-transformer";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-@Exclude()
-export class ErrorDetailResponseDto {
-	@Expose()
-	property!: string;
+const errorDetailSchema = type({
+	property: "string",
+	constraintName: "string",
+	message: "string",
+});
 
-	@Expose()
-	constraintName!: string;
+export class ErrorDetailResponseDto extends createArkDto(errorDetailSchema, {
+	name: "ErrorDetailResponseDto",
+}) {}
 
-	@Expose()
-	message!: string;
-}
+const errorResponseSchema = type({
+	timestamp: "string",
+	statusCode: "number",
+	"statusMessage?": "string",
+	message: "string",
+	"details?": errorDetailSchema.array(),
+});
 
-@Exclude()
-export class ErrorResponseDto {
-	@Expose()
-	timestamp!: string;
-
-	@Expose()
-	statusCode!: number;
-
-	@Expose()
-	statusMessage?: string;
-
-	@Expose()
-	message!: string;
-
-	@Expose()
-	details?: ErrorDetailResponseDto[];
-}
+export class ErrorResponseDto extends createArkDto(errorResponseSchema, {
+	name: "ErrorResponseDto",
+}) {}

@@ -1,17 +1,14 @@
-import { StringValidator } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
+import { type } from "arktype";
 import { validateConfig } from "./validate-config";
 
-class IntegrationEnvVariables {
-	@StringValidator()
-	IMAGEKIT_PRIVATE_KEY!: string;
-
-	@StringValidator()
-	RESEND_API_KEY!: string;
-}
+const integrationEnvSchema = type({
+	IMAGEKIT_PRIVATE_KEY: "string >= 1",
+	RESEND_API_KEY: "string >= 1",
+});
 
 export const integrationConfig = registerAs("integration", () => {
-	const config = validateConfig(IntegrationEnvVariables);
+	const config = validateConfig(integrationEnvSchema);
 
 	return {
 		imagekitPrivateKey: config.IMAGEKIT_PRIVATE_KEY,

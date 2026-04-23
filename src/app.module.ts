@@ -1,5 +1,6 @@
 import { AppController } from "@app.controller";
 import { NodeEnv } from "@common/enums";
+import { ArkSerializeInterceptor } from "@common/interceptors/ark-serialize.interceptor";
 import {
 	appConfig,
 	authConfig,
@@ -22,6 +23,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { CacheManagerOptions, CacheModule } from "@nestjs/cache-manager";
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MulterModule } from "@nestjs/platform-express";
 import ms from "ms";
 import { memoryStorage } from "multer";
@@ -91,11 +93,11 @@ const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
 		Modules,
 	],
 	controllers: [AppController],
-	// providers: [
-	// 	{
-	// 		provide: APP_INTERCEPTOR,
-	// 		useClass: HttpCacheInterceptor,
-	// 	},
-	// ],
+	providers: [
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: ArkSerializeInterceptor,
+		},
+	],
 })
 export class AppModule {}

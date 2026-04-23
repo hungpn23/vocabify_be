@@ -1,12 +1,6 @@
 import { STATUS_CODES } from "node:http";
 import { ErrorResponseDto, PaginatedDto } from "@common/dtos";
-import {
-	applyDecorators,
-	HttpCode,
-	HttpStatus,
-	SerializeOptions,
-	Type,
-} from "@nestjs/common";
+import { applyDecorators, HttpCode, HttpStatus, Type } from "@nestjs/common";
 import {
 	ApiBearerAuth,
 	ApiExtraModels,
@@ -15,6 +9,10 @@ import {
 	getSchemaPath,
 } from "@nestjs/swagger";
 import { ApiPublic } from "./api-public.decorator";
+import {
+	ArkSerialize,
+	type ArkSerializeTarget,
+} from "./ark-serialize.decorator";
 
 type EndpointOptions = Partial<{
 	responseType: Type<unknown>;
@@ -24,6 +22,12 @@ type EndpointOptions = Partial<{
 	errorStatusCodes: HttpStatus[];
 	isPaginated: boolean;
 }>;
+
+function isArkDto(t: unknown): t is ArkSerializeTarget {
+	return (
+		typeof t === "function" && (t as { isArkDto?: boolean }).isArkDto === true
+	);
+}
 
 export function ApiEndpoint(options: EndpointOptions = {}) {
 	const {
@@ -37,13 +41,9 @@ export function ApiEndpoint(options: EndpointOptions = {}) {
 
 	const decorators: MethodDecorator[] = [];
 
-	decorators.push(
-		SerializeOptions({
-			type: responseType,
-			excludeExtraneousValues: true,
-			strategy: "excludeAll",
-		}),
-	);
+	if (responseType && isArkDto(responseType)) {
+		decorators.push(ArkSerialize(responseType));
+	}
 	decorators.push(HttpCode(statusCode));
 	decorators.push(isPublic ? ApiPublic() : ApiBearerAuth());
 

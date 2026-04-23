@@ -1,5 +1,4 @@
-import { MetadataResponseDto, QueryDto } from "@common/dtos";
-import { plainToInstance } from "class-transformer";
+import { type QueryDto } from "@common/dtos";
 
 export function getMetadataResponseDto(totalRecords: number, query: QueryDto) {
 	const limit = query.limit;
@@ -15,12 +14,12 @@ export function getMetadataResponseDto(totalRecords: number, query: QueryDto) {
 			? currentPage - 1
 			: undefined;
 
-	return plainToInstance(MetadataResponseDto, {
+	return {
 		limit,
 		totalRecords,
 		totalPages,
 		currentPage,
 		nextPage,
 		previousPage,
-	});
+	};
 }

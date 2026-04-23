@@ -1,7 +1,10 @@
-import { Exclude, Expose } from "class-transformer";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-@Exclude()
-export class SuccessResponseDto {
-	@Expose()
-	success!: boolean;
-}
+const successResponseSchema = type({
+	success: "boolean",
+});
+
+export class SuccessResponseDto extends createArkDto(successResponseSchema, {
+	name: "SuccessResponseDto",
+}) {}

@@ -1,13 +1,15 @@
-import { Exclude, Expose } from "class-transformer";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-@Exclude()
-export class MediaInfoResponseDto {
-	@Expose()
-	url!: string;
+export const mediaInfoResponseSchema = type({
+	url: "string",
+	fileId: "string",
+	filePath: "string",
+});
 
-	@Expose()
-	fileId!: string;
-
-	@Expose()
-	filePath!: string;
-}
+export class MediaInfoResponseDto extends createArkDto(
+	mediaInfoResponseSchema,
+	{
+		name: "MediaInfoResponseDto",
+	},
+) {}

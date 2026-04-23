@@ -1,6 +1,14 @@
-import { QueryDto } from "@common/dtos";
-import { PickType } from "@nestjs/swagger";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-export class GetNotificationsQueryDto extends PickType(QueryDto, [
-	"limit",
-] as const) {}
+const getNotificationsQuerySchema = type({
+	limit: type("string.numeric.parse|number.integer")
+		.narrow((n, ctx) => Number.isInteger(n) || ctx.mustBe("an integer"))
+		.narrow((n, ctx) => n >= 10 || ctx.mustBe("at least 10"))
+		.default(10),
+});
+
+export class GetNotificationsQueryDto extends createArkDto(
+	getNotificationsQuerySchema,
+	{ name: "GetNotificationsQueryDto", input: true },
+) {}

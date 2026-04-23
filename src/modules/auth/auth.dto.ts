@@ -1,78 +1,100 @@
-import {
-	EmailValidator,
-	NumberValidator,
-	PasswordValidator,
-	StringValidator,
-} from "@common/decorators";
-import { PickType } from "@nestjs/swagger";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-export class BaseAuthDto {
-	@StringValidator()
-	username!: string;
+const passwordSchema = type("string").narrow(
+	(s, ctx) =>
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#$%&*@^]).{8,}$/.test(s) ||
+		ctx.mustBe(
+			"at least 8 characters, including uppercase, lowercase, number, and special characters",
+		),
+);
 
-	@EmailValidator()
-	email!: string;
+const baseAuthSchema = type({
+	username: "string >= 1",
+	email: "string.email",
+	password: passwordSchema,
+});
 
-	@PasswordValidator()
-	password!: string;
-}
+const loginSchema = baseAuthSchema.pick("email", "password");
 
-export class LoginDto extends PickType(BaseAuthDto, [
-	"email",
-	"password",
-] as const) {}
+const signUpSchema = baseAuthSchema.pick("username", "password").merge({
+	verifiedToken: "string.uuid.v4",
+});
 
-export class SignUpDto extends PickType(BaseAuthDto, [
-	"username",
-	"password",
-] as const) {
-	@StringValidator({ isUUID: true })
-	verifiedToken!: string;
-}
+const requestEmailVerificationSchema = baseAuthSchema.pick("email");
 
-export class RequestEmailVerificationDto extends PickType(BaseAuthDto, [
-	"email",
-] as const) {}
+const confirmEmailVerificationSchema = baseAuthSchema.pick("email").merge({
+	otp: "string == 6",
+});
 
-export class ConfirmEmailVerificationDto extends PickType(BaseAuthDto, [
-	"email",
-] as const) {
-	@NumberValidator({ isInt: true, minimum: 100000, maximum: 999999 })
-	otp!: number;
-}
+const requestMagicLinkSchema = baseAuthSchema.pick("email");
 
-export class RequestMagicLinkDto extends PickType(BaseAuthDto, [
-	"email",
-] as const) {}
+const changePasswordSchema = type({
+	oldPassword: passwordSchema,
+	newPassword: passwordSchema,
+});
 
-export class ChangePasswordDto {
-	@PasswordValidator()
-	oldPassword!: string;
+const refreshTokenSchema = type({
+	refreshToken: "string >= 1",
+});
 
-	@PasswordValidator()
-	newPassword!: string;
-}
+const requestPasswordResetSchema = baseAuthSchema.pick("email");
 
-export class RefreshTokenDto {
-	@StringValidator()
-	refreshToken!: string;
-}
+const confirmPasswordResetSchema = baseAuthSchema.pick("email").merge({
+	otp: "string.numeric == 6",
+});
 
-export class RequestPasswordResetDto extends PickType(BaseAuthDto, [
-	"email",
-] as const) {}
+const resetPasswordSchema = type({
+	resetToken: "string.uuid.v4",
+	newPassword: passwordSchema,
+});
 
-export class ConfirmPasswordResetDto extends PickType(BaseAuthDto, [
-	"email",
-] as const) {
-	@NumberValidator({ isInt: true, minimum: 100000, maximum: 999999 })
-	otp!: number;
-}
+export class LoginDto extends createArkDto(loginSchema, {
+	name: "LoginDto",
+	input: true,
+}) {}
 
-export class ResetPasswordDto {
-	@StringValidator({ isUUID: true })
-	resetToken!: string;
+export class SignUpDto extends createArkDto(signUpSchema, {
+	name: "SignUpDto",
+	input: true,
+}) {}
 
-	@PasswordValidator()
-	newPassword!: string;
-}
+export class RequestEmailVerificationDto extends createArkDto(
+	requestEmailVerificationSchema,
+	{ name: "RequestEmailVerificationDto", input: true },
+) {}
+
+export class ConfirmEmailVerificationDto extends createArkDto(
+	confirmEmailVerificationSchema,
+	{ name: "ConfirmEmailVerificationDto", input: true },
+) {}
+
+export class RequestMagicLinkDto extends createArkDto(requestMagicLinkSchema, {
+	name: "RequestMagicLinkDto",
+	input: true,
+}) {}
+
+export class ChangePasswordDto extends createArkDto(changePasswordSchema, {
+	name: "ChangePasswordDto",
+	input: true,
+}) {}
+
+export class RefreshTokenDto extends createArkDto(refreshTokenSchema, {
+	name: "RefreshTokenDto",
+	input: true,
+}) {}
+
+export class RequestPasswordResetDto extends createArkDto(
+	requestPasswordResetSchema,
+	{ name: "RequestPasswordResetDto", input: true },
+) {}
+
+export class ConfirmPasswordResetDto extends createArkDto(
+	confirmPasswordResetSchema,
+	{ name: "ConfirmPasswordResetDto", input: true },
+) {}
+
+export class ResetPasswordDto extends createArkDto(resetPasswordSchema, {
+	name: "ResetPasswordDto",
+	input: true,
+}) {}

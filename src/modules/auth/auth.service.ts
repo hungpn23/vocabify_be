@@ -328,7 +328,7 @@ export class AuthService {
 		);
 		if (!data) throw new BadRequestException();
 
-		const isOtpValid = await argon2.verify(data.hashedOtp, otp.toString());
+		const isOtpValid = await argon2.verify(data.hashedOtp, otp);
 		if (!isOtpValid) throw new BadRequestException();
 
 		await Promise.all([

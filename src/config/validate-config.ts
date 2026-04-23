@@ -1,18 +1,14 @@
-import { ClassConstructor, plainToInstance } from "class-transformer";
-import { validateSync } from "class-validator";
+import { ArkErrors, type Type } from "arktype";
 
-export function validateConfig<T extends object>(
-	envVariablesClass: ClassConstructor<T>,
+export function validateConfig<T extends Type>(
+	arkSchema: T,
 	config: Record<string, unknown> = process.env,
-): T {
-	const transformed = plainToInstance(envVariablesClass, config);
+): T["infer"] {
+	const result = arkSchema(config);
 
-	const errors = validateSync(transformed, {
-		whitelist: true,
-		enableDebugMessages: true,
-	});
+	if (result instanceof ArkErrors) {
+		throw new Error(`Invalid environment configuration:\n${result.summary}`);
+	}
 
-	if (errors.length > 0) throw new Error(errors.toString());
-
-	return transformed;
+	return result;
 }

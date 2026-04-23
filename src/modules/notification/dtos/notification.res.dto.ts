@@ -1,37 +1,30 @@
-import type { UUID } from "@common/types";
-import type { NotificationType } from "@modules/notification/notification.type";
-import { ActorResponseDto } from "@modules/user/user.res.dto";
-import { Exclude, Expose } from "class-transformer";
+import { actorResponseSchema } from "@modules/user/user.res.dto";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-@Exclude()
-export class NotificationResponseDto {
-	@Expose()
-	id!: UUID;
+const notificationTypeSchema = type("'account'|'custom'|'system'");
 
-	@Expose()
-	type!: NotificationType;
+const notificationResponseSchema = type({
+	id: "string.uuid",
+	type: notificationTypeSchema,
+	content: "string",
+	"readAt?": "Date",
+	"actor?": actorResponseSchema,
+	recipientId: "string.uuid",
+	createdAt: "Date",
+});
 
-	@Expose()
-	content!: string;
+export class NotificationResponseDto extends createArkDto(
+	notificationResponseSchema,
+	{ name: "NotificationResponseDto" },
+) {}
 
-	@Expose()
-	readAt?: Date;
+const getNotificationsResponseSchema = type({
+	data: notificationResponseSchema.array(),
+	totalRecords: "number",
+});
 
-	@Expose()
-	actor?: ActorResponseDto;
-
-	@Expose()
-	recipientId!: UUID;
-
-	@Expose()
-	createdAt!: Date;
-}
-
-@Exclude()
-export class GetNotificationsResponseDto {
-	@Expose()
-	data!: NotificationResponseDto[];
-
-	@Expose()
-	totalRecords!: number;
-}
+export class GetNotificationsResponseDto extends createArkDto(
+	getNotificationsResponseSchema,
+	{ name: "GetNotificationsResponseDto" },
+) {}

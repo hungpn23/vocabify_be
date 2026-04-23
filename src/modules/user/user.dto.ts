@@ -1,6 +1,11 @@
-import { StringValidator } from "@common/decorators";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-export class UpdateProfileDto {
-	@StringValidator()
-	username!: string;
-}
+const updateProfileSchema = type({
+	username: "string >= 1",
+});
+
+export class UpdateProfileDto extends createArkDto(updateProfileSchema, {
+	name: "UpdateProfileDto",
+	input: true,
+}) {}

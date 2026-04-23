@@ -1,20 +1,15 @@
-import { StringValidator } from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
+import { type } from "arktype";
 import { validateConfig } from "./validate-config";
 
-class GoogleEnvVariables {
-	@StringValidator()
-	GOOGLE_CLIENT_ID!: string;
-
-	@StringValidator()
-	GOOGLE_CLIENT_SECRET!: string;
-
-	@StringValidator()
-	GOOGLE_REDIRECT_URI!: string;
-}
+const googleEnvSchema = type({
+	GOOGLE_CLIENT_ID: "string >= 1",
+	GOOGLE_CLIENT_SECRET: "string >= 1",
+	GOOGLE_REDIRECT_URI: "string >= 1",
+});
 
 export const googleConfig = registerAs("google", () => {
-	const config = validateConfig(GoogleEnvVariables);
+	const config = validateConfig(googleEnvSchema);
 
 	return {
 		clientId: config.GOOGLE_CLIENT_ID,

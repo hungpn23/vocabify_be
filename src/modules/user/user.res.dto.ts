@@ -1,42 +1,35 @@
-import { MediaInfoResponseDto } from "@common/dtos/media-info.res.dto";
+import { mediaInfoResponseSchema } from "@common/dtos/media-info.res.dto";
 import { UserRole } from "@common/enums";
-import { type UUID } from "@common/types";
-import { PickType } from "@nestjs/swagger";
-import { Exclude, Expose } from "class-transformer";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-@Exclude()
-export class UserResponseDto {
-	@Expose()
-	id!: UUID;
+export const userResponseSchema = type({
+	id: "string.uuid",
+	username: "string",
+	"email?": "string",
+	emailVerified: "boolean",
+	"avatar?": mediaInfoResponseSchema,
+	role: type.enumerated(...Object.values(UserRole)),
+	createdAt: "Date",
+	"updatedAt?": "Date",
+});
 
-	@Expose()
-	username!: string;
+export class UserResponseDto extends createArkDto(userResponseSchema, {
+	name: "UserResponseDto",
+}) {}
 
-	@Expose()
-	email?: string;
-
-	@Expose()
-	emailVerified!: boolean;
-
-	@Expose()
-	avatar?: MediaInfoResponseDto;
-
-	@Expose()
-	role!: UserRole;
-
-	@Expose()
-	createdAt!: Date;
-
-	@Expose()
-	updatedAt?: Date;
-}
-
-@Exclude()
-export class OwnerResponseDto extends PickType(UserResponseDto, [
+export const ownerResponseSchema = userResponseSchema.pick(
 	"id",
 	"username",
 	"avatar",
-] as const) {}
+);
 
-@Exclude()
-export class ActorResponseDto extends OwnerResponseDto {}
+export class OwnerResponseDto extends createArkDto(ownerResponseSchema, {
+	name: "OwnerResponseDto",
+}) {}
+
+export const actorResponseSchema = ownerResponseSchema;
+
+export class ActorResponseDto extends createArkDto(actorResponseSchema, {
+	name: "ActorResponseDto",
+}) {}

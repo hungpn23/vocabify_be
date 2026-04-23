@@ -1,56 +1,51 @@
-import {
-	EnumValidatorOptional,
-	NumberValidatorOptional,
-	StringValidatorOptional,
-} from "@common/decorators/validators.decorator";
 import { QueryOrder } from "@mikro-orm/core";
-import { Exclude, Expose } from "class-transformer";
+import { type } from "arktype";
+import { createArkDto } from "nestjs-arktype";
 
-export class QueryDto {
-	@NumberValidatorOptional({ isInt: true, minimum: 1 })
-	page: number = 1;
+const positiveIntFromQuery = type("string.numeric.parse|number.integer").narrow(
+	(n, ctx) => Number.isInteger(n) || ctx.mustBe("an integer"),
+);
 
-	@NumberValidatorOptional({ isInt: true, minimum: 10 })
-	limit: number = 10;
+const querySchema = type({
+	page: positiveIntFromQuery
+		.narrow((n, ctx) => n >= 1 || ctx.mustBe("at least 1"))
+		.default(1),
+	limit: positiveIntFromQuery
+		.narrow((n, ctx) => n >= 10 || ctx.mustBe("at least 10"))
+		.default(10),
+	order: type
+		.enumerated(...Object.values(QueryOrder))
+		.default(QueryOrder.DESC_NULLS_LAST),
+	"search?": "string",
+});
 
-	@EnumValidatorOptional(QueryOrder)
-	order: QueryOrder = QueryOrder.DESC_NULLS_LAST;
-
-	@StringValidatorOptional()
-	search?: string;
-
-	get offset() {
-		return this.page ? (this.page - 1) * this.limit : 0;
+export class QueryDto extends createArkDto(querySchema, {
+	name: "QueryDto",
+	input: true,
+}) {
+	get offset(): number {
+		return (this.page - 1) * this.limit;
 	}
 }
 
-@Exclude()
-export class MetadataResponseDto {
-	@Expose()
-	limit!: number;
+const metadataResponseSchema = type({
+	limit: "number",
+	totalRecords: "number",
+	totalPages: "number",
+	currentPage: "number",
+	"nextPage?": "number",
+	"previousPage?": "number",
+});
 
-	@Expose()
-	totalRecords!: number;
+export class MetadataResponseDto extends createArkDto(metadataResponseSchema, {
+	name: "MetadataResponseDto",
+}) {}
 
-	@Expose()
-	totalPages!: number;
+const paginatedSchema = type({
+	data: "unknown[]",
+	metadata: metadataResponseSchema,
+});
 
-	@Expose()
-	currentPage!: number;
-
-	@Expose()
-	nextPage?: number;
-
-	@Expose()
-	previousPage?: number;
-}
-
-@Exclude()
-export class PaginatedDto<T> {
-	// manually define swagger schema model at ApiPaginatedResponse decorator
-	@Expose()
-	data!: T[];
-
-	@Expose()
-	metadata!: MetadataResponseDto;
-}
+export class PaginatedDto extends createArkDto(paginatedSchema, {
+	name: "PaginatedDto",
+}) {}

@@ -1,34 +1,28 @@
-import {
-	BooleanValidatorOptional,
-	PortValidatorOptional,
-	StringValidator,
-	StringValidatorOptional,
-} from "@common/decorators";
 import { ConfigType, registerAs } from "@nestjs/config";
+import { type } from "arktype";
 import { validateConfig } from "./validate-config";
 
-class MailEnvVariables {
-	@StringValidatorOptional()
-	MAIL_HOST?: string;
+const portSchema = type("string.numeric.parse").narrow(
+	(n, ctx) =>
+		(Number.isInteger(n) && n >= 0 && n <= 65535) ||
+		ctx.mustBe("a valid port number (0-65535)"),
+);
 
-	@PortValidatorOptional()
-	MAIL_PORT?: number;
+const boolSchema = type("'true'|'false'|boolean").pipe((v) =>
+	typeof v === "boolean" ? v : v === "true",
+);
 
-	@BooleanValidatorOptional()
-	MAIL_SECURE?: boolean;
-
-	@StringValidatorOptional()
-	MAIL_AUTH_USER?: string;
-
-	@StringValidatorOptional()
-	MAIL_AUTH_PASS?: string;
-
-	@StringValidator()
-	MAIL_FROM!: string;
-}
+const mailEnvSchema = type({
+	"MAIL_HOST?": "string",
+	"MAIL_PORT?": portSchema,
+	"MAIL_SECURE?": boolSchema,
+	"MAIL_AUTH_USER?": "string",
+	"MAIL_AUTH_PASS?": "string",
+	MAIL_FROM: "string >= 1",
+});
 
 export const mailConfig = registerAs("mail", () => {
-	const config = validateConfig(MailEnvVariables);
+	const config = validateConfig(mailEnvSchema);
 
 	return {
 		host: config.MAIL_HOST,
