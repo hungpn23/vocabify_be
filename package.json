@@ -18,7 +18,7 @@
 		"check": "pnpm exec biome check",
 		"check:fix": "pnpm exec biome check --write",
 		"email:build": "email build",
-		"email:dev": "email dev --dir src/modules/mail/templates",
+		"email:dev": "email dev --dir src/integrations/mail/templates",
 		"email:export": "email export",
 		"test": "jest",
 		"test:watch": "jest --watch",
@@ -27,9 +27,12 @@
 		"test:e2e": "jest --config ./test/jest-e2e.json",
 		"mikro:debug": "npx mikro-orm debug",
 		"schema:fresh": "npx mikro-orm schema:fresh --config mikro-orm.config.ts --run",
+		"schema:fresh:local": "npx dotenv -e .env.local -- npx mikro-orm schema:fresh --config mikro-orm.config.ts --run",
 		"seeder:run": "npx dotenv -e .env.local -- npx mikro-orm seeder:run --config mikro-orm.config.ts",
 		"migration:create": "npx mikro-orm migration:create --config mikro-orm.config.ts",
+		"migration:create:local": "npx dotenv -e .env.local -- npx mikro-orm migration:create --config mikro-orm.config.ts",
 		"migration:up": "npx mikro-orm migration:up",
+		"migration:up:local": "npx dotenv -e .env.local -- npx mikro-orm migration:up",
 		"prepare": "node .husky/install.mjs || true"
 	},
 	"dependencies": {

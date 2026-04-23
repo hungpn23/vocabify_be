@@ -1,9 +1,9 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20260205030255 extends Migration {
+export class Migration20260423103812 extends Migration {
 	override async up(): Promise<void> {
 		this.addSql(
-			`create table "user" ("id" uuid not null, "created_at" timestamptz not null, "updated_at" timestamptz null, "username" varchar(255) not null, "email" varchar(255) not null, "email_verified" boolean not null default false, "password" varchar(255) null, "avatar_url" varchar(255) null, "role" text check ("role" in ('user', 'admin')) not null default 'user', constraint "user_pkey" primary key ("id"));`,
+			`create table "user" ("id" uuid not null, "created_at" timestamptz not null, "updated_at" timestamptz null, "username" varchar(255) not null, "email" varchar(255) not null, "email_verified" boolean not null default false, "password" varchar(255) null, "avatar_url" varchar(255) null, "avatar_file_id" varchar(255) null, "avatar_file_path" varchar(255) null, "role" text check ("role" in ('user', 'admin')) not null default 'user', constraint "user_pkey" primary key ("id"));`,
 		);
 		this.addSql(
 			`alter table "user" add constraint "user_username_unique" unique ("username");`,
