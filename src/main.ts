@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { AppModule } from "@app.module";
 import { NodeEnv } from "@common/enums";
 import { GlobalExceptionFilter } from "@common/filters";

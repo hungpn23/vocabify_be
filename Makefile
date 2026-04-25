@@ -3,11 +3,11 @@ build:
 up:
 	docker compose up -d
 upLocal:
-	docker compose -f compose.local.yml --env-file .env.local up -d
+	docker compose -f compose.local.yml up -d
 down:
 	docker compose down
 downLocal:
-	docker compose -f compose.local.yml --env-file .env.local down
+	docker compose -f compose.local.yml down
 db:
 	docker compose exec db bash
 node:

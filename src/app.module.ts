@@ -1,11 +1,9 @@
 import { AppController } from "@app.controller";
-import { NodeEnv } from "@common/enums";
 import {
 	appConfig,
 	authConfig,
 	DatabaseConfig,
 	databaseConfig,
-	getAppConfig,
 	googleConfig,
 	integrationConfig,
 	mailConfig,
@@ -28,13 +26,10 @@ import { ScheduleModule } from "@nestjs/schedule";
 import ms from "ms";
 import { memoryStorage } from "multer";
 
-const isProduction = getAppConfig().nodeEnv === NodeEnv.PRODUCTION;
-
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath: isProduction ? ".env" : ".env.local",
 			cache: true,
 			expandVariables: true, // support ${<ENV_KEY>} in .env file
 			skipProcessEnv: true,
