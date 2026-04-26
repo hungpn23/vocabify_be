@@ -6,6 +6,7 @@ import { MailModule } from "./mail/mail.module";
 import { NotificationModule } from "./notification/notification.module";
 import { RedisModule } from "./redis/redis.module";
 import { StudyModule } from "./study/study.module";
+import { StudyGroupModule } from "./study-group/study-group.module";
 import { SuggestionModule } from "./suggestion/suggestion.module";
 import { UserModule } from "./user/user.module";
 
@@ -20,6 +21,7 @@ import { UserModule } from "./user/user.module";
 		StudyModule,
 		SuggestionModule,
 		NotificationModule,
+		StudyGroupModule,
 	],
 })
 export class Modules {}

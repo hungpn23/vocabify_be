@@ -38,6 +38,27 @@ export class SocketIOAdapter extends IoAdapter {
 					});
 			});
 
+		server
+			.of(SocketIONamespace.STUDY_GROUP)
+			.use((socket: Socket, next: (err?: ExtendedError) => void) => {
+				const accessToken = extractTokenFromHeader(
+					socket.handshake.headers.authorization,
+				);
+
+				this.authService
+					.verifyJwt(accessToken)
+					.then((payload) => {
+						(socket as SocketWithUser).user = payload;
+						next();
+					})
+					.catch((ex: UnauthorizedException) => {
+						const error: ExtendedError = new Error(ex.message);
+						error.data = ex.getResponse();
+
+						next(error);
+					});
+			});
+
 		return server;
 	}
 }
