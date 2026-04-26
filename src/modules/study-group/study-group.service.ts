@@ -2,8 +2,6 @@ import { randomInt } from "node:crypto";
 import type { Seconds, UUID } from "@common/types";
 import { Deck } from "@db/entities";
 import { EntityManager } from "@mikro-orm/core";
-import { InjectRepository } from "@mikro-orm/nestjs";
-import { EntityRepository } from "@mikro-orm/postgresql";
 import { REDIS_CLIENT } from "@modules/redis/redis.constant";
 import { RedisService } from "@modules/redis/redis.service";
 import { Inject, Injectable, Logger } from "@nestjs/common";
@@ -50,8 +48,6 @@ export class StudyGroupService {
 		private readonly redis: RedisService,
 		@Inject(REDIS_CLIENT) private readonly redisClient: Redis,
 		private readonly em: EntityManager,
-		@InjectRepository(Deck)
-		private readonly deckRepository: EntityRepository<Deck>,
 	) {}
 
 	async createRoom(
@@ -62,7 +58,9 @@ export class StudyGroupService {
 		deckIds: string[],
 		settings: RoomSettings,
 	): Promise<RoomInfo> {
-		const decks = await this.deckRepository.find(
+		const fork = this.em.fork();
+		const decks = await fork.find(
+			Deck,
 			{ id: { $in: deckIds as UUID[] }, owner: userId },
 			{ populate: ["cards"] },
 		);
@@ -124,7 +122,7 @@ export class StudyGroupService {
 		userId: UUID,
 		username: string,
 		avatar: PlayerInfo["avatar"],
-	): Promise<{ roomInfo: RoomInfo; players: PlayerInfo[] }> {
+	): Promise<{ roomInfo: RoomInfo; players: PlayerInfo[]; isNew: boolean }> {
 		const roomInfo = await this.redis.getValue<RoomInfo>(key(roomId, "info"));
 		if (!roomInfo) throw new Error("Room not found");
 		if (roomInfo.status !== RoomStatus.WAITING)
@@ -136,7 +134,10 @@ export class StudyGroupService {
 		const players = playersMap ? Object.values(playersMap) : [];
 
 		if (players.some((p) => p.userId === userId)) {
-			throw new Error("Already in room");
+			// Reconnecting — update connected status
+			await this.setPlayerConnected(roomId, userId, true);
+			const updatedPlayers = await this.getPlayers(roomId);
+			return { roomInfo, players: updatedPlayers, isNew: false };
 		}
 
 		if (players.length >= roomInfo.settings.maxPlayers) {
@@ -153,7 +154,7 @@ export class StudyGroupService {
 
 		await this.redis.hset(key(roomId, "players"), userId, playerInfo, ROOM_TTL);
 
-		return { roomInfo, players: [...players, playerInfo] };
+		return { roomInfo, players: [...players, playerInfo], isNew: true };
 	}
 
 	async joinByPasscode(
@@ -161,7 +162,12 @@ export class StudyGroupService {
 		userId: UUID,
 		username: string,
 		avatar: PlayerInfo["avatar"],
-	): Promise<{ roomId: string; roomInfo: RoomInfo; players: PlayerInfo[] }> {
+	): Promise<{
+		roomId: string;
+		roomInfo: RoomInfo;
+		players: PlayerInfo[];
+		isNew: boolean;
+	}> {
 		const rooms = await this.getWaitingRooms();
 		const room = rooms.find((r) => r.passcode === passcode);
 		if (!room) throw new Error("Invalid passcode");

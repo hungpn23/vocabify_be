@@ -122,6 +122,8 @@ export class StudyGroupGateway
 			});
 
 			socket.emit("roomCreated", roomInfo);
+			const players = await this.studyGroupService.getPlayers(roomInfo.roomId);
+			socket.emit("playerList" as any, players);
 		} catch (err: any) {
 			socket.emit("error", { message: err.message });
 		}
@@ -167,9 +169,17 @@ export class StudyGroupGateway
 			await socket.join(roomId);
 			this.socketRooms.set(socket.id, { userId, roomId });
 
-			const newPlayer = result.players.find((p: any) => p.userId === userId);
-			if (newPlayer) {
-				this.server.to(roomId).emit("playerJoined", newPlayer);
+			// Send room info + full player list to the joining player
+			socket.emit("roomCreated", result.roomInfo);
+			const allPlayers = await this.studyGroupService.getPlayers(roomId);
+			socket.emit("playerList" as any, allPlayers);
+
+			// Only broadcast playerJoined for new players
+			if (result.isNew) {
+				const newPlayer = result.players.find((p: any) => p.userId === userId);
+				if (newPlayer) {
+					this.server.to(roomId).emit("playerJoined", newPlayer);
+				}
 			}
 		} catch (err: any) {
 			socket.emit("error", { message: err.message });
