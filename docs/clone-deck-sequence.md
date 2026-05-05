@@ -3,49 +3,70 @@
 Sơ đồ dưới đây mô tả ngắn gọn nghiệp vụ clone một deck chia sẻ trong module `deck`. Khi clone thành công, hệ thống tăng learner count, tạo thông báo cho chủ deck gốc và gửi realtime notification nếu chủ deck đang online.
 
 ```mermaid
+---
+config:
+  theme: base
+  look: classic
+  sequence:
+    showSequenceNumbers: false
+    mirrorActors: false
+    diagramMarginX: 12
+    diagramMarginY: 8
+    actorMargin: 34
+    boxMargin: 6
+    boxTextMargin: 4
+    noteMargin: 6
+    messageMargin: 24
+  themeVariables:
+    background: "#ffffff"
+    mainBkg: "#ffffff"
+    actorBkg: "#f8fafc"
+    actorBorder: "#475569"
+    actorTextColor: "#0f172a"
+    signalColor: "#334155"
+    signalTextColor: "#0f172a"
+    noteBkgColor: "#eef6ff"
+    noteTextColor: "#0f172a"
+    noteBorderColor: "#93c5fd"
+    loopTextColor: "#0f172a"
+    activationBkgColor: "#e0f2fe"
+    activationBorderColor: "#0284c7"
+    labelBoxBkgColor: "#f1f5f9"
+    labelBoxBorderColor: "#94a3b8"
+    labelTextColor: "#0f172a"
+    fontFamily: "Arial"
+    fontSize: "12px"
+---
 sequenceDiagram
-	autonumber
 	actor User
 	actor Owner
 	participant FE as FE
-	participant BE as BE
+	participant BE as API
 	participant DB as DB
 	participant Redis as Redis
 	participant Realtime as Notification Gateway
 
 	Note over User,Realtime: Luồng clone deck chia sẻ
 	User->>FE: Chọn clone một deck chia sẻ
-	FE->>BE: Gửi yêu cầu clone kèm access token và passcode nếu có
-	BE->>BE: Kiểm tra access token
-	BE->>Redis: Đối chiếu phiên đăng nhập hiện tại
-	alt Token không hợp lệ hoặc phiên không tồn tại
+	FE->>BE: Clone deck + access token
+	BE->>BE: Verify access token
+	BE->>Redis: Check session
+	alt Token lỗi hoặc session không tồn tại
 		BE-->>FE: Báo không được phép truy cập
 		FE-->>User: Yêu cầu đăng nhập lại
 	else Phiên hợp lệ
-		BE->>DB: Tìm deck gốc không thuộc người dùng hiện tại và không phải private
-		alt Không tìm thấy deck phù hợp
-			BE-->>FE: Báo không tìm thấy deck
-			FE-->>User: Hiển thị thông báo lỗi
-		else Tìm thấy deck gốc
-			alt Deck protected nhưng passcode không đúng
-				BE-->>FE: Báo passcode không hợp lệ
-				FE-->>User: Yêu cầu nhập lại passcode
-			else Có thể clone
-				BE->>DB: Tạo deck clone ở trạng thái private
-				BE->>DB: Sao chép danh sách card sang deck mới
-				BE->>DB: Tăng learner count cho deck gốc
-				BE->>DB: Lấy thông tin người thực hiện clone
-				alt Không tìm thấy người thực hiện
-					BE-->>FE: Báo yêu cầu không hợp lệ
-					FE-->>User: Hiển thị thông báo lỗi
-				else Tìm thấy người thực hiện
-					BE->>DB: Tạo notification cho chủ deck gốc
-					BE->>Realtime: Gửi realtime notification
-					Realtime-->>Owner: Nhận thông báo nếu đang online
-					BE-->>FE: Thành công
-					FE-->>User: Clone deck thành công
-				end
-			end
+		BE->>DB: Find shareable source deck
+		BE->>BE: Validate passcode nếu protected
+		alt Deck, passcode hoặc user không hợp lệ
+			BE-->>FE: Báo clone deck thất bại
+		else Có thể clone
+			BE->>DB: Tạo deck clone private
+			BE->>DB: Copy cards, tăng learner count
+			BE->>DB: Tạo notification cho owner
+			BE->>Realtime: Gửi realtime notification
+			Realtime-->>Owner: Nhận thông báo nếu online
+			BE-->>FE: Thành công
+			FE-->>User: Clone deck thành công
 		end
 	end
 ```

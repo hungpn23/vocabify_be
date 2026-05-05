@@ -3,44 +3,68 @@
 Sơ đồ dưới đây mô tả ngắn gọn nghiệp vụ tải avatar trong module `user`. Hệ thống kiểm tra phiên đăng nhập, xác thực tệp ảnh, tải ảnh mới lên kho lưu trữ, sau đó cập nhật hồ sơ người dùng.
 
 ```mermaid
+---
+config:
+  theme: base
+  look: classic
+  sequence:
+    showSequenceNumbers: false
+    mirrorActors: false
+    diagramMarginX: 12
+    diagramMarginY: 8
+    actorMargin: 34
+    boxMargin: 6
+    boxTextMargin: 4
+    noteMargin: 6
+    messageMargin: 24
+  themeVariables:
+    background: "#ffffff"
+    mainBkg: "#ffffff"
+    actorBkg: "#f8fafc"
+    actorBorder: "#475569"
+    actorTextColor: "#0f172a"
+    signalColor: "#334155"
+    signalTextColor: "#0f172a"
+    noteBkgColor: "#eef6ff"
+    noteTextColor: "#0f172a"
+    noteBorderColor: "#93c5fd"
+    loopTextColor: "#0f172a"
+    activationBkgColor: "#e0f2fe"
+    activationBorderColor: "#0284c7"
+    labelBoxBkgColor: "#f1f5f9"
+    labelBoxBorderColor: "#94a3b8"
+    labelTextColor: "#0f172a"
+    fontFamily: "Arial"
+    fontSize: "12px"
+---
 sequenceDiagram
-	autonumber
 	actor User
 	participant FE as FE
-	participant BE as BE
+	participant BE as API
 	participant DB as DB
 	participant Redis as Redis
 	participant ImageKit as ImageKit
 
 	Note over User,ImageKit: Luồng tải avatar
 	User->>FE: Chọn ảnh đại diện
-	FE->>BE: Gửi yêu cầu tải avatar kèm access token và file ảnh
-	BE->>BE: Kiểm tra access token và xác thực file ảnh
-	BE->>Redis: Đối chiếu phiên đăng nhập hiện tại
-	alt Token không hợp lệ hoặc phiên không tồn tại
+	FE->>BE: Upload avatar + access token
+	BE->>BE: Verify token, validate image
+	BE->>Redis: Check session
+	alt Token, session hoặc file không hợp lệ
 		BE-->>FE: Báo không được phép truy cập
-		FE-->>User: Hiển thị thông báo lỗi
 	else Phiên hợp lệ
-		BE->>DB: Tìm người dùng hiện tại
-		alt Không tìm thấy người dùng
-			BE-->>FE: Báo yêu cầu không hợp lệ
-			FE-->>User: Hiển thị thông báo lỗi
-		else Tìm thấy người dùng
-			BE->>ImageKit: Tải ảnh mới lên kho lưu trữ
-			alt Tải ảnh thất bại hoặc không nhận được thông tin file
-				BE-->>FE: Báo tải avatar thất bại
-				FE-->>User: Hiển thị thông báo lỗi
-			else Tải ảnh thành công
-				BE->>DB: Cập nhật avatar mới cho người dùng
-				alt Người dùng đã có avatar cũ
-					BE->>ImageKit: Xóa avatar cũ
-					BE->>BE: Nếu xóa avatar cũ lỗi thì chỉ ghi log
-				else Chưa có avatar cũ
-					BE->>BE: Bỏ qua bước xóa avatar cũ
-				end
-				BE-->>FE: Thành công
-				FE-->>User: Cập nhật avatar thành công
+		BE->>DB: Lấy user hiện tại
+		BE->>ImageKit: Upload ảnh mới
+		alt User không tồn tại hoặc upload lỗi
+			BE-->>FE: Báo upload avatar thất bại
+		else Upload thành công
+			BE->>DB: Cập nhật avatar mới
+			opt Có avatar cũ
+				BE->>ImageKit: Xóa avatar cũ
+				BE->>BE: Lỗi xóa cũ chỉ ghi log
 			end
+			BE-->>FE: Thành công
+			FE-->>User: Cập nhật avatar thành công
 		end
 	end
 ```

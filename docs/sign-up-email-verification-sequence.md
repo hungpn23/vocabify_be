@@ -3,91 +3,83 @@
 Sơ đồ dưới đây mô tả ngắn gọn nghiệp vụ đăng ký tài khoản bằng email/password, trong đó người dùng phải xác thực email trước khi hoàn tất đăng ký.
 
 ```mermaid
+---
+config:
+  theme: base
+  look: classic
+  sequence:
+    showSequenceNumbers: false
+    mirrorActors: false
+    diagramMarginX: 12
+    diagramMarginY: 8
+    actorMargin: 34
+    boxMargin: 6
+    boxTextMargin: 4
+    noteMargin: 6
+    messageMargin: 24
+  themeVariables:
+    background: "#ffffff"
+    mainBkg: "#ffffff"
+    actorBkg: "#f8fafc"
+    actorBorder: "#475569"
+    actorTextColor: "#0f172a"
+    signalColor: "#334155"
+    signalTextColor: "#0f172a"
+    noteBkgColor: "#eef6ff"
+    noteTextColor: "#0f172a"
+    noteBorderColor: "#93c5fd"
+    loopTextColor: "#0f172a"
+    activationBkgColor: "#e0f2fe"
+    activationBorderColor: "#0284c7"
+    labelBoxBkgColor: "#f1f5f9"
+    labelBoxBorderColor: "#94a3b8"
+    labelTextColor: "#0f172a"
+    fontFamily: "Arial"
+    fontSize: "12px"
+---
 sequenceDiagram
-	autonumber
 	actor User
 	participant FE as FE
-	participant BE as BE
+	participant BE as API
 	participant DB as DB
 	participant Redis as Redis
 
-	rect rgb(245, 248, 255)
-	Note over User,Redis: Bước 1 - Yêu cầu xác thực email
+	Note over User,Redis: 1. Gửi OTP
 	User->>FE: Nhập email
-	FE->>BE: Gửi yêu cầu xác thực email
-	BE->>DB: Kiểm tra email đã tồn tại và đã xác thực chưa
-	alt Email đã được xác thực
-		BE-->>FE: Thành công
-		FE-->>User: Thông báo cho user họ sẽ nhận được email nếu như nó tồn tại
-	else Email có thể tiếp tục xác thực
-		BE->>Redis: Tăng số lần yêu cầu OTP
-		alt Vượt quá số lần cho phép
-			BE-->>FE: Báo lỗi quá số lần thử
-			FE-->>User: Hiển thị thông báo lỗi
-		else Hợp lệ
-			BE->>BE: Tạo OTP, mã hóa OTP và gửi email
-			BE->>Redis: Lưu OTP kèm thời hạn hiệu lực
-			BE-->>FE: Thành công
-			FE-->>User: Yêu cầu nhập OTP
-		end
-	end
+	FE->>BE: Request OTP
+	BE->>DB: Check email
+	BE->>Redis: Check rate limit
+	alt Email đã xác thực hoặc quá giới hạn
+		BE-->>FE: Kết quả ẩn danh hoặc lỗi
+	else Có thể gửi OTP
+		BE->>BE: Tạo OTP và gửi email
+		BE->>Redis: Lưu OTP + TTL
+		BE-->>FE: Cho nhập OTP
 	end
 
-	rect rgb(245, 255, 247)
-	Note over User,Redis: Bước 2 - Xác thực OTP email
+	Note over User,Redis: 2. Xác thực OTP
 	User->>FE: Nhập email và OTP
-	FE->>BE: Gửi yêu cầu xác thực OTP
-	BE->>Redis: Tăng số lần xác thực OTP
-	alt Vượt quá số lần cho phép
-		BE-->>FE: Báo lỗi quá số lần thử
-		FE-->>User: Hiển thị thông báo lỗi
-	else Hợp lệ
-		BE->>Redis: Lấy OTP đã lưu
-		alt OTP không tồn tại hoặc đã hết hạn
-			BE-->>FE: Báo OTP không hợp lệ
-			FE-->>User: Yêu cầu xin lại OTP
-		else OTP còn hiệu lực
-			BE->>BE: Đối chiếu OTP
-			alt OTP không đúng
-				BE-->>FE: Báo OTP không hợp lệ
-				FE-->>User: Yêu cầu nhập lại OTP
-			else OTP đúng
-				BE->>Redis: Xóa OTP và bộ đếm số lần thử
-				BE->>DB: Kiểm tra email đã được xác thực chưa
-				alt Email đã được xác thực trước đó
-					BE-->>FE: Báo email đã được xác thực
-					FE-->>User: Hiển thị thông báo
-				else Chưa được xác thực
-					BE->>Redis: Tạo verifiedToken và lưu tạm
-					BE-->>FE: Trả về verifiedToken
-					FE-->>User: Cho phép nhập thông tin đăng ký
-				end
-			end
-		end
-	end
+	FE->>BE: Verify OTP
+	BE->>Redis: Check attempts + OTP
+	alt OTP hết hạn, sai hoặc quá giới hạn
+		BE-->>FE: Báo OTP không hợp lệ
+	else OTP đúng
+		BE->>Redis: Xóa OTP, tạo verifiedToken
+		BE-->>FE: Trả verifiedToken
 	end
 
-	rect rgb(255, 248, 245)
-	Note over User,Redis: Bước 3 - Hoàn tất đăng ký
+	Note over User,Redis: 3. Hoàn tất đăng ký
 	User->>FE: Nhập username, password, verifiedToken
-	FE->>BE: Gửi yêu cầu đăng ký
-	BE->>Redis: Kiểm tra verifiedToken
-	alt verifiedToken không tồn tại hoặc đã hết hạn
-		BE-->>FE: Báo thông tin xác thực không hợp lệ
-		FE-->>User: Yêu cầu xác thực email lại
+	FE->>BE: Sign up
+	BE->>Redis: Validate verifiedToken
+	BE->>DB: Check email
+	alt Token lỗi hoặc email đã tồn tại
+		BE-->>FE: Báo đăng ký không hợp lệ
 	else verifiedToken hợp lệ
-		BE->>DB: Kiểm tra email theo verifiedToken
-		alt Email đã có tài khoản đã xác thực
-			BE->>Redis: Xóa verifiedToken
-			BE-->>FE: Báo đăng ký không hợp lệ
-			FE-->>User: Hiển thị thông báo lỗi
-		else Có thể tạo tài khoản
-			BE->>BE: Mã hóa mật khẩu và tạo phiên đăng nhập
-			BE->>DB: Tạo tài khoản với trạng thái email đã xác thực
-			BE->>Redis: Lưu phiên đăng nhập và xóa verifiedToken
-			BE-->>FE: Trả về access token và refresh token
-			FE-->>User: Đăng ký thành công
-		end
-	end
+		BE->>BE: Hash password, tạo session
+		BE->>DB: Tạo user đã xác thực email
+		BE->>Redis: Lưu session, xóa token
+		BE-->>FE: Trả access + refresh token
+		FE-->>User: Đăng ký thành công
 	end
 ```

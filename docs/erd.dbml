@@ -1,0 +1,99 @@
+Table users {
+  id uuid [pk]
+  createdAt datetime
+  updatedAt datetime
+  username varchar
+  email varchar
+  emailVerified boolean
+  password varchar
+  avatar_url varchar
+  avatar_fileId varchar
+  role varchar
+}
+
+Table decks {
+  id uuid [pk]
+  createdAt datetime
+  updatedAt datetime
+  deletedAt datetime
+  name varchar
+  slug varchar
+  description varchar
+  visibility varchar
+  passcode varchar
+  viewCount int
+  learnerCount int
+  openedAt datetime
+  clonedFromId uuid
+  ownerId uuid
+  createdBy uuid
+  updatedBy uuid
+}
+
+Table cards {
+  id uuid [pk]
+  term varchar
+  termLanguage varchar
+  definition varchar
+  definitionLanguage varchar
+  image_url varchar
+  image_fileId varchar
+  pronunciation varchar
+  partOfSpeech varchar
+  usageOrGrammar varchar
+  examples varchar
+  streak int
+  reviewDate datetime
+  status varchar
+  deckId uuid
+}
+
+Table notifications {
+  id uuid [pk]
+  createdAt datetime
+  updatedAt datetime
+  entityId uuid [note: 'Business UUID only. Not declared as a direct FK.']
+  type varchar
+  content varchar
+  readAt datetime
+  actorId uuid
+  recipientId uuid
+}
+
+Table user_statistics {
+  id uuid [pk]
+  lastStudyDate datetime
+  currentStreak int
+  longestStreak int
+  totalCardsLearned int
+  masteryRate float
+  userId uuid [unique]
+}
+
+Table pending_media {
+  id uuid [pk]
+  pending_url varchar
+  pending_fileId varchar
+  ownerId uuid
+  createdAt datetime
+}
+
+Table card_suggestions {
+  id uuid [pk]
+  term varchar
+  termLanguage varchar
+  definition varchar
+  definitionLanguage varchar
+  pronunciation varchar
+  partOfSpeech varchar
+  usageOrGrammar varchar
+  examples varchar
+}
+
+Ref: users.id < decks.ownerId
+Ref: decks.id < cards.deckId
+Ref: decks.id < decks.clonedFromId
+Ref: users.id < notifications.recipientId
+Ref: users.id < notifications.actorId
+Ref: users.id - user_statistics.userId
+Ref: users.id < pending_media.ownerId
