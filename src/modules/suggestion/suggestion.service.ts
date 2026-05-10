@@ -143,6 +143,25 @@ export class SuggestionService implements OnModuleInit {
 		};
 	}
 
+	async ensureEmbedded(): Promise<void> {
+		const { collectionName } = this.vectorDbConf;
+		const { count } = await this.store.client.count(collectionName, {
+			exact: false,
+		});
+
+		if (count > 0) {
+			this.logger.debug(
+				`Collection "${collectionName}" already has ${count} points, skip embedding.`,
+			);
+			return;
+		}
+
+		this.logger.debug(
+			`Collection "${collectionName}" is empty, start embedding...`,
+		);
+		await this.embedData();
+	}
+
 	private async _similaritySearch(query: string, k: number) {
 		const points = (await this.store.similaritySearch(
 			query,

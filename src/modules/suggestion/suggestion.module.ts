@@ -8,5 +8,6 @@ import { SuggestionService } from "./suggestion.service";
 	imports: [MikroOrmModule.forFeature([CardSuggestion])],
 	controllers: [SuggestionController],
 	providers: [SuggestionService],
+	exports: [SuggestionService],
 })
 export class SuggestionModule {}

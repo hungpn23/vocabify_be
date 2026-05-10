@@ -7,6 +7,7 @@ import { FieldsValidationPipe } from "@common/pipes";
 import { getAppConfig, VectorDbConfig, vectorDbConfig } from "@config";
 import { MikroORM } from "@mikro-orm/core";
 import { AuthService } from "@modules/auth/auth.service";
+import { SuggestionService } from "@modules/suggestion/suggestion.service";
 import { Logger } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
@@ -20,6 +21,7 @@ async function bootstrap() {
 
 	const app = await NestFactory.create(AppModule);
 	const authService = app.get(AuthService);
+	const suggestionService = app.get(SuggestionService);
 	const reflector = app.get(Reflector);
 	const { host: vectorDbHost, port: vectorDbPort } = app.get<VectorDbConfig>(
 		vectorDbConfig.KEY,
@@ -48,6 +50,9 @@ async function bootstrap() {
 		const orm = app.get(MikroORM);
 		await orm.schema.updateSchema();
 	}
+
+	await app.init();
+	await suggestionService.ensureEmbedded();
 
 	const config = new DocumentBuilder()
 		.setTitle("App title")
